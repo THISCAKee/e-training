@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum EnrollmentStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id             Int                    @id @default(autoincrement())
+  email          String                 @unique
+  name           String?
+  password       String
+  role           Role                   @default(USER)
+  studentId      String?                @unique
+  faculty        String?
+  program        String?
+  major          String?
+  year           Int?
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  quizAttempts   QuizAttempt[]
+  lessonProgress UserLessonProgress[]
+  enrollments    UserCourseEnrollment[]
+}
+
+model Course {
+  id          Int                    @id @default(autoincrement())
+  title       String
+  description String                 @db.Text
+  imageUrl    String?                @db.Text
+  videoUrl    String?                @db.Text
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  lessons     Lesson[]
+  enrollments UserCourseEnrollment[]
+}
+
+model Lesson {
+  id           Int                  @id @default(autoincrement())
+  title        String
+  videoUrl     String
+  duration     Int?
+  order        Int                  @default(0)
+  courseId     Int
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  course       Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quiz         Quiz?
+  userProgress UserLessonProgress[]
+
+  @@unique([courseId, order])
+}
+
+model Quiz {
+  id        Int           @id @default(autoincrement())
+  title     String
+  lessonId  Int           @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  questions Question[]
+  lesson    Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts  QuizAttempt[]
+}
+
+model Question {
+  id        Int      @id @default(autoincrement())
+  text      String   @db.Text
+  quizId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  options   Option[]
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId], map: "Question_quizId_fkey")
+}
+
+model Option {
+  id         Int      @id @default(autoincrement())
+  text       String
+  isCorrect  Boolean  @default(false)
+  questionId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId], map: "Option_questionId_fkey")
+}
+
+model UserLessonProgress {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  lessonId  Int
+  completed Boolean  @default(false)
+  progress  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId], name: "userId_lessonId")
+  @@index([lessonId], map: "UserLessonProgress_lessonId_fkey")
+}
+
+model QuizAttempt {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  quizId     Int
+  score      Int
+  total      Int
+  percentage Float
+  passed     Boolean
+  createdAt  DateTime @default(now())
+  quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([quizId])
+}
+
+model UserCourseEnrollment {
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  courseId    Int
+  status      EnrollmentStatus @default(IN_PROGRESS) // สถานะ: กำลังเรียน / เรียนจบแล้ว
+  enrolledAt  DateTime         @default(now())
+  completedAt DateTime? // วันที่เรียนจบ (ได้ใบประกาศ)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId]) // ผู้ใช้ 1 คน ลงทะเบียนคอร์ส 1 คอร์สได้ครั้งเดียว
+  @@index([userId])
+  @@index([courseId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
