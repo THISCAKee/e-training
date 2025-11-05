@@ -13,6 +13,10 @@ export default async function DashboardPage() {
     redirect("/login");
   }
   const userId = parseInt(session.user.id);
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { studentId: true },
+  });
 
   // 1. ดึงข้อมูล Enrollments พร้อมข้อมูล Course
   const enrollments = await prisma.userCourseEnrollment.findMany({
@@ -91,8 +95,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6 text-black">
-        Welcome to your Dashboard, {session.user.name}!
+      <h1 className="text-2xl font-medium mb-6 text-black">
+        ชื่อ {session.user.name} รหัสนิสิต {user?.studentId}
       </h1>
       {/* <p className="mb-8 text-gray-700">Your role is: {session.user.role}</p> */}
 

@@ -9,6 +9,35 @@ import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
+// ประกาศประเภทข้อมูลเพิ่มเติมสำหรับ session และ token
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      email: string;
+      name?: string | null;
+      role: string;
+      studentId?: string | null;
+    };
+  }
+
+  interface User {
+    id: string;
+    email: string;
+    name?: string | null;
+    role: string;
+    studentId?: string | null;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    sub: string;
+    role?: string;
+    studentId?: string | null;
+  }
+}
+
 // เราจะรวม Config ทั้งหมดไว้ที่นี่
 const authOptions: NextAuthConfig = {
   pages: {
@@ -80,6 +109,7 @@ const authOptions: NextAuthConfig = {
       if (token && session.user) {
         session.user.id = token.sub; // ดึง id จาก token (token.sub คือ user id)
         session.user.role = token.role as string; // ดึง role จาก token
+        session.user.studentId = token.studentId as string | null;
       }
       return session;
     },
