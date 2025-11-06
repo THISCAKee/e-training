@@ -43,7 +43,7 @@ export default function CertificateDisplay({
         ประกาศนียบัตร
       </h1>
       <p className="text-lg text-gray-600 mb-8">มอบให้เพื่อแสดงว่า</p>
-      <p className="text-3xl md:text-4xl font-semibold text-blue-700 mb-4">
+      <p className="text-3xl md:text-4xl font-semibold text-black mb-4">
         {userName}
       </p>
       <p className="text-lg text-gray-600 mb-4">ได้สำเร็จ</p>

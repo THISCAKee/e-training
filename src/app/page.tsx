@@ -3,20 +3,30 @@
 import CourseCard from "@/components/CourseCard";
 import type { Course } from "@/data/courses";
 import Link from "next/link";
+import Image from "next/image";
 // (เราจะไม่ใช้ <Image> ในส่วนนี้ จะใช้ CSS background แทน)
 
 async function getRecentCourses(): Promise<Course[]> {
-  // ... (ฟังก์ชันนี้เหมือนเดิม) ...
   try {
+    // --- vvvv แก้ไขตรงนี้ vvvv ---
+
+    // 1. เรียก API โดยระบุว่าต้องการแค่ 4 รายการ (หน้า 1, ขนาด 4)
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses?page=1&pageSize=4`,
       {
         cache: "no-store",
       },
     );
+
     if (!res.ok) return [];
-    const allCourses = await res.json();
-    return allCourses.slice(0, 4); // เอาแค่ 4 รายการล่าสุด
+
+    // 2. รับข้อมูลเป็น Object
+    const responseData = await res.json();
+
+    // 3. คืนค่าเฉพาะ Array ที่อยู่ใน .data
+    return responseData.data;
+
+    // --- ^^^^ สิ้นสุดการแก้ไข ^^^^ ---
   } catch (error) {
     console.error(error);
     return [];

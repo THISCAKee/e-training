@@ -3,6 +3,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
+import { Search } from "lucide-react";
 
 type Course = {
   id: number;
@@ -11,6 +12,7 @@ type Course = {
   imageUrl?: string | null;
   videoUrl?: string | null;
   createdAt: string;
+  _count: { lessons: number };
 };
 
 const emptyCourse = {
@@ -29,12 +31,23 @@ export default function CourseList() {
   const [currentCourse, setCurrentCourse] =
     useState<Partial<Course>>(emptyCourse);
 
-  const fetchCourses = async () => {
+  // States for Pagination and Search
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const fetchCourses = async (page = 1, searchTerm = "") => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/courses");
+      const response = await fetch(
+        `/api/admin/courses?page=${page}&pageSize=10&search=${searchTerm}`,
+      );
       const data = await response.json();
-      setCourses(data);
+      setCourses(data.data);
+      setTotalPages(data.totalPages);
+      setCurrentPage(data.currentPage);
+      setTotalCount(data.totalCount);
     } catch (error) {
       console.error("Failed to fetch courses", error);
     } finally {
@@ -43,9 +56,8 @@ export default function CourseList() {
   };
 
   useEffect(() => {
-    fetchCourses();
-  }, []);
-
+    fetchCourses(currentPage, search);
+  }, [currentPage, search]);
   const handleAddNew = () => {
     setCurrentCourse(emptyCourse);
     setIsFormVisible(true);
@@ -88,12 +100,13 @@ export default function CourseList() {
     <div className="bg-white p-6 rounded-lg shadow-md mt-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Course Management</h2>
-        <button
+        <Link
           onClick={handleAddNew}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          href={""}
         >
           + Add New Course
-        </button>
+        </Link>
       </div>
 
       {isFormVisible && (
@@ -154,62 +167,124 @@ export default function CourseList() {
             />
           </div>
           <div className="flex space-x-2">
-            <button
+            <Link
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              href={""}
             >
               Save
-            </button>
-            <button
+            </Link>
+            <Link
               type="button"
               onClick={() => setIsFormVisible(false)}
               className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+              href={""}
             >
               Cancel
-            </button>
+            </Link>
           </div>
         </form>
       )}
 
+      {/* Search Input */}
+      <div className="mb-4">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by course title..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full p-2 pl-10 border rounded-md"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        </div>
+      </div>
+
       {/* Table to display courses */}
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead className="bg-gray-200">
+        <table className="min-w-full bg-white text-black">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="py-2 px-4 border-b">ID</th>
               <th className="py-2 px-4 border-b text-left">Title</th>
-              <th className="py-2 px-4 border-b">Actions</th>
+              <th className="py-2 px-4 border-b text-center">Lessons</th>
+              <th className="py-2 px-4 border-b text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {courses.map((course) => (
-              <tr key={course.id} className="hover:bg-gray-100">
-                <td className="py-2 px-4 border-b text-center">{course.id}</td>
-                <td className="py-2 px-4 border-b">{course.title}</td>
-                <td className="py-2 px-4 border-b text-center">
-                  <Link
-                    href={`/admin/courses/${course.id}`}
-                    className="bg-green-500 text-white px-3 py-1 mx-2 rounded hover:bg-green-600 text-xs font-semibold"
-                  >
-                    เพิ่มบทเรียน
-                  </Link>
-                  <button
-                    onClick={() => handleEdit(course)}
-                    className="text-blue-500 hover:text-blue-700 mr-2 text-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(course.id)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Delete
-                  </button>
+            {loading ? (
+              <tr>
+                <td colSpan={3} className="text-center py-6">
+                  Loading...
                 </td>
               </tr>
-            ))}
+            ) : courses.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="text-center py-6">
+                  No courses found.
+                </td>
+              </tr>
+            ) : (
+              courses.map((course) => (
+                <tr key={course.id} className="hover:bg-gray-50">
+                  <td className="py-2 px-4 border-b">{course.title}</td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {course._count.lessons}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center space-x-2">
+                    <Link
+                      href={`/admin/courses/${course.id}`}
+                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs font-semibold"
+                    >
+                      แก้ไขบทเรียน
+                    </Link>
+                    <Link
+                      onClick={() => handleEdit(course)}
+                      className="text-blue-500 hover:text-blue-700 text-sm"
+                      href={""}
+                    >
+                      Edit
+                    </Link>
+                    <Link
+                      onClick={() => handleDelete(course.id)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                      href={""}
+                    >
+                      Delete
+                    </Link>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-6 flex justify-between items-center">
+        <span className="text-sm text-gray-600">
+          Total {totalCount} courses
+        </span>
+        <div className="flex space-x-2">
+          <Link
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            // disabled={currentPage === 1 || loading}
+            className="px-4 py-2 text-sm bg-gray-200 rounded-md disabled:opacity-50"
+            href={""}
+          >
+            Previous
+          </Link>
+          <span className="px-4 py-2 text-sm text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Link
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            // disabled={currentPage === totalPages || loading}
+            className="px-4 py-2 text-sm bg-gray-200 rounded-md disabled:opacity-50"
+            href={""}
+          >
+            Next
+          </Link>
+        </div>
       </div>
     </div>
   );

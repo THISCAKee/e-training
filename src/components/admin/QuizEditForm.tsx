@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, PlusCircle } from "lucide-react";
+import { Trash2, PlusCircle, Link } from "lucide-react";
 
 // --- (Types และ Interface เหมือนเดิม) ---
 type OptionState = {
@@ -40,7 +40,7 @@ export default function QuizEditForm({
   // --- (States และ Handlers อื่นๆ เหมือนเดิม) ---
   const [title, setTitle] = useState(initialData?.title || "");
   const [questions, setQuestions] = useState<QuestionState[]>(
-    initialData?.questions || []
+    initialData?.questions || [],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export default function QuizEditForm({
   const deleteOption = (qIndex: number, oIndex: number) => {
     const newQuestions = [...questions];
     newQuestions[qIndex].options = newQuestions[qIndex].options.filter(
-      (_, index) => index !== oIndex
+      (_, index) => index !== oIndex,
     );
     setQuestions(newQuestions);
   };
@@ -87,7 +87,7 @@ export default function QuizEditForm({
   const handleOptionTextChange = (
     qIndex: number,
     oIndex: number,
-    text: string
+    text: string,
   ) => {
     const newQuestions = [...questions];
     newQuestions[qIndex].options[oIndex].text = text;
@@ -202,13 +202,13 @@ export default function QuizEditForm({
             className="p-6 border border-gray-200 rounded-lg bg-gray-50 relative"
           >
             {/* ... (ปุ่มลบคำถาม) ... */}
-            <button
+            <Link
               type="button"
               onClick={() => deleteQuestion(qIndex)}
               className="absolute top-4 right-4 text-red-500 hover:text-red-700"
             >
               <Trash2 size={20} />
-            </button>
+            </Link>
 
             <label className="block text-md font-semibold text-gray-800 mb-3">
               คำถามที่ {qIndex + 1}
@@ -247,26 +247,26 @@ export default function QuizEditForm({
                     placeholder={`ตัวเลือก ${oIndex + 1}`}
                   />
                   {/* ... (ปุ่มลบตัวเลือก) ... */}
-                  <button
+                  <Link
                     type="button"
                     onClick={() => deleteOption(qIndex, oIndex)}
                     className="text-gray-400 hover:text-red-500"
                   >
                     <Trash2 size={16} />
-                  </button>
+                  </Link>
                 </div>
               ))}
             </div>
 
             {/* ... (ปุ่มเพิ่มตัวเลือก) ... */}
-            <button
+            <Link
               type="button"
               onClick={() => addOption(qIndex)}
               className="mt-4 flex items-center text-sm text-blue-600 hover:text-blue-800"
             >
               <PlusCircle size={16} className="mr-1" />
               เพิ่มตัวเลือก
-            </button>
+            </Link>
           </div>
         ))}
       </div>

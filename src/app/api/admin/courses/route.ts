@@ -6,16 +6,47 @@ import { PrismaClient } from "@prisma/client";
 import { auth } from "@/auth";
 
 const prisma = new PrismaClient();
-
+export const dynamic = "force-dynamic";
 // ฟังก์ชันนี้จะดึงข้อมูลหลักสูตรทั้งหมด
 export async function GET(request: Request) {
   try {
-    const courses = await prisma.course.findMany({
-      orderBy: {
-        createdAt: "desc",
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search") || "";
+    const page = parseInt(searchParams.get("page") || "1");
+    const pageSize = parseInt(searchParams.get("pageSize") || "10");
+
+    const skip = (page - 1) * pageSize;
+
+    const whereCondition = search
+      ? {
+          title: { contains: search },
+        }
+      : {};
+
+    const [courses, totalCount] = await prisma.$transaction([
+      prisma.course.findMany({
+        where: whereCondition,
+        orderBy: { createdAt: "desc" },
+        include: {
+          _count: { select: { lessons: true } }, // (เพิ่ม) นับจำนวนบทเรียน
+        },
+        skip: skip,
+        take: pageSize,
+      }),
+      prisma.course.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return NextResponse.json(
+      {
+        data: courses,
+        totalCount: totalCount,
+        totalPages: Math.ceil(totalCount / pageSize),
+        currentPage: page,
       },
-    });
-    return NextResponse.json(courses, { status: 200 });
+      { status: 200 },
+    );
   } catch (error) {
     console.error("GET_COURSES_ERROR", error);
     return new NextResponse("Internal Server Error", { status: 500 });

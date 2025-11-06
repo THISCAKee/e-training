@@ -63,9 +63,9 @@ export function StartLearningButton({
     // กรณี: ยังไม่ลงทะเบียน (null) หรือ กำลังเรียน (IN_PROGRESS)
     const isEnrolled = enrollmentStatus === "IN_PROGRESS";
     return (
-      <button
+      <Link
         onClick={handleEnrollAndLearn} // เรียกฟังก์ชัน Enroll + Redirect
-        disabled={isLoading}
+        // disabled={isLoading}
         className={`inline-block font-bold text-lg px-8 py-3 rounded-md transition duration-300 shadow-md
           ${
             isLoading
@@ -75,9 +75,10 @@ export function StartLearningButton({
                 : "bg-blue-600 hover:bg-blue-700 text-white" // เริ่มเรียน (น้ำเงิน)
           }
           disabled:opacity-70 disabled:cursor-wait`}
+        href={""}
       >
         {isLoading ? "กำลังโหลด..." : isEnrolled ? "เรียนต่อ" : "เริ่มเรียน"}
-      </button>
+      </Link>
     );
   }
   // --- ^^^^ สิ้นสุดการปรับ Logic ^^^^ ---

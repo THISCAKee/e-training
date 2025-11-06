@@ -137,15 +137,16 @@ export default function ManageCoursePage() {
       <div className="bg-white p-6 rounded-lg shadow-md mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-black">บทเรียน</h2>
-          <button
+          <Link
             onClick={() => {
               setCurrentLesson(emptyLesson);
               setIsLessonFormVisible(true);
             }}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            href={""}
           >
             + เพิ่มบทเรียนใหม่
-          </button>
+          </Link>
         </div>
 
         {/* --- Add/Edit Lesson Form --- */}
@@ -213,19 +214,21 @@ export default function ManageCoursePage() {
               </div>
             </div>
             <div className="flex space-x-2">
-              <button
+              <Link
                 type="submit"
                 className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                href={""}
               >
                 Save Lesson
-              </button>
-              <button
+              </Link>
+              <Link
                 type="button"
                 onClick={() => setIsLessonFormVisible(false)}
                 className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                href={""}
               >
                 Cancel
-              </button>
+              </Link>
             </div>
           </form>
         )}
@@ -270,23 +273,25 @@ export default function ManageCoursePage() {
                   </Link>
 
                   {/* ปุ่มแก้ไขบทเรียน (ปรับ Style ให้เข้ากัน) */}
-                  <button
+                  <Link
                     onClick={() => {
                       setCurrentLesson(lesson);
                       setIsLessonFormVisible(true);
                     }}
                     className="px-3 py-1.5 text-xs font-medium text-white bg-gray-600 hover:bg-gray-700 rounded-md"
+                    href={""}
                   >
                     แก้ไขบทเรียน
-                  </button>
+                  </Link>
 
                   {/* ปุ่มลบบทเรียน (ปรับ Style ให้เข้ากัน) */}
-                  <button
+                  <Link
                     onClick={() => handleDeleteLesson(lesson.id)}
                     className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+                    href={""}
                   >
                     ลบ
-                  </button>
+                  </Link>
                 </div>
                 {/* ^^^^ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */}
               </div>

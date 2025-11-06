@@ -169,7 +169,7 @@ export async function GET(
             .certificate-name {
               font-size: 36px;
               font-weight: bold;
-              color: #2563eb;
+              color: #1f2937;
               margin: 5mm 0;
               line-height: 1.3;
             }

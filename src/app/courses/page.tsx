@@ -7,14 +7,16 @@ import type { Course } from "@/data/courses"; // เรายังใช้ Typ
 async function getCourses(): Promise<Course[]> {
   // ใน môi trường production ควรเปลี่ยนเป็น URL เต็ม
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/courses`, // <-- **ต้องเป็น /api/courses** (ไม่มี /admin)
     {
-      cache: "no-store", // ไม่ต้อง cache ข้อมูล เพื่อให้เห็นข้อมูลล่าสุดเสมอ
-    }
+      cache: "no-store",
+    },
   );
+  // --- ^^^^ สิ้นสุดการแก้ไข ^^^^ ---
 
   if (!res.ok) {
-    throw new Error("Failed to fetch courses");
+    // <-- บรรทัดที่ 13
+    throw new Error("Failed to fetch courses"); // <-- บรรทัดที่ 14 (ที่เกิด Error)
   }
   return res.json();
 }

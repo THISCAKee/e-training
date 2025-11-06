@@ -29,7 +29,13 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white shadow-md sticky top-0 z-50">
+      {/*
+       * sticky: ทำให้ element นี้ "ลอย" อยู่ในตำแหน่ง
+       * top-0: กำหนดให้ลอยอยู่ติดขอบบน (top: 0px)
+       * z-50: กำหนด z-index ให้สูงๆ เพื่อให้ลอยทับเนื้อหาอื่น (เลข 50 คือสูงมาก)
+       */}
+      {/* --- ^^^^ สิ้นสุดการแก้ไข ^^^^ --- */}
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-4">
           <p>
@@ -66,12 +72,13 @@ export default function Header() {
             // === ส่วนที่แก้ไข: เมื่อ Login แล้ว ===
             <div className="relative" ref={dropdownRef}>
               {/* ปุ่มไอคอน Profile */}
-              <button
+              <Link
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="rounded-full text-gray-600 hover:text-blue-600 focus:outline-none"
+                href={""}
               >
                 <UserRound size={35} />
-              </button>
+              </Link>
 
               {/* Dropdown Menu (แสดงเมื่อ isDropdownOpen เป็น true) */}
               {isDropdownOpen && (
@@ -94,19 +101,22 @@ export default function Header() {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setIsDropdownOpen(false)} // คลิกแล้วให้ปิด
                   >
-                    Dashboard
+                    {session.user?.role === "ADMIN"
+                      ? "Dashboard"
+                      : "หลักสูตรทั้งหมด"}
                   </Link>
 
                   {/* ปุ่ม ออกจากระบบ */}
-                  <button
+                  <Link
                     onClick={() => {
                       setIsDropdownOpen(false); // คลิกแล้วให้ปิด
                       signOut({ callbackUrl: "/" });
                     }}
                     className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    href={""}
                   >
                     ออกจากระบบ
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>

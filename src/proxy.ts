@@ -1,6 +1,6 @@
 // middleware.ts (ฉบับแก้ไข)
 
-export { auth as middleware } from "@/auth";
+export { auth as proxy } from "@/auth";
 
 export const config = {
   matcher: ["/dashboard/:path*", "/admin/:path*", "/login"],
