@@ -102,16 +102,15 @@ export default function Header() {
                   </Link>
 
                   {/* ปุ่ม ออกจากระบบ */}
-                  <Link
+                  <button
                     onClick={() => {
                       setIsDropdownOpen(false); // คลิกแล้วให้ปิด
                       signOut({ callbackUrl: "/" });
                     }}
                     className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    href={""}
                   >
                     ออกจากระบบ
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>

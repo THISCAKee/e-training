@@ -7,9 +7,10 @@ import { useSession } from "next-auth/react"; // 2. Import useSession
 import UserList from "@/components/admin/UserList";
 import CourseList from "@/components/admin/CourseList";
 import AdminStats from "@/components/admin/AdminStats"; // (Import component ใหม่)
-import { LayoutDashboard, Users, BookOpen } from "lucide-react"; // (Import icons)
+import { LayoutDashboard, Users, BookOpen, Presentation } from "lucide-react";
+import HeroSliderManagement from "@/components/admin/HeroSliderManagement";
 
-type Tab = "dashboard" | "users" | "courses";
+type Tab = "dashboard" | "users" | "courses" | "slides";
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession(); // 3. ใช้ useSession
@@ -23,6 +24,8 @@ export default function AdminDashboardPage() {
         return <UserList />;
       case "courses":
         return <CourseList />;
+      case "slides":
+        return <HeroSliderManagement />;
       default:
         return null;
     }
@@ -56,6 +59,12 @@ export default function AdminDashboardPage() {
             label="Manage Courses"
             isActive={activeTab === "courses"}
             onClick={() => setActiveTab("courses")}
+          />
+          <TabButton
+            icon={<Presentation size={18} />}
+            label="Manage Hero Slides"
+            isActive={activeTab === "slides"}
+            onClick={() => setActiveTab("slides")}
           />
         </div>
       </div>

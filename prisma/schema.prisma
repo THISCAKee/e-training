@@ -140,6 +140,20 @@ model UserCourseEnrollment {
   @@index([courseId])
 }
 
+model HeroSlide {
+  id        Int      @id @default(autoincrement())
+  title     String
+  subtitle  String?  @db.Text
+  imageUrl  String   @db.Text // URL ของรูปภาพ
+  linkUrl   String // ลิงก์ที่จะไปเมื่อคลิก (เช่น /courses/1)
+  order     Int      @default(0) // ลำดับการแสดงผล
+  isActive  Boolean  @default(true) // เปิด/ปิดสไลด์นี้
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order, isActive])
+}
+
 enum Role {
   USER
   ADMIN

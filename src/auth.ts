@@ -1,11 +1,9 @@
 // auth.ts (The Single Source of Truth)
 
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import type { NextAuthConfig } from "next-auth";
-import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
@@ -39,13 +37,18 @@ declare module "next-auth/jwt" {
 }
 
 // เราจะรวม Config ทั้งหมดไว้ที่นี่
-const authOptions: NextAuthConfig = {
+export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/login",
   },
   session: { strategy: "jwt" },
   providers: [
     Credentials({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) return null;
 
@@ -69,37 +72,12 @@ const authOptions: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    // ---- START OF AUTHORIZED CALLBACK ----
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const userRole = (auth?.user as { role?: string })?.role;
-      const pathname = nextUrl.pathname;
-
-      // กฎข้อที่ 1: ถ้าเป็น ADMIN และกำลังจะไปที่ /dashboard ให้ส่งไป /admin แทน
-      // นี่คือ Logic หลักสำหรับแก้ปัญหา Redirect
-      if (userRole === "ADMIN" && pathname.startsWith("/dashboard")) {
-        return NextResponse.redirect(new URL("/admin", nextUrl));
-      }
-
-      // กฎข้อที่ 2: ป้องกันหน้า Admin
-      if (pathname.startsWith("/admin")) {
-        return userRole === "ADMIN"; // ต้องเป็น Admin เท่านั้น
-      }
-
-      // กฎข้อที่ 3: ป้องกันหน้า Dashboard ทั่วไป
-      if (pathname.startsWith("/dashboard")) {
-        return isLoggedIn; // ขอแค่ Login ก็พอ
-      }
-
-      return true; // สำหรับหน้าอื่นๆ ที่เป็น Public
-    },
-    // ---- END OF AUTHORIZED CALLBACK ----
-
     async jwt({ token, user }) {
       // เพิ่มข้อมูลเข้า token เมื่อมีการ login (user มีค่า)
       if (user) {
         token.sub = user.id; // เพิ่ม user id ลงใน token (sub คือ standard field สำหรับ subject)
         token.role = (user as { role?: string })?.role;
+        token.studentId = (user as { studentId?: string | null })?.studentId;
         // เพิ่ม role ลงใน token
       }
       return token;
@@ -116,9 +94,12 @@ const authOptions: NextAuthConfig = {
   },
 };
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };
+
+// Export auth function สำหรับใช้ตรวจสอบ session
+export async function auth() {
+  const { getServerSession } = await import("next-auth/next");
+  return getServerSession(authOptions);
+}

@@ -4,6 +4,7 @@ import CourseCard from "@/components/CourseCard";
 import type { Course } from "@/data/courses";
 import Link from "next/link";
 import Image from "next/image";
+import HeroCarousel from "@/components/HeroCarousel";
 // (เราจะไม่ใช้ <Image> ในส่วนนี้ จะใช้ CSS background แทน)
 
 async function getRecentCourses(): Promise<Course[]> {
@@ -12,7 +13,7 @@ async function getRecentCourses(): Promise<Course[]> {
 
     // 1. เรียก API โดยระบุว่าต้องการแค่ 4 รายการ (หน้า 1, ขนาด 4)
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses?page=1&pageSize=4`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses`,
       {
         cache: "no-store",
       },
@@ -42,27 +43,7 @@ export default async function HomePage() {
   return (
     <>
       {/* --- vvvv Hero Section (แก้ไขใหม่ทั้งหมด) vvvv --- */}
-      <div
-        className="relative text-center opacity-95 h-[60vh]" // 2. ใช้ relative เพื่อให้ Overlay ลอยทับได้
-        style={{
-          backgroundImage: `url('${heroImageUrl}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black opacity-30 flex items-center justify-center"></div>
-
-        {/* 4. ส่วนของเนื้อหา (ต้องใช้ relative z-10 เพื่อให้ลอยอยู่เหนือ Overlay) */}
-        <div className="container mx-auto px-6 py-24 md:py-32 relative z-10 justify items-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
-            พลิกโฉมการเรียนรู้ <br /> สู่โลกดิจิทัล
-          </h1>
-          <p className="mt-10 text-3xl text-gray-200">
-            แพลตฟอร์มที่จะช่วยพัฒนาทักษะของคุณให้พร้อมสำหรับอนาคต
-          </p>
-        </div>
-      </div>
-      {/* --- ^^^^ สิ้นสุด Hero Section ^^^^ --- */}
+      <HeroCarousel />
 
       {/* Recent Courses Section (ส่วนนี้เหมือนเดิม) */}
       <div className="bg-gray-50 py-16">
