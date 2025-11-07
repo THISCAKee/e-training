@@ -16,7 +16,7 @@ const anuphan = Anuphan({
 });
 
 export const metadata: Metadata = {
-  title: "E-Training Platform",
+  title: "MSU e-Training",
   description: "เรียนรู้และพัฒนาทักษะยุคใหม่",
 };
 

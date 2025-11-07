@@ -5,7 +5,8 @@ import Link from "next/link";
 // import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
-import { UserRound } from "lucide-react";
+import { CircleUserRound } from "lucide-react";
+import Image from "next/image";
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -38,26 +39,20 @@ export default function Header() {
       {/* --- ^^^^ สิ้นสุดการแก้ไข ^^^^ --- */}
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-4">
-          <p>
-            <span className="text-2xl font-bold text-neutral-950">
-              E-Training
+          {/*<p>
+            <span className="text-3xl font-bold text-yellow-400 text-shadow-lg/20 hover:text-amber-500">
+              E-TRAINING
             </span>
-          </p>
-          {/*<Image
-            src="/logo02.png"
-            alt=""
-            width={45}
-            height={40}
-            className="rounded-md"
-          />
+          </p>*/}
           <Image
-            src="/logo01.png"
+            src="/logo_etraining.png"
             alt=""
-            width={45}
-            height={40}
-            className="rounded-md"
-          />*/}
+            width={80}
+            height={45}
+            className="rounded-md shadow-md"
+          />
         </Link>
+
         <div className="flex items-center space-x-4">
           <Link
             href="/courses"
@@ -77,7 +72,7 @@ export default function Header() {
                 className="rounded-full text-gray-600 hover:text-blue-600 focus:outline-none"
                 href={""}
               >
-                <UserRound size={35} />
+                <CircleUserRound size={35} />
               </Link>
 
               {/* Dropdown Menu (แสดงเมื่อ isDropdownOpen เป็น true) */}

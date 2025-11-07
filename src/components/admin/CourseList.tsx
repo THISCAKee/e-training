@@ -10,7 +10,7 @@ type Course = {
   title: string;
   description: string;
   imageUrl?: string | null;
-  videoUrl?: string | null;
+  // videoUrl?: string | null;
   createdAt: string;
   _count: { lessons: number };
 };
@@ -20,7 +20,7 @@ const emptyCourse = {
   title: "",
   description: "",
   imageUrl: "",
-  videoUrl: "",
+  // videoUrl: "",
   createdAt: "",
 };
 
@@ -30,6 +30,8 @@ export default function CourseList() {
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [currentCourse, setCurrentCourse] =
     useState<Partial<Course>>(emptyCourse);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // States for Pagination and Search
   const [search, setSearch] = useState("");
@@ -77,6 +79,8 @@ export default function CourseList() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true); // (เพิ่ม) เริ่มโหลด
+    setFormError(null); // (เพิ่ม) เคลียร์ Error เก่า
     const isEditing = currentCourse.id;
     const url = isEditing
       ? `/api/admin/courses/${currentCourse.id}`
@@ -154,7 +158,7 @@ export default function CourseList() {
               className="w-full p-2 border rounded"
             />
           </div>
-          <div>
+          {/*<div>
             <label className="block text-sm font-medium">Video URL</label>
             <input
               type="url"
@@ -165,7 +169,7 @@ export default function CourseList() {
               className="w-full p-2 border rounded"
               placeholder="https://www.youtube.com/watch?v=..."
             />
-          </div>
+          </div>*/}
           <div className="flex space-x-2">
             <Link
               type="submit"

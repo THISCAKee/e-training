@@ -25,6 +25,16 @@ export default function RegisterPage() {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
+    if (!studentId || studentId.trim().length === 0) {
+      setError("กรุณากรอกรหัสนิสิต");
+      setIsLoading(false);
+      return; // หยุดทำงาน
+    }
+    if (studentId.length !== 11) {
+      setError("รหัสนิสิตต้องมี 11 ตัวอักษรพอดี");
+      setIsLoading(false);
+      return; // หยุดทำงาน
+    }
 
     // --- vvvv 2. เพิ่ม field ใหม่ใน body ที่จะส่ง vvvv ---
     const response = await fetch("/api/auth/register", {
@@ -97,7 +107,9 @@ export default function RegisterPage() {
             <div>
               <input
                 name="studentId"
-                type="text"
+                type="number"
+                minLength={11}
+                maxLength={11}
                 required // อาจจะ required หรือไม่ก็ได้
                 className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
                 placeholder="รหัสนิสิต"

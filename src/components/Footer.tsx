@@ -22,8 +22,8 @@ export default function Footer() {
           />
         </Link>
         <p>
-          &copy; {new Date().getFullYear()} E-Training Platform. All Rights
-          Reserved.
+          &copy; {new Date().getFullYear()} E-Training Platform. Mahasarakham
+          University.
         </p>
       </div>
     </footer>

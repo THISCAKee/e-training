@@ -1,25 +1,16 @@
 // src/app/api/admin/users/[id]/route.ts
-
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { auth } from "@/auth";
 
 const prisma = new PrismaClient();
 
-// 1. เปลี่ยน Interface นี้ (IParams)
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-
 // === PATCH function ===
 export async function PATCH(
   request: Request,
-  contextPromise: Promise<RouteContext> // 2. รับเป็น Promise
+  { params }: { params: Promise<{ id: string }> }, // 1. รับ params เป็น Promise
 ) {
-  // 3. Await Promise
-  const { params } = await contextPromise;
+  const { id } = await params; // 2. Await ก่อนใช้งาน
 
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
@@ -27,7 +18,6 @@ export async function PATCH(
   }
 
   try {
-    const { id } = params; // 4. ใช้งาน params.id
     const body = await request.json();
     const { role } = body;
 
@@ -50,10 +40,9 @@ export async function PATCH(
 // === DELETE function ===
 export async function DELETE(
   request: Request,
-  contextPromise: Promise<RouteContext> // 2. รับเป็น Promise
+  { params }: { params: Promise<{ id: string }> }, // 1. รับ params เป็น Promise
 ) {
-  // 3. Await Promise
-  const { params } = await contextPromise;
+  const { id } = await params; // 2. Await ก่อนใช้งาน
 
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
@@ -61,8 +50,6 @@ export async function DELETE(
   }
 
   try {
-    const { id } = params; // 4. ใช้งาน params.id
-
     if (!id) {
       return new NextResponse("User ID not found", { status: 400 });
     }
