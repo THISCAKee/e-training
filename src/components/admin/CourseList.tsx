@@ -171,21 +171,19 @@ export default function CourseList() {
             />
           </div>*/}
           <div className="flex space-x-2">
-            <Link
+            <button
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-              href={""}
             >
               Save
-            </Link>
-            <Link
+            </button>
+            <button
               type="button"
               onClick={() => setIsFormVisible(false)}
               className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-              href={""}
             >
               Cancel
-            </Link>
+            </button>
           </div>
         </form>
       )}
