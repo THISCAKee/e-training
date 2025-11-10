@@ -27,7 +27,7 @@ export default function CourseCard({ course }: CourseCardProps) {
           <p className="text-gray-600 text-sm h-20 overflow-hidden">
             {course.description}
           </p>
-          <div className="mt-4 text-blue-600 font-semibold hover:text-blue-800">
+          <div className="mt-4 text-blue-600 font-medium hover:text-blue-800">
             ดูรายละเอียด →
           </div>
         </div>

@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, description, imageUrl } = body;
+    const { title, description, imageUrl, categoryId } = body;
 
     if (!title || !description) {
       return new NextResponse("Title and description are required", {
@@ -75,6 +75,7 @@ export async function POST(request: Request) {
         title,
         description,
         imageUrl,
+        categoryId: categoryId ? parseInt(categoryId) : null,
       },
     });
 

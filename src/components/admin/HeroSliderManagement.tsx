@@ -62,6 +62,28 @@ export default function HeroSliderManagement() {
     setIsFormVisible(true);
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this slide?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/hero-slides/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete slide");
+      }
+
+      // Refresh the slides list after successful deletion
+      fetchSlides();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete slide. Please try again.");
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -128,7 +150,7 @@ export default function HeroSliderManagement() {
                 setCurrentSlide({ ...currentSlide, title: e.target.value })
               }
               className="w-full p-2 border rounded"
-              required
+              // required
             />
           </div>
 
@@ -237,11 +259,21 @@ export default function HeroSliderManagement() {
       {/* (ตารางแสดง List of Slides) */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white text-black">
-          {/* ... (thead: Title, Link, Order, Active) ... */}
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="py-2 px-4 border-b text-left">Title</th>
+              <th className="py-2 px-4 border-b text-left">Link</th>
+              <th className="py-2 px-4 border-b text-left">Order</th>
+              <th className="py-2 px-4 border-b text-left">Active</th>
+              <th className="py-2 px-4 border-b text-left">Actions</th>
+            </tr>
+          </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5}>Loading...</td>
+                <td colSpan={5} className="text-center py-4">
+                  Loading...
+                </td>
               </tr>
             ) : (
               slides.map((slide) => (
@@ -255,11 +287,16 @@ export default function HeroSliderManagement() {
                   <td className="py-2 px-4 border-b">
                     <button
                       onClick={() => handleEdit(slide)}
-                      className="text-blue-500"
+                      className="text-blue-500 hover:text-blue-700 mr-4"
                     >
                       Edit
                     </button>
-                    {/* (ปุ่ม Delete) */}
+                    <button
+                      onClick={() => handleDelete(slide.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))

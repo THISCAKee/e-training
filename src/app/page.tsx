@@ -5,12 +5,11 @@ import type { Course } from "@/data/courses";
 import Link from "next/link";
 import Image from "next/image";
 import HeroCarousel from "@/components/HeroCarousel";
+import { BrainCircuit, HeartHandshake, FlaskConical } from "lucide-react";
 // (เราจะไม่ใช้ <Image> ในส่วนนี้ จะใช้ CSS background แทน)
 
 async function getRecentCourses(): Promise<Course[]> {
   try {
-    // --- vvvv แก้ไขตรงนี้ vvvv ---
-
     // 1. เรียก API โดยระบุว่าต้องการแค่ 4 รายการ (หน้า 1, ขนาด 4)
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses`,
@@ -39,17 +38,71 @@ export default async function HomePage() {
 
   // 1. นี่คือลิงก์รูปภาพโดยตรงจาก Unsplash ID (trJEbYWZ_Z4) ที่คุณให้มา
   const heroImageUrl = "/bg-hero.jpg";
+  // (Component ย่อยสำหรับ Category Card)
+  const CategoryCard = ({
+    title,
+    description,
+    icon,
+    href,
+  }: {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    href: string;
+  }) => (
+    <Link
+      href={href}
+      className="block bg-white p-6 rounded-lg shadow-lg  hover:-translate-y-1 transition-transform duration-300"
+    >
+      <div className="flex items-center space-x-4 mb-3">
+        <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+          {icon}
+        </div>
+        <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
+      </div>
+      <p className="text-gray-600">{description}</p>
+    </Link>
+  );
 
   return (
     <>
       {/* --- vvvv Hero Section (แก้ไขใหม่ทั้งหมด) vvvv --- */}
       <HeroCarousel />
+      <div className="bg-white py-16">
+        {" "}
+        {/* ใช้พื้นหลังสีขาว หรือสีอ่อนๆ */}
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
+            สำรวจหมวดหมู่ของเรา
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <CategoryCard
+              title="AI For Creative"
+              description="เครื่องมือ AI สำหรับงานสร้างสรรค์และออกแบบ"
+              icon={<BrainCircuit size={28} className="text-blue-600" />}
+              href="/category/Creative" // <-- ลิงก์ไปยัง Category "Creative"
+            />
+            <CategoryCard
+              title="AI For Life"
+              description="การประยุกต์ใช้ AI ในชีวิตประจำวันและสังคม"
+              icon={<HeartHandshake size={28} className="text-blue-600" />}
+              href="/category/Life" // <-- ลิงก์ไปยัง Category "Life"
+            />
+            <CategoryCard
+              title="AI For Research"
+              description="AI สำหรับการวิจัย การวิเคราะห์ข้อมูลขั้นสูง"
+              icon={<FlaskConical size={28} className="text-blue-600" />}
+              href="/category/Research" // <-- ลิงก์ไปยัง Category "Research"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Recent Courses Section (ส่วนนี้เหมือนเดิม) */}
       <div className="bg-gray-50 py-16">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-            หลักสูตรล่าสุด
+          <h2 className="text-3xl font-semiboldbold text-center text-gray-800 mb-8">
+            หลักสูตรแนะนำ
           </h2>
           {recentCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -65,7 +118,7 @@ export default async function HomePage() {
           <div className="text-center mt-12">
             <Link
               href="/courses"
-              className="bg-blue-600 text-white font-bold px-8 py-3 rounded-md hover:bg-blue-700 transition duration-300"
+              className="bg-blue-600 text-white font-normal px-8 py-3 rounded-md hover:bg-blue-700 transition duration-300"
             >
               ดูหลักสูตรทั้งหมด
             </Link>

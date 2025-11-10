@@ -40,6 +40,10 @@ model Course {
   updatedAt   DateTime               @updatedAt
   lessons     Lesson[]
   enrollments UserCourseEnrollment[]
+  categoryId  Int? // Foreign Key (อาจจะไม่มีก็ได้)
+  category    Category?              @relation(fields: [categoryId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+
+  @@index([categoryId]) // (Optional) เพิ่ม index เพื่อ performance
 }
 
 model Lesson {
@@ -152,6 +156,12 @@ model HeroSlide {
   updatedAt DateTime @updatedAt
 
   @@index([order, isActive])
+}
+
+model Category {
+  id      Int      @id @default(autoincrement())
+  name    String   @unique // ชื่อหมวดหมู่ (เช่น Programming, Design, Marketing)
+  courses Course[] // คอร์สทั้งหมดในหมวดหมู่นี้
 }
 
 enum Role {

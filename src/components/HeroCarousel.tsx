@@ -46,7 +46,7 @@ export default function HeroCarousel() {
 
   if (loading) {
     return (
-      <div className="relative text-center opacity-95 h-[60vh] bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="relative text-center opacity-95 h-[70vh] bg-gray-200 animate-pulse flex items-center justify-center">
         <p className="text-gray-500">Loading Slides...</p>
       </div>
     );
@@ -56,7 +56,7 @@ export default function HeroCarousel() {
     // ถ้าไม่มีสไลด์เลย ให้กลับไปแสดง Hero แบบเดิม (หรือไม่แสดงอะไรเลย)
     return (
       <div
-        className="relative text-center opacity-95 h-[60vh]"
+        className="relative text-center opacity-95 h-[70vh] shadow-2xl"
         style={{
           backgroundImage: `url('/bg-hero.jpg')`,
           backgroundSize: "cover",
@@ -84,21 +84,21 @@ export default function HeroCarousel() {
         navigation={true}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         loop={true}
-        className="w-full h-full"
+        className="w-full h-[510px]"
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.id} className="relative">
             {/* 1. รูปภาพพื้นหลัง */}
             <div
-              className="w-full h-full bg-cover bg-center"
+              className="w-full h-[510px] object-cover bg-center"
               style={{ backgroundImage: `url(${slide.imageUrl})` }}
             >
               {/* 2. Overlay สีดำ */}
-              <div className="absolute inset-0 bg-black opacity-40"></div>
+              <div className="absolute inset-0 bg-black opacity-0"></div>
             </div>
 
             {/* 3. เนื้อหาข้อความ */}
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-8">
+            {/*<div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-8">
               <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-4">
                 {slide.title}
               </h1>
@@ -113,7 +113,7 @@ export default function HeroCarousel() {
               >
                 ดูรายละเอียด
               </Link>
-            </div>
+            </div>*/}
           </SwiperSlide>
         ))}
       </Swiper>

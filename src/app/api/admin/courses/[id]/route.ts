@@ -61,11 +61,17 @@ export async function PATCH(
   try {
     const { id } = await params; // 4. ใช้งาน params.id (ตัวเล็ก)
     const body = await request.json();
-    const { title, description, imageUrl, videoUrl } = body;
+    const { title, description, imageUrl, videoUrl, categoryId } = body;
 
     const updatedCourse = await prisma.course.update({
       where: { id: parseInt(id!) },
-      data: { title, description, imageUrl, videoUrl },
+      data: {
+        title,
+        description,
+        imageUrl,
+        videoUrl,
+        categoryId: categoryId ? parseInt(categoryId) : null,
+      },
     });
 
     return NextResponse.json(updatedCourse, { status: 200 });

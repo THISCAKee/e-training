@@ -5,6 +5,11 @@ import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 
+type Category = {
+  id: number;
+  name: string;
+};
+
 type Course = {
   id: number;
   title: string;
@@ -13,6 +18,7 @@ type Course = {
   // videoUrl?: string | null;
   createdAt: string;
   _count: { lessons: number };
+  categoryId: number | null;
 };
 
 const emptyCourse = {
@@ -22,6 +28,7 @@ const emptyCourse = {
   imageUrl: "",
   // videoUrl: "",
   createdAt: "",
+  categoryId: null,
 };
 
 export default function CourseList() {
@@ -56,6 +63,27 @@ export default function CourseList() {
       setLoading(false);
     }
   };
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    // ดึง Categories เมื่อ Component โหลด
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const res = await fetch("/api/admin/categories");
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const data = await res.json();
+        setCategories(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     fetchCourses(currentPage, search);
@@ -157,6 +185,31 @@ export default function CourseList() {
               }
               className="w-full p-2 border rounded"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Category</label>
+            <select
+              value={currentCourse.categoryId || ""} // ถ้าเป็น null ให้เป็น string ว่าง
+              onChange={(e) =>
+                setCurrentCourse({
+                  ...currentCourse,
+                  // แปลงกลับเป็น number หรือ null
+                  categoryId: e.target.value ? parseInt(e.target.value) : null,
+                })
+              }
+              className="w-full p-2 border rounded"
+              disabled={loadingCategories}
+            >
+              <option value="">-- No Category --</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            {loadingCategories && (
+              <span className="text-xs">Loading categories...</span>
+            )}
           </div>
           {/*<div>
             <label className="block text-sm font-medium">Video URL</label>

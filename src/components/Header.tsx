@@ -49,14 +49,14 @@ export default function Header() {
             alt=""
             width={80}
             height={45}
-            className="rounded-md shadow-md"
+            className="rounded-md shadow-md hover:shadow-amber-400 hover:shadow-md"
           />
         </Link>
 
         <div className="flex items-center space-x-4">
           <Link
             href="/courses"
-            className="text-gray-600 text-[20px] font-bold hover:text-blue-600"
+            className="text-gray-600 text-[20px] font-normal hover:text-blue-600"
           >
             หลักสูตรทั้งหมด
           </Link>
