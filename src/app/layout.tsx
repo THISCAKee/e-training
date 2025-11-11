@@ -18,6 +18,13 @@ const anuphan = Anuphan({
 export const metadata: Metadata = {
   title: "MSU e-Training",
   description: "เรียนรู้และพัฒนาทักษะยุคใหม่",
+  icons: {
+    icon: "/logo_etraining.png", // <-- ใช้โลโก้ มมส.
+    // (หรือใช้ /logo_etraining.png ถ้าต้องการ)
+
+    // (Optional: สำหรับ Apple devices)
+    // apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({

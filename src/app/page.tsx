@@ -42,12 +42,12 @@ export default async function HomePage() {
   const CategoryCard = ({
     title,
     description,
-    icon,
+    // icon,
     href,
   }: {
     title: string;
     description: string;
-    icon: React.ReactNode;
+    // icon: React.ReactNode;
     href: string;
   }) => (
     <Link
@@ -55,9 +55,9 @@ export default async function HomePage() {
       className="block bg-white p-6 rounded-lg shadow-lg  hover:-translate-y-1 transition-transform duration-300"
     >
       <div className="flex items-center space-x-4 mb-3">
-        <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+        {/*<div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
           {icon}
-        </div>
+        </div>*/}
         <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
       </div>
       <p className="text-gray-600">{description}</p>
@@ -68,30 +68,30 @@ export default async function HomePage() {
     <>
       {/* --- vvvv Hero Section (แก้ไขใหม่ทั้งหมด) vvvv --- */}
       <HeroCarousel />
-      <div className="bg-white py-16">
+      <div className="bg-white py-16 j">
         {" "}
         {/* ใช้พื้นหลังสีขาว หรือสีอ่อนๆ */}
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
+          <h2 className="text-3xl font-medium text-center text-gray-800 mb-8">
             สำรวจหมวดหมู่ของเรา
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <CategoryCard
               title="AI For Creative"
               description="เครื่องมือ AI สำหรับงานสร้างสรรค์และออกแบบ"
-              icon={<BrainCircuit size={28} className="text-blue-600" />}
+              // icon={<BrainCircuit size={28} className="text-blue-600" />}
               href="/category/Creative" // <-- ลิงก์ไปยัง Category "Creative"
             />
             <CategoryCard
               title="AI For Life"
               description="การประยุกต์ใช้ AI ในชีวิตประจำวันและสังคม"
-              icon={<HeartHandshake size={28} className="text-blue-600" />}
+              // icon={<HeartHandshake size={28} className="text-blue-600" />}
               href="/category/Life" // <-- ลิงก์ไปยัง Category "Life"
             />
             <CategoryCard
               title="AI For Research"
               description="AI สำหรับการวิจัย การวิเคราะห์ข้อมูลขั้นสูง"
-              icon={<FlaskConical size={28} className="text-blue-600" />}
+              // icon={<FlaskConical size={28} className="text-blue-600" />}
               href="/category/Research" // <-- ลิงก์ไปยัง Category "Research"
             />
           </div>
