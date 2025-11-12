@@ -28,7 +28,8 @@ export async function GET(request: Request) {
         where: whereCondition,
         orderBy: { createdAt: "desc" },
         include: {
-          _count: { select: { lessons: true } }, // (เพิ่ม) นับจำนวนบทเรียน
+          _count: { select: { lessons: true } },
+          category: { select: { name: true } }, // (เพิ่ม) นับจำนวนบทเรียน
         },
         skip: skip,
         take: pageSize,

@@ -38,7 +38,7 @@ export default function RootLayout({
         <AuthProvider>
           {" "}
           {/* 2. Wrap ด้วย AuthProvider */}
-          <Header />
+          {/*<Header />*/}
           <main className="flex-grow">{children}</main>
           <Footer />
         </AuthProvider>

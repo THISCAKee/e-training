@@ -42,11 +42,13 @@ export default async function HomePage() {
   const CategoryCard = ({
     title,
     description,
+    theme,
     // icon,
     href,
   }: {
     title: string;
     description: string;
+    theme: string;
     // icon: React.ReactNode;
     href: string;
   }) => (
@@ -54,13 +56,19 @@ export default async function HomePage() {
       href={href}
       className="block bg-white p-6 rounded-lg shadow-lg  hover:-translate-y-1 transition-transform duration-300"
     >
-      <div className="flex items-center space-x-4 mb-3">
+      <div className="text-center space-x-4 mb-3">
         {/*<div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
           {icon}
         </div>*/}
-        <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
+        <h1 className="text-6xl font-bold text-gray-800">{theme}</h1>
       </div>
-      <p className="text-gray-600">{description}</p>
+      <div className="text-center space-x-4 mb-3">
+        {/*<div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+          {icon}
+        </div>*/}
+        <p className="text-2xl font-normal text-gray-800">{title}</p>
+      </div>
+      <p className="text-center text-gray-600">{description}</p>
     </Link>
   );
 
@@ -73,26 +81,29 @@ export default async function HomePage() {
         {/* ใช้พื้นหลังสีขาว หรือสีอ่อนๆ */}
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-medium text-center text-gray-800 mb-8">
-            สำรวจหมวดหมู่ของเรา
+            CATEGORY
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <CategoryCard
+              theme="C"
               title="AI For Creative"
               description="เครื่องมือ AI สำหรับงานสร้างสรรค์และออกแบบ"
               // icon={<BrainCircuit size={28} className="text-blue-600" />}
-              href="/category/Creative" // <-- ลิงก์ไปยัง Category "Creative"
+              href="/category/AI For Creative" // <-- ลิงก์ไปยัง Category "Creative"
             />
             <CategoryCard
+              theme="L"
               title="AI For Life"
               description="การประยุกต์ใช้ AI ในชีวิตประจำวันและสังคม"
               // icon={<HeartHandshake size={28} className="text-blue-600" />}
-              href="/category/Life" // <-- ลิงก์ไปยัง Category "Life"
+              href="/category/AI ForLife" // <-- ลิงก์ไปยัง Category "Life"
             />
             <CategoryCard
+              theme="R"
               title="AI For Research"
               description="AI สำหรับการวิจัย การวิเคราะห์ข้อมูลขั้นสูง"
               // icon={<FlaskConical size={28} className="text-blue-600" />}
-              href="/category/Research" // <-- ลิงก์ไปยัง Category "Research"
+              href="/category/AI For Research" // <-- ลิงก์ไปยัง Category "Research"
             />
           </div>
         </div>

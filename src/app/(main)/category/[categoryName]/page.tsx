@@ -41,7 +41,7 @@ export default async function CategoryPage(
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-6 py-12 justify-items-center">
         <h1 className="text-4xl font-semiboldbold text-gray-800 mb-10">
-          AI For {categoryName}
+          {categoryName}
         </h1>
         {filteredCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

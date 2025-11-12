@@ -21,6 +21,11 @@ export default function CourseCard({ course }: CourseCardProps) {
           className="w-full h-48 object-cover"
         />
         <div className="p-6">
+          {course.category?.name && (
+            <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">
+              {course.category.name}
+            </span>
+          )}
           <h3 className="text-xl font-bold text-gray-800 mb-2 truncate">
             {course.title}
           </h3>

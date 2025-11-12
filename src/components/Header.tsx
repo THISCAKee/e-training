@@ -56,10 +56,18 @@ export default function Header() {
         <div className="flex items-center space-x-4">
           <Link
             href="/courses"
-            className="text-gray-600 text-[20px] font-normal hover:text-blue-600"
+            className="text-gray-600 text-[18px] font-normal hover:text-blue-600 px-4"
           >
             หลักสูตรทั้งหมด
           </Link>
+          {!session && status !== "loading" && (
+            <Link
+              href="/register"
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-700 "
+            >
+              สมัครสมาชิก
+            </Link>
+          )}
 
           {status === "loading" ? (
             <div className="text-gray-500">Loading...</div>
@@ -118,7 +126,7 @@ export default function Header() {
             // === เมื่อยังไม่ได้ Login (เหมือนเดิม) ===
             <Link
               href="/login"
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="bg-yellow-500 text-black px-4 py-2 rounded-md hover:bg-yellow-600"
             >
               เข้าสู่ระบบ
             </Link>

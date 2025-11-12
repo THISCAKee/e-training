@@ -13,9 +13,9 @@ export async function GET(request: Request) {
         createdAt: "desc", // เรียงตามล่าสุด
       },
       // (Optional) อาจจะ include จำนวนบทเรียนมาด้วย ถ้าต้องการแสดงใน Card
-      // include: {
-      //   _count: { select: { lessons: true } }
-      // }
+      include: {
+        category: { select: { name: true } },
+      },
     });
 
     return NextResponse.json(courses, { status: 200 });
