@@ -106,7 +106,7 @@ export default function Header() {
                   >
                     {session.user?.role === "ADMIN"
                       ? "Dashboard"
-                      : "หลักสูตรทั้งหมด"}
+                      : "หลักสูตรที่ลงเรียน"}
                   </Link>
 
                   {/* ปุ่ม ออกจากระบบ */}

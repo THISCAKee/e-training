@@ -163,7 +163,7 @@ export default function CoursePlayer({
                 }`}
               >
                 {/* (ปุ่มเล่น) */}
-                <Link
+                <button
                   type="button"
                   onClick={() => setActiveLesson(lesson)}
                   className={`w-full text-left flex justify-between items-center ${
@@ -171,7 +171,6 @@ export default function CoursePlayer({
                       ? "text-blue-800"
                       : "text-gray-800"
                   }`}
-                  href={""}
                 >
                   <span
                     className={`flex items-center${
@@ -188,7 +187,7 @@ export default function CoursePlayer({
                   <span className="text-sm text-gray-500 font-mono">
                     {formatDuration(lesson.duration)}
                   </span>
-                </Link>
+                </button>
 
                 {/* (ลอจิกปุ่ม Quiz) */}
                 {lesson.quiz && (
