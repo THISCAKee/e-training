@@ -60,19 +60,23 @@ export async function GET(
     // 1. อ่านไฟล์ logo และแปลงเป็น base64
     let logoBase64 = "";
     try {
-      const logoPath = join(process.cwd(), "public", "logo02.png");
+      const logoPath = join(process.cwd(), "public", "logo03.png"); // หรือ logo02.png ตามที่คุณเลือก
       const logoImage = readFileSync(logoPath);
       logoBase64 = `data:image/png;base64,${logoImage.toString("base64")}`;
     } catch (error) {
       console.error("Error reading logo file:", error);
-      logoBase64 = `data:image/svg+xml;base64,${Buffer.from(
-        `
-        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 100 100">
-          <rect width="100" height="100" fill="#f59e0b" rx="15"/>
-          <text x="50" y="50" font-family="Anuphan" font-size="16" fill="white" text-anchor="middle" dominant-baseline="middle">LOGO</text>
-        </svg>
-      `,
-      ).toString("base64")}`;
+    }
+    let bgBase64 = "";
+    try {
+      // อ่านไฟล์จาก public/certificate.jpg
+      const bgPath = join(process.cwd(), "public", "certificate.jpg");
+      const bgImage = readFileSync(bgPath);
+      // แปลงเป็น Base64 เพื่อฝังใน HTML
+      bgBase64 = `data:image/jpeg;base64,${bgImage.toString("base64")}`;
+    } catch (error) {
+      console.error("Error reading background image:", error);
+      // Fallback เป็นสีพื้นเรียบๆ ถ้าหาไฟล์ไม่เจอ
+      bgBase64 = "";
     }
 
     // 2. สร้าง HTML สำหรับใบประกาศ (ขนาด A4 แนวนอน)
@@ -95,28 +99,20 @@ export async function GET(
               margin: 0;
               padding: 0;
               background-color: #f3f4f6;
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
+              text-rendering: optimizeLegibility;
             }
 
             .certificate-container {
               width: 297mm; /* ความกว้าง A4 แนวนอน */
               height: 210mm; /* ความสูง A4 แนวนอน */
               position: relative;
-              background-color: white;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-              overflow: hidden;
+              background-image: url('${bgBase64}');
+              background-size: cover;
+              background-position: center;
+              background-repeat: no-repeat;
             }
-
-            .certificate-border {
-              position: absolute;
-              top: 5mm;
-              left: 5mm;
-              right: 5mm;
-              bottom: 5mm;
-              border: 4px solid #f59e0b;
-              border-radius: 8px;
-              pointer-events: none;
-            }
-
             .certificate-content {
               position: relative;
               z-index: 1;
@@ -145,14 +141,14 @@ export async function GET(
             .certificate-title {
               font-size: 48px;
               font-weight: bold;
-              color: #1f2937;
-              margin: 0;
+              color: white;
+              margin: 3mm 0;
               line-height: 1.2;
             }
 
             .certificate-subtitle {
               font-size: 20px;
-              color: #6b7280;
+              color: white;
               margin: 5mm 0;
               margin-bottom: -80px
             }
@@ -169,20 +165,20 @@ export async function GET(
             .certificate-name {
               font-size: 36px;
               font-weight: bold;
-              color: #1f2937;
+              color: #ffcc00;
               margin: 5mm 0;
               line-height: 1.3;
             }
 
             .certificate-course {
               font-size: 24px;
-              color: #4b5563;
+              color: white;
               margin: 5mm 0;
             }
 
             .certificate-date {
               font-size: 18px;
-              color: #6b7280;
+              color: white;
               margin-top: 5mm;
             }
 
@@ -200,7 +196,7 @@ export async function GET(
 
             .certificate-signature {
               font-size: 16px;
-              color: #4b5563;
+              color: white;
               margin-top: 5mm;
             }
 
@@ -219,7 +215,7 @@ export async function GET(
                 <div class="logo-container">
                   <img src="${logoBase64}" alt="Logo" width="100" height="100" />
                 </div>
-                <h1 class="certificate-title">ประกาศนียบัตร</h1>
+                <h1 class="certificate-title">CERTIFICATE</h1>
                 <p class="certificate-subtitle">มอบให้เพื่อแสดงว่า</p>
               </div>
 
@@ -264,7 +260,7 @@ export async function GET(
     await page.setViewport({
       width: 1754, // 297mm * 150/25.4
       height: 1240, // 210mm * 150/25.4
-      deviceScaleFactor: 1.5, // เพิ่มความละเอียด
+      deviceScaleFactor: 3, // เพิ่มความละเอียด
     });
 
     // 5. ตั้งค่า timeout ให้นานขึ้น
