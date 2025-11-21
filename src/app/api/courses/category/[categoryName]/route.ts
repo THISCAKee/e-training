@@ -5,21 +5,13 @@ import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// (แก้ปัญหา Next.js 15+)
-interface RouteContext {
-  params: Promise<{
-    categoryName: string; // ชื่อต้องตรงกับโฟลเดอร์ [categoryName]
-  }>;
-}
-
 export async function GET(
   request: Request,
-  contextPromise: Promise<RouteContext>,
+  { params }: { params: Promise<{ categoryName: string }> },
 ) {
-  const { params } = await contextPromise;
-  const resolvedParams = await params; // await params อีกครั้ง
-
   try {
+    const resolvedParams = await params;
+
     // 1. Decode ชื่อ Category จาก URL (เช่น ถ้าชื่อมีเว้นวรรค)
     const categoryName = decodeURIComponent(resolvedParams.categoryName);
 

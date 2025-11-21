@@ -8,22 +8,11 @@ import { auth } from "@/auth";
 export const dynamic = "force-dynamic";
 const prisma = new PrismaClient();
 
-// 1. เพิ่ม Interface
-interface RouteContext {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
 // === GET function ===
 export async function GET(
   request: Request,
-  // contextPromise: Promise<RouteContext>
   { params }: { params: Promise<{ id: string }> },
 ) {
-  // 3. Await Promise
-  // const { params } = await contextPromise;
-
   try {
     const { id } = await params;
     const course = await prisma.course.findUnique({
@@ -48,18 +37,15 @@ export async function GET(
 // === PATCH function ===
 export async function PATCH(
   request: Request,
-  contextPromise: Promise<RouteContext>, // 2. รับเป็น Promise
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  // 3. Await Promise
-  const { params } = await contextPromise;
-
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
   try {
-    const { id } = await params; // 4. ใช้งาน params.id (ตัวเล็ก)
+    const { id } = await params;
     const body = await request.json();
     const { title, description, imageUrl, videoUrl, categoryId } = body;
 
@@ -83,18 +69,15 @@ export async function PATCH(
 // === DELETE function ===
 export async function DELETE(
   request: Request,
-  contextPromise: Promise<RouteContext>, // 2. รับเป็น Promise
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  // 3. Await Promise
-  const { params } = await contextPromise;
-
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
   try {
-    const { id } = await params; // 4. ใช้งาน params.id (ตัวเล็ก)
+    const { id } = await params;
     await prisma.course.delete({
       where: { id: parseInt(id!) },
     });
