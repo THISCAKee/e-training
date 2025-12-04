@@ -195,7 +195,7 @@ export async function GET(
             .certificate-subtitle {
               font-size: 20px;
               color: white;
-              margin: 5mm 0;
+              margin: 2mm 0;
               margin-bottom: -80px
             }
 
@@ -213,7 +213,7 @@ export async function GET(
               font-weight: bold;
               color: #ffcc00;
               margin: 5mm 0;
-              line-height: 1.3;
+              margin-bottom: 1mm;
             }
 
             .certificate-course {

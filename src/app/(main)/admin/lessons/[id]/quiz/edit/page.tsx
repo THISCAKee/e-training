@@ -10,10 +10,10 @@ async function getQuizData(lessonId: number) {
     where: { lessonId },
     include: {
       questions: {
-        orderBy: { createdAt: "asc" },
+        orderBy: { id: "asc" },
         include: {
           options: {
-            orderBy: { createdAt: "asc" },
+            orderBy: { id: "asc" },
           },
         },
       },

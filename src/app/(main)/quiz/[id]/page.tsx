@@ -98,14 +98,14 @@ export default async function QuizPage({ params }: QuizPageProps) {
         },
       },
       questions: {
-        orderBy: { createdAt: "asc" },
+        orderBy: { id: "asc" },
         include: {
           options: {
             select: {
               id: true,
               text: true,
             },
-            orderBy: { createdAt: "asc" },
+            orderBy: { id: "asc" },
           },
         },
       },
@@ -144,7 +144,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
     title: quiz.title,
     lessonTitle: quiz.lesson.title,
     courseId: quiz.lesson.courseId,
-    questions: quiz.questions.map((q) => ({
+    questions: quiz.questions.map((q: any) => ({
       id: q.id,
       text: q.text,
       options: q.options,

@@ -131,7 +131,7 @@ export default function QuizForm({ quizData }: QuizFormProps) {
         {/* --- ^^^^ สิ้นสุดส่วนที่เพิ่ม ^^^^ --- */}
 
         {/* (Optional) แสดงเฉลยรายข้อ (เหมือนเดิม) */}
-        <div className="space-y-4 mb-8">
+        {/* <div className="space-y-4 mb-8">
           {quizData.questions.map((q, index) => {
             const res = result.results.find((r) => r.questionId === q.id);
             const selectedOpt = q.options.find(
@@ -154,7 +154,7 @@ export default function QuizForm({ quizData }: QuizFormProps) {
               </div>
             );
           })}
-        </div>
+        </div> */}
 
         {/* (ปุ่มกลับหน้าหลักสูตร เหมือนเดิม) */}
         <Link
