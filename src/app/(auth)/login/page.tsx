@@ -1,18 +1,16 @@
-// src/app/login/page.tsx (ฉบับแก้ไข 최종)
-
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react"; // 1. เพิ่ม import Suspense
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation"; // 1. Import useSearchParams
+import { useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+// 2. เปลี่ยนชื่อ Component เดิมจาก LoginPage เป็น "LoginForm" (เพื่อเป็นไส้ใน)
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // 2. ดึง error message จาก URL (ถ้ามี)
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const error =
@@ -24,13 +22,9 @@ export default function LoginPage() {
     event.preventDefault();
     setIsLoading(true);
 
-    // 3. เรียกใช้ signIn แบบง่ายๆ ปล่อยให้ NextAuth จัดการ redirect
-    // เราไม่ต้องใช้ try-catch หรือ .then() อีกต่อไป
     await signIn("credentials", {
       email,
       password,
-      // บอกให้ NextAuth ไปที่หน้าที่ถูกต้องหลัง login
-      // Middleware จะเข้ามาจัดการตรงนี้และอาจเปลี่ยนเส้นทางอีกที
       callbackUrl,
     });
 
@@ -38,7 +32,6 @@ export default function LoginPage() {
   };
 
   return (
-    // <div className="bg-gray-50 flex items-center justify-center py-12 px-4">
     <div className="w-full max-w-md space-y-8 p-10 bg-white rounded-xl shadow-lg">
       <div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
@@ -46,14 +39,12 @@ export default function LoginPage() {
         </h2>
       </div>
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        {/* แสดงข้อความ Error ที่ได้จาก URL */}
         {error && (
           <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-center">
             {error}
           </div>
         )}
         <div className="space-y-4 rounded-md">
-          {/* Input fields for email and password... */}
           <div>
             <input
               id="email-address"
@@ -98,6 +89,16 @@ export default function LoginPage() {
         </div>
       </form>
     </div>
-    // </div>
+  );
+}
+
+// 3. สร้าง Component หลัก (export default) มาครอบด้วย Suspense
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={<div className="flex justify-center p-10">กำลังโหลด...</div>}
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -63,13 +63,22 @@ export async function GET(
       const logoPath = join(process.cwd(), "public", "logo03.png"); // หรือ logo02.png ตามที่คุณเลือก
       const logoImage = readFileSync(logoPath);
       logoBase64 = `data:image/png;base64,${logoImage.toString("base64")}`;
+      
     } catch (error) {
       console.error("Error reading logo file:", error);
+    }
+    let logo1Base64 = "";
+    try {
+      const logo1Path = join(process.cwd(), "public", "logo04.png"); // เปลี่ยนชื่อไฟล์ตามต้องการ
+      const logo1Image = readFileSync(logo1Path);
+      logo1Base64 = `data:image/png;base64,${logo1Image.toString("base64")}`;
+    } catch (error) {
+      console.error("Error reading logo1 file:", error);
     }
     let bgBase64 = "";
     try {
       // อ่านไฟล์จาก public/certificate.jpg
-      const bgPath = join(process.cwd(), "public", "certificate.jpg");
+      const bgPath = join(process.cwd(), "public", "certificate2.jpg");
       const bgImage = readFileSync(bgPath);
       // แปลงเป็น Base64 เพื่อฝังใน HTML
       bgBase64 = `data:image/jpeg;base64,${bgImage.toString("base64")}`;
@@ -77,6 +86,35 @@ export async function GET(
       console.error("Error reading background image:", error);
       // Fallback เป็นสีพื้นเรียบๆ ถ้าหาไฟล์ไม่เจอ
       bgBase64 = "";
+    }
+    // 1.1 อ่านไฟล์ signature และแปลงเป็น base64
+    let signatureBase64 = "";
+    try {
+      const signaturePath = join(process.cwd(), "public", "signature.png");
+      const signatureImage = readFileSync(signaturePath);
+      signatureBase64 = `data:image/png;base64,${signatureImage.toString("base64")}`;
+    } catch (error) {
+      console.error("Error reading signature file:", error);
+    }
+
+    // 1.2 อ่านไฟล์ signature2 และแปลงเป็น base64
+    let signature2Base64 = "";
+    try {
+      const signaturePath = join(process.cwd(), "public", "signature2.png");
+      const signatureImage = readFileSync(signaturePath);
+      signature2Base64 = `data:image/png;base64,${signatureImage.toString("base64")}`;
+    } catch (error) {
+      console.error("Error reading signature2 file:", error);
+    }
+
+    // 1.3 อ่านไฟล์ signature3 และแปลงเป็น base64
+    let signature3Base64 = "";
+    try {
+      const signaturePath = join(process.cwd(), "public", "signature3.png");
+      const signatureImage = readFileSync(signaturePath);
+      signature3Base64 = `data:image/png;base64,${signatureImage.toString("base64")}`;
+    } catch (error) {
+      console.error("Error reading signature3 file:", error);
     }
 
     // 2. สร้าง HTML สำหรับใบประกาศ (ขนาด A4 แนวนอน)
@@ -134,8 +172,16 @@ export async function GET(
             .logo-container {
               display: flex;
               justify-content: center;
+              align-items: center; /* จัดกึ่งกลางแนวตั้ง */
+              gap: 20px; /* เพิ่มระยะห่างระหว่างโลโก้ */
               margin-top: -25px;
-              margin-bottom: 15px; /* เพิ่มระยะห่างด้านล่างของ logo */
+              margin-bottom: 15px;
+            }
+            
+            .logo-img {
+               width: 100px; /* กำหนดความกว้าง */
+               height: 100px; /* กำหนดความสูง */
+               object-fit: contain; /* ให้รูปคงสัดส่วน */
             }
 
             .certificate-title {
@@ -183,15 +229,28 @@ export async function GET(
             }
 
             .certificate-footer {
+              width: 100%;
               text-align: center;
               margin-top: 15mm;
               display: flex;
               justify-content: center;
-              align-items: center;
+              align-items: flex-start;
             }
-            .certificate-footer div{
+            .certificate-footer > div {
               margin: 0 5mm;
               text-align: center;
+              flex: 1;
+              width: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+
+            .certificate-footer > div.center-signature {
+              position: relative;
+              top: -40px;
+              transform: none;
+              margin-bottom: 0;
             }
 
             .certificate-signature {
@@ -199,7 +258,13 @@ export async function GET(
               color: white;
               margin-top: 5mm;
             }
-
+            .signature-image {
+              height: 40px; /* ปรับขนาดตามความเหมาะสม */
+              margin-bottom: 5px;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+            }
             .certificate-star {
               width: 60px;
               height: 60px;
@@ -213,7 +278,8 @@ export async function GET(
             <div class="certificate-content">
               <div class="certificate-header">
                 <div class="logo-container">
-                  <img src="${logoBase64}" alt="Logo" width="100" height="100" />
+                <img src="${logoBase64}" class="logo-img" alt="Logo 1" />
+                <img src="${logo1Base64}" class="logo-img" alt="Logo 2" />
                 </div>
                 <h1 class="certificate-title">CERTIFICATE</h1>
                 <p class="certificate-subtitle">มอบให้เพื่อแสดงว่า</p>
@@ -228,8 +294,33 @@ export async function GET(
               <div class="certificate-footer">
 
                 <div>
-                  <p class="certificate-signature">รองศาสตราจารย์ ดร.ประยุกต์ ศรีวิไล</p>
-                  <p class="certificate-signature">อธิการบดีมหาวิทยาลัยมหาสารคาม</p>
+                  ${
+                    signatureBase64
+                      ? `<img src="${signatureBase64}" class="signature-image" alt="Signature" />`
+                      : ""
+                  }
+                  <p class="certificate-signature">รศ.ดร.ภญ.จันทร์ทิพย์ กาญจนศิลป์<br>รองอธิการบดีฝ่ายวิชาการและนวัตกรรม<br>การเรียนรู้</p>
+                  
+                </div>
+
+                <div class="center-signature">
+                  ${
+                    signature2Base64
+                      ? `<img src="${signature2Base64}" class="signature-image" alt="Signature 2" />`
+                      : ""
+                  }
+                  <p class="certificate-signature">รองศาสตราจารย์ ดร.ประยุกต์ ศรีวิไล<br>อธิการบดีมหาวิทยาลัยมหาสารคาม</p>
+                  
+                </div>
+
+                <div>
+                  ${
+                    signature3Base64
+                      ? `<img src="${signature3Base64}" class="signature-image" alt="Signature 3" />`
+                      : ""
+                  }
+                  <p class="certificate-signature">รองศาสตราจารย์ ดร.รัตนโชติ เทียนมงคล<br>ผู้อำนวยการสำนักวิทยบริการ</p>
+                 
                 </div>
 
 
