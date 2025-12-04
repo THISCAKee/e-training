@@ -90,7 +90,7 @@ export async function GET(
     // 1.1 อ่านไฟล์ signature และแปลงเป็น base64
     let signatureBase64 = "";
     try {
-      const signaturePath = join(process.cwd(), "public", "signature.png");
+      const signaturePath = join(process.cwd(), "public", "signature3.png");
       const signatureImage = readFileSync(signaturePath);
       signatureBase64 = `data:image/png;base64,${signatureImage.toString("base64")}`;
     } catch (error) {
@@ -110,7 +110,7 @@ export async function GET(
     // 1.3 อ่านไฟล์ signature3 และแปลงเป็น base64
     let signature3Base64 = "";
     try {
-      const signaturePath = join(process.cwd(), "public", "signature3.png");
+      const signaturePath = join(process.cwd(), "public", "signature.png");
       const signatureImage = readFileSync(signaturePath);
       signature3Base64 = `data:image/png;base64,${signatureImage.toString("base64")}`;
     } catch (error) {
@@ -257,10 +257,26 @@ export async function GET(
               font-size: 16px;
               color: white;
               margin-top: 5mm;
+              white-space: nowrap;
             }
             .signature-image {
+              height: 90px; /* ปรับขนาดตามความเหมาะสม */
+              margin-bottom: -20px;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            .signature-image-2 {
+              height: 70px; /* ปรับขนาดตามความเหมาะสม */
+              margin-bottom: -10px;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            .signature-image-3 {
               height: 40px; /* ปรับขนาดตามความเหมาะสม */
               margin-bottom: 5px;
+              margin-top: 25px;
               display: block;
               margin-left: auto;
               margin-right: auto;
@@ -299,14 +315,14 @@ export async function GET(
                       ? `<img src="${signatureBase64}" class="signature-image" alt="Signature" />`
                       : ""
                   }
-                  <p class="certificate-signature">รศ.ดร.ภญ.จันทร์ทิพย์ กาญจนศิลป์<br>รองอธิการบดีฝ่ายวิชาการและนวัตกรรม<br>การเรียนรู้</p>
+                  <p class="certificate-signature">รองศาสตราจารย์ ดร.ภญ.จันทร์ทิพย์ กาญจนศิลป์<br>รองอธิการบดีฝ่ายวิชาการและนวัตกรรม<br>การเรียนรู้</p>
                   
                 </div>
 
                 <div class="center-signature">
                   ${
                     signature2Base64
-                      ? `<img src="${signature2Base64}" class="signature-image" alt="Signature 2" />`
+                      ? `<img src="${signature2Base64}" class="signature-image-2" alt="Signature 2" />`
                       : ""
                   }
                   <p class="certificate-signature">รองศาสตราจารย์ ดร.ประยุกต์ ศรีวิไล<br>อธิการบดีมหาวิทยาลัยมหาสารคาม</p>
@@ -316,7 +332,7 @@ export async function GET(
                 <div>
                   ${
                     signature3Base64
-                      ? `<img src="${signature3Base64}" class="signature-image" alt="Signature 3" />`
+                      ? `<img src="${signature3Base64}" class="signature-image-3" alt="Signature 3" />`
                       : ""
                   }
                   <p class="certificate-signature">รองศาสตราจารย์ ดร.รัตนโชติ เทียนมงคล<br>ผู้อำนวยการสำนักวิทยบริการ</p>
