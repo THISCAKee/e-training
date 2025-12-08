@@ -30,6 +30,9 @@ export async function GET(request: Request) {
         include: {
           _count: { select: { lessons: true } },
           category: { select: { name: true } }, // (เพิ่ม) นับจำนวนบทเรียน
+          enrollments: {
+            select: { status: true},
+          },
         },
         skip: skip,
         take: pageSize,

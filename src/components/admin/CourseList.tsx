@@ -19,6 +19,7 @@ type Course = {
   createdAt: string;
   _count: { lessons: number };
   categoryId: number | null;
+  enrollments: { status: "IN_PROGRESS" | "COMPLETED";}[];
 };
 
 const emptyCourse = {
@@ -262,53 +263,72 @@ export default function CourseList() {
             <tr>
               <th className="py-2 px-4 border-b text-left">Title</th>
               <th className="py-2 px-4 border-b text-center">Lessons</th>
+              {/* --- vvv เพิ่ม Header --- */}
+              <th className="py-2 px-4 border-b text-center">กำลังเรียน</th>
+              <th className="py-2 px-4 border-b text-center text-green-600">สำเร็จ/สอบผ่าน</th>
+              {/* --- ^^^ --------------- */}
               <th className="py-2 px-4 border-b text-center">Actions</th>
             </tr>
           </thead>
-          <tbody>
+         <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={3} className="text-center py-6">
-                  Loading...
-                </td>
-              </tr>
+              <tr><td colSpan={5} className="text-center py-6">Loading...</td></tr>
             ) : courses.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="text-center py-6">
-                  No courses found.
-                </td>
-              </tr>
+              <tr><td colSpan={5} className="text-center py-6">No courses found.</td></tr>
             ) : (
-              courses.map((course) => (
-                <tr key={course.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4 border-b">{course.title}</td>
-                  <td className="py-2 px-4 border-b text-center">
-                    {course._count.lessons}
-                  </td>
-                  <td className="py-2 px-4 border-b text-center space-x-2">
-                    <Link
-                      href={`/admin/courses/${course.id}`}
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs font-semibold"
-                    >
-                      แก้ไขบทเรียน
-                    </Link>
-                    <Link
-                      onClick={() => handleEdit(course)}
-                      className="text-blue-500 hover:text-blue-700 text-sm"
-                      href={""}
-                    >
-                      Edit
-                    </Link>
-                    <Link
-                      onClick={() => handleDelete(course.id)}
-                      className="text-red-500 hover:text-red-700 text-sm"
-                      href={""}
-                    >
-                      Delete
-                    </Link>
-                  </td>
-                </tr>
-              ))
+              courses.map((course) => {
+                // --- vvv คำนวณจำนวนผู้เรียนในแต่ละรอบ vvv ---
+                const studyingCount = course.enrollments.filter(e => e.status === 'IN_PROGRESS').length;
+                const completedCount = course.enrollments.filter(e => e.status === 'COMPLETED').length;
+                // --- ^^^ ----------------------------------
+
+                return (
+                  <tr key={course.id} className="hover:bg-gray-50">
+                    <td className="py-2 px-4 border-b">
+                      <div className="font-medium">{course.title}</div>
+                      {/* (Optional) แสดงหมวดหมู่ถ้ามี */}
+                      {/* <div className="text-xs text-gray-500">{course.category?.name}</div> */}
+                    </td>
+                    <td className="py-2 px-4 border-b text-center">
+                      {course._count.lessons}
+                    </td>
+                    
+                    {/* --- vvv แสดงข้อมูลสถิติ vvv --- */}
+                    <td className="py-2 px-4 border-b text-center">
+                      <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                        {studyingCount} คน
+                      </span>
+                    </td>
+                    <td className="py-2 px-4 border-b text-center">
+                      <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                        {completedCount} คน
+                      </span>
+                    </td>
+                    {/* --- ^^^ ------------------- */}
+
+                    <td className="py-2 px-4 border-b text-center space-x-2">
+                      <Link
+                        href={`/admin/courses/${course.id}`}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs font-semibold"
+                      >
+                        จัดการบทเรียน
+                      </Link>
+                      <button // เปลี่ยนจาก Link เป็น button เพื่อความถูกต้องตาม accessibility
+                        onClick={() => handleEdit(course)}
+                        className="text-blue-500 hover:text-blue-700 text-sm underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(course.id)}
+                        className="text-red-500 hover:text-red-700 text-sm underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
