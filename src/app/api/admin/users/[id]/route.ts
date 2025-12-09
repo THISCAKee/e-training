@@ -5,6 +5,48 @@ import { auth } from "@/auth";
 
 const prisma = new PrismaClient();
 
+// === เพิ่มฟังก์ชัน GET นี้ลงไป ===
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const session = await auth();
+  
+  if (session?.user?.role !== "ADMIN") {
+    return new NextResponse("Unauthorized", { status: 403 });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        enrollments: {
+          include: {
+            course: {
+              select: {
+                id: true,
+                title: true,
+              }
+            }
+          },
+          orderBy: { enrolledAt: 'desc' }
+        }
+      }
+    });
+
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    return NextResponse.json(user, { status: 200 });
+  } catch (error) {
+    console.error("GET_USER_DETAILS_ERROR", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
+  }
+}
+
+
 // === PATCH function ===
 export async function PATCH(
   request: Request,

@@ -34,7 +34,7 @@ export default function UserList() {
     setError(null);
     try {
       const response = await fetch(
-        `/api/admin/users?page=${page}&pageSize=10&search=${searchTerm}`,
+        `/api/admin/users?page=${page}&pageSize=10&search=${searchTerm}`
       );
       if (!response.ok) throw new Error("Failed to fetch users");
       const data = await response.json();
@@ -65,7 +65,7 @@ export default function UserList() {
 
       // อัปเดต state เพื่อให้ UI เปลี่ยนทันที
       setUsers(
-        users.map((u) => (u.id === userId ? { ...u, role: newRole } : u)),
+        users.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
       );
     } catch (err) {
       alert(err instanceof Error ? err.message : "An error occurred");
@@ -155,6 +155,12 @@ export default function UserList() {
                   </td>
                   {/* --- vvvv (เพิ่ม) นำคอลัมน์ Actions กลับมา vvvv --- */}
                   <td className="py-2 px-4 border-b text-center">
+                    <Link
+                      href={`/admin/users/${user.id}`}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      {user.name || "No Name"}
+                    </Link>
                     {/* ปุ่มจะถูก disable ถ้าเป็นแถวของ Admin ที่ login อยู่ */}
                     {session?.user?.id !== user.id.toString() ? (
                       <div className="flex justify-center space-x-2">
