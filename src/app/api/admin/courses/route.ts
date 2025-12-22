@@ -31,7 +31,19 @@ export async function GET(request: Request) {
           _count: { select: { lessons: true } },
           category: { select: { name: true } }, // (เพิ่ม) นับจำนวนบทเรียน
           enrollments: {
-            select: { status: true},
+            select: {
+              status: true,
+              enrolledAt: true, // ดูวันที่เริ่มเรียน
+              user: {
+                // ดึงข้อมูล User ออกมาด้วย
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  // image: true,
+                },
+              },
+            },
           },
         },
         skip: skip,
@@ -49,7 +61,7 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(totalCount / pageSize),
         currentPage: page,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     console.error("GET_COURSES_ERROR", error);

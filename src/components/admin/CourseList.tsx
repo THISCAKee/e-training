@@ -3,7 +3,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, X, User as UserIcon } from "lucide-react";
 
 type Category = {
   id: number;
@@ -19,7 +19,16 @@ type Course = {
   createdAt: string;
   _count: { lessons: number };
   categoryId: number | null;
-  enrollments: { status: "IN_PROGRESS" | "COMPLETED";}[];
+  enrollments: {
+    enrolledAt: string | number | Date;
+    status: "IN_PROGRESS" | "COMPLETED";
+    user: {
+      id: number;
+      name: string | null;
+      email: string | null;
+      // image: string | null;
+    };
+  }[];
 };
 
 const emptyCourse = {
@@ -47,11 +56,17 @@ export default function CourseList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalTab, setModalTab] = useState<"IN_PROGRESS" | "COMPLETED">(
+    "IN_PROGRESS"
+  );
+
   const fetchCourses = async (page = 1, searchTerm = "") => {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/admin/courses?page=${page}&pageSize=10&search=${searchTerm}`,
+        `/api/admin/courses?page=${page}&pageSize=10&search=${searchTerm}`
       );
       const data = await response.json();
       setCourses(data.data);
@@ -128,6 +143,15 @@ export default function CourseList() {
   };
 
   if (loading) return <p>Loading courses...</p>;
+
+  const openStudentList = (
+    course: Course,
+    tab: "IN_PROGRESS" | "COMPLETED"
+  ) => {
+    setSelectedCourse(course);
+    setModalTab(tab);
+    setShowModal(true);
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mt-8">
@@ -265,21 +289,35 @@ export default function CourseList() {
               <th className="py-2 px-4 border-b text-center">Lessons</th>
               {/* --- vvv เพิ่ม Header --- */}
               <th className="py-2 px-4 border-b text-center">กำลังเรียน</th>
-              <th className="py-2 px-4 border-b text-center text-green-600">สำเร็จ/สอบผ่าน</th>
+              <th className="py-2 px-4 border-b text-center text-green-600">
+                สำเร็จ/สอบผ่าน
+              </th>
               {/* --- ^^^ --------------- */}
               <th className="py-2 px-4 border-b text-center">Actions</th>
             </tr>
           </thead>
-         <tbody>
+          <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="text-center py-6">Loading...</td></tr>
+              <tr>
+                <td colSpan={5} className="text-center py-6">
+                  Loading...
+                </td>
+              </tr>
             ) : courses.length === 0 ? (
-              <tr><td colSpan={5} className="text-center py-6">No courses found.</td></tr>
+              <tr>
+                <td colSpan={5} className="text-center py-6">
+                  No courses found.
+                </td>
+              </tr>
             ) : (
               courses.map((course) => {
                 // --- vvv คำนวณจำนวนผู้เรียนในแต่ละรอบ vvv ---
-                const studyingCount = course.enrollments.filter(e => e.status === 'IN_PROGRESS').length;
-                const completedCount = course.enrollments.filter(e => e.status === 'COMPLETED').length;
+                const studyingCount = course.enrollments.filter(
+                  (e) => e.status === "IN_PROGRESS"
+                ).length;
+                const completedCount = course.enrollments.filter(
+                  (e) => e.status === "COMPLETED"
+                ).length;
                 // --- ^^^ ----------------------------------
 
                 return (
@@ -292,20 +330,26 @@ export default function CourseList() {
                     <td className="py-2 px-4 border-b text-center">
                       {course._count.lessons}
                     </td>
-                    
-                    {/* --- vvv แสดงข้อมูลสถิติ vvv --- */}
-                    <td className="py-2 px-4 border-b text-center">
-                      <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                        {studyingCount} คน
-                      </span>
-                    </td>
-                    <td className="py-2 px-4 border-b text-center">
-                      <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                        {completedCount} คน
-                      </span>
-                    </td>
-                    {/* --- ^^^ ------------------- */}
 
+                    {/* ปุ่มแสดงจำนวนคนกำลังเรียน */}
+                    <td className="py-2 px-4 border-b text-center">
+                      <button
+                        onClick={() => openStudentList(course, "IN_PROGRESS")}
+                        className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition text-xs font-semibold px-3 py-1 rounded-full cursor-pointer"
+                      >
+                        {studyingCount} คน
+                      </button>
+                    </td>
+
+                    {/* ปุ่มแสดงจำนวนคนเรียนจบ */}
+                    <td className="py-2 px-4 border-b text-center">
+                      <button
+                        onClick={() => openStudentList(course, "COMPLETED")}
+                        className="bg-green-100 text-green-800 hover:bg-green-200 transition text-xs font-semibold px-3 py-1 rounded-full cursor-pointer"
+                      >
+                        {completedCount} คน
+                      </button>
+                    </td>
                     <td className="py-2 px-4 border-b text-center space-x-2">
                       <Link
                         href={`/admin/courses/${course.id}`}
@@ -333,6 +377,122 @@ export default function CourseList() {
           </tbody>
         </table>
       </div>
+      {/* --- ส่วน Modal แสดงรายชื่อ --- */}
+      {showModal && selectedCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden animate-fade-in-up">
+            {/* Header Modal */}
+            <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+              <h3 className="font-bold text-lg text-gray-800 truncate pr-4">
+                {selectedCourse.title}
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b text-sm">
+              <button
+                className={`flex-1 py-3 font-medium ${
+                  modalTab === "IN_PROGRESS"
+                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
+                    : "text-gray-500 hover:bg-gray-50"
+                }`}
+                onClick={() => setModalTab("IN_PROGRESS")}
+              >
+                กำลังเรียน (
+                {
+                  selectedCourse.enrollments.filter(
+                    (e) => e.status === "IN_PROGRESS"
+                  ).length
+                }
+                )
+              </button>
+              <button
+                className={`flex-1 py-3 font-medium ${
+                  modalTab === "COMPLETED"
+                    ? "text-green-600 border-b-2 border-green-600 bg-green-50"
+                    : "text-gray-500 hover:bg-gray-50"
+                }`}
+                onClick={() => setModalTab("COMPLETED")}
+              >
+                สำเร็จ/สอบผ่าน (
+                {
+                  selectedCourse.enrollments.filter(
+                    (e) => e.status === "COMPLETED"
+                  ).length
+                }
+                )
+              </button>
+            </div>
+
+            {/* List Content */}
+            <div className="p-0 max-h-[60vh] overflow-y-auto">
+              {selectedCourse.enrollments.filter((e) => e.status === modalTab)
+                .length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  ไม่มีผู้เรียนในสถานะนี้
+                </div>
+              ) : (
+                <ul className="divide-y divide-gray-100">
+                  {selectedCourse.enrollments
+                    .filter((e) => e.status === modalTab)
+                    .map((enroll, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center p-4 hover:bg-gray-50 transition"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-3 shrink-0">
+                          {/* แสดงรูปถ้ามี หรือแสดง icon คน */}
+                          {/* {enroll.user.image ? (
+                             <img src={enroll.user.image} alt="" className="w-10 h-10 rounded-full object-cover" />
+                           ) : (
+                             <UserIcon size={20} />
+                           )} */}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {enroll.user.name || "Unknown Name"}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {enroll.user.email}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            เริ่มเมื่อ:{" "}
+                            {new Date(enroll.enrolledAt).toLocaleDateString(
+                              "th-TH"
+                            )}
+                          </p>
+                        </div>
+                        <div className="ml-2">
+                          <Link
+                            href={`/admin/users/${enroll.user.id}`}
+                            className="text-xs border border-blue-200 text-blue-600 px-2 py-1 rounded hover:bg-blue-50"
+                          >
+                            ดูข้อมูล
+                          </Link>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="p-4 border-t bg-gray-50 text-right">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-sm font-medium"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="mt-6 flex justify-between items-center">
