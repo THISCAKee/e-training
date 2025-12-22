@@ -11,6 +11,7 @@
   "dependencies": {
     "@prisma/client": "^6.18.0",
     "@types/bcryptjs": "^2.4.6",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "lucide-react": "^0.546.0",
     "next": "^16.0.7",
@@ -25,6 +26,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",

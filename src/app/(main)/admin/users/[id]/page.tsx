@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, KeyRound } from "lucide-react";
 
 type Enrollment = {
   id: number;
@@ -32,6 +32,9 @@ export default function AdminUserDetailPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  // เพิ่ม State สำหรับจัดการรหัสผ่านใหม่
+  const [newPassword, setNewPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // ดึงข้อมูล User
   const fetchUser = async () => {
@@ -70,6 +73,38 @@ export default function AdminUserDetailPage() {
     } catch (error) {
       console.error(error);
       alert("เกิดข้อผิดพลาด");
+    }
+  };
+
+  // เพิ่มฟังก์ชันเปลี่ยนรหัสผ่าน
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword) return;
+    if (newPassword.length < 6) {
+      alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
+
+    if (!confirm("ยืนยันการเปลี่ยนรหัสผ่านให้ผู้ใช้นี้?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/users/${params.id}/password`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword }),
+      });
+
+      if (res.ok) {
+        alert("เปลี่ยนรหัสผ่านสำเร็จ!");
+        setNewPassword(""); // ล้างช่อง input
+        setIsChangingPassword(false); // ปิดฟอร์ม
+      } else {
+        const msg = await res.text();
+        alert(`เกิดข้อผิดพลาด: ${msg}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     }
   };
 
@@ -121,6 +156,16 @@ export default function AdminUserDetailPage() {
           <p>
             <strong>ชั้นปี:</strong> {user.year || "-"}
           </p>
+
+          {/* ปุ่มเปิดปิดฟอร์มเปลี่ยนรหัส */}
+          <button
+            onClick={() => setIsChangingPassword(!isChangingPassword)}
+            className="flex items-center text-sm bg-blue-50 text-blue-600 px-3 py-2 rounded hover:bg-blue-100 transition w-35"
+          >
+            <KeyRound size={16} className="mr-2" />
+            {isChangingPassword ? "ยกเลิกการเปลี่ยนรหัส" : "เปลี่ยนรหัสผ่าน"}
+          </button>
+          {/* ปุ่มเปิดปิดฟอร์มเปลี่ยนรหัส */}
         </div>
       </div>
 
@@ -128,6 +173,38 @@ export default function AdminUserDetailPage() {
         <h2 className="text-xl font-bold mb-4 text-gray-800">
           คอร์สที่ลงทะเบียน ({user.enrollments.length})
         </h2>
+        {/* --- vvv ส่วนฟอร์มเปลี่ยนรหัสผ่าน (แสดงเมื่อกดปุ่ม) vvv --- */}
+        {isChangingPassword && (
+          <div className="mt-6 p-4 border border-blue-200 bg-blue-50 rounded-lg animate-fade-in">
+            <h3 className="font-semibold text-blue-800 mb-2">
+              ตั้งรหัสผ่านใหม่
+            </h3>
+            <form
+              onSubmit={handleChangePassword}
+              className="flex gap-2 items-end"
+            >
+              <div className="flex-1 max-w-md">
+                <label className="block text-xs text-gray-500 mb-1">
+                  รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)
+                </label>
+                <input
+                  type="text" // ใช้ text เพื่อให้ Admin เห็นว่าพิมพ์อะไรอยู่ (หรือใช้ password ก็ได้)
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 border rounded text-black"
+                  placeholder="ระบุรหัสผ่านใหม่..."
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-medium"
+              >
+                บันทึก
+              </button>
+            </form>
+          </div>
+        )}
+        {/* --- ^^^ จบส่วนฟอร์มเปลี่ยนรหัสผ่าน ^^^ --- */}
 
         {user.enrollments.length === 0 ? (
           <p className="text-gray-500">
