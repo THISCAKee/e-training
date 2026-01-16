@@ -15,7 +15,7 @@ async function getRecentCourses(): Promise<Course[]> {
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses`,
       {
         cache: "no-store",
-      },
+      }
     );
 
     if (!res.ok) return [];
@@ -96,7 +96,7 @@ export default async function HomePage() {
               title="AI For Life"
               description="การประยุกต์ใช้ AI ในชีวิตประจำวันและสังคม"
               // icon={<HeartHandshake size={28} className="text-blue-600" />}
-              href="/category/AI ForLife" // <-- ลิงก์ไปยัง Category "Life"
+              href="/category/AI For Life" // <-- ลิงก์ไปยัง Category "Life"
             />
             <CategoryCard
               theme="R"
