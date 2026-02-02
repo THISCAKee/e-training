@@ -69,11 +69,20 @@ export default function RegisterPage() {
 
   return (
     // <div className="bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div className="w-full max-w-md space-y-8 p-10 bg-white rounded-xl shadow-lg">
+    <div className="w-full max-w-md space-y-3 p-10 bg-white rounded-xl shadow-lg">
       <div>
         <h2 className="mt-6 text-center text-2xl font-medium tracking-tight text-gray-900">
           สร้างบัญชีใหม่
         </h2>
+      </div>
+      <div className="mt-2 text-sm text-center text-black">
+        บุคลากรภายใน{" "}
+        <Link
+          href="/register-staff"
+          className="text-blue-600 font-bold hover:underline text-[16px]"
+        >
+          ลงทะเบียนบุคลากร
+        </Link>
       </div>
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         {/* --- vvvv 3. เพิ่ม Input Fields ใหม่ vvvv --- */}
