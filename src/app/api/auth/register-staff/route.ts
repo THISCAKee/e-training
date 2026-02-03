@@ -6,18 +6,28 @@ export async function POST(request: Request) {
   try {
     const { name, email, password, faculty } = await request.json();
 
-    // 1. ตรวจสอบข้อมูลว่าครบไหม
     if (!name || !email || !password || !faculty) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
-    // 2. เช็คว่ามีอีเมลนี้ในระบบหรือยัง
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    // 1. เช็คว่ามีอีเมล หรือ ชื่อ นี้ในระบบหรือยัง
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: email },
+          { name: name }, // ✅ เพิ่มการเช็คชื่อซ้ำ
+        ],
+      },
     });
 
     if (existingUser) {
-      return new NextResponse("Email already exists", { status: 400 });
+      if (existingUser.email === email) {
+        return new NextResponse("อีเมลนี้มีอยู่ในระบบแล้ว", { status: 400 });
+      }
+      // ✅ เพิ่มเงื่อนไขแจ้งเตือนชื่อซ้ำ
+      if (existingUser.name === name) {
+        return new NextResponse("ชื่อนี้มีอยู่ในระบบแล้ว", { status: 400 });
+      }
     }
 
     // 3. เข้ารหัสรหัสผ่าน

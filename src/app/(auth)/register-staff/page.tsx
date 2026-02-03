@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Swal from "sweetalert2"; // ✅ 1. นำเข้า SweetAlert2
 
 export default function RegisterStaffPage() {
   const [formData, setFormData] = useState({
@@ -10,7 +11,7 @@ export default function RegisterStaffPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    faculty: "", // เพิ่ม field department
+    faculty: "", // หมายเหตุ: ตรวจสอบให้แน่ใจว่า API รับค่าเป็น 'faculty' หรือ 'department' นะครับ
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,8 +22,15 @@ export default function RegisterStaffPage() {
     setError("");
     setLoading(true);
 
+    // ✅ 2. แจ้งเตือนรหัสผ่านไม่ตรงกัน
     if (formData.password !== formData.confirmPassword) {
-      setError("รหัสผ่านไม่ตรงกัน");
+      Swal.fire({
+        icon: "warning",
+        title: "รหัสผ่านไม่ตรงกัน",
+        text: "กรุณากรอกรหัสผ่านให้ตรงกันทั้งสองช่อง",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#d33",
+      });
       setLoading(false);
       return;
     }
@@ -35,18 +43,47 @@ export default function RegisterStaffPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          // ⚠️ ถ้า Backend ใช้ 'department' อย่าลืมแก้ตรงนี้เป็น department: formData.faculty
           faculty: formData.faculty,
         }),
       });
 
+      const msg = await res.text();
+
       if (res.ok) {
-        router.push("/login?registered=true");
+        // ✅ 3. แจ้งเตือนสำเร็จ
+        Swal.fire({
+          icon: "success",
+          title: "ลงทะเบียนสำเร็จ!",
+          text: "ระบบกำลังพาท่านไปที่หน้าเข้าสู่ระบบ",
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          router.push("/login?registered=true");
+        });
       } else {
-        const msg = await res.text();
-        setError(msg);
+        // ✅ 4. แจ้งเตือนกรณี Error (เช่น อีเมลซ้ำ)
+        let errorText = msg;
+        if (msg.includes("Email already exists")) {
+          errorText = "อีเมลนี้มีอยู่ในระบบแล้ว กรุณาใช้อีเมลอื่น";
+        }
+
+        Swal.fire({
+          icon: "error",
+          title: "ไม่สามารถลงทะเบียนได้",
+          text: errorText,
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#d33",
+        });
+        // setError(msg); // ไม่ต้อง set error text แล้วเพราะใช้ Popup แทน
       }
     } catch (err) {
-      setError("Something went wrong");
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ระบบขัดข้อง กรุณาลองใหม่ภายหลัง",
+        confirmButtonText: "ตกลง",
+      });
     } finally {
       setLoading(false);
     }
@@ -59,6 +96,7 @@ export default function RegisterStaffPage() {
           ลงทะเบียนสำหรับบุคลากร
         </h2>
 
+        {/* ส่วนแสดง Error เดิม (จะยังคงอยู่แต่ไม่แสดงผลเพราะเราไม่ได้ set state error แล้ว) */}
         {error && (
           <div className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm">
             {error}
