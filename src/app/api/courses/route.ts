@@ -3,8 +3,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma"; // (Import prisma client ของคุณ)
 
-export const dynamic = "force-dynamic"; // (แนะนำ) เพื่อให้ข้อมูลอัปเดตเสมอ
-
 export async function GET(request: Request) {
   try {
     // ดึงข้อมูล Course ทั้งหมด

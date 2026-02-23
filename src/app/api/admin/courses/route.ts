@@ -2,11 +2,8 @@
 // src/app/api/admin/courses/route.ts
 
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
-
-const prisma = new PrismaClient();
-export const dynamic = "force-dynamic";
 // ฟังก์ชันนี้จะดึงข้อมูลหลักสูตรทั้งหมด
 export async function GET(request: Request) {
   try {
@@ -61,7 +58,7 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(totalCount / pageSize),
         currentPage: page,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("GET_COURSES_ERROR", error);

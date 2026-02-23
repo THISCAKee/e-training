@@ -1,8 +1,5 @@
 // src/app/courses/[id]/learn/page.tsx
 
-// (Optional) บังคับให้ revalidate ทุกครั้งที่เข้าหน้านี้ เพื่อให้ข้อมูล progress สดใหม่เสมอ
-export const dynamic = "force-dynamic";
-
 import ProtectedContent from "@/components/ProtectedContent";
 import CoursePlayer from "@/components/CoursePlayer";
 import prisma from "@/lib/prisma";
@@ -84,28 +81,25 @@ async function getCourseLearnData(
 // --- End Function ดึงข้อมูล ---
 
 // --- Main Page Component ---
-export default async function CourseLearnPage(
-  contextPromise: Promise<CourseLearnPageProps>, // แก้ปัญหา Next.js 15
-) {
-  // 1. Await props และ ดึง session
-  const { params } = await contextPromise;
+export default async function CourseLearnPage({
+  params,
+}: CourseLearnPageProps) {
+  // 1. ดึง params และ session
+  const { id } = await params;
   const session = await auth();
   const userId = session?.user?.id ? parseInt(session.user.id) : undefined;
   const userRole = session?.user?.role;
 
   // 2. ตรวจสอบ Login
   if (!userId) {
-    // ถ้ายังไม่ Login, redirect ไปหน้า Login พร้อม callback กลับมาหน้านี้
-    const callbackUrl = encodeURIComponent(
-      `/courses/${(await params).id}/learn`,
-    );
+    const callbackUrl = encodeURIComponent(`/courses/${id}/learn`);
     redirect(`/login?callbackUrl=${callbackUrl}`);
   }
 
   // 3. ตรวจสอบ Course ID
-  const courseId = parseInt((await params).id);
+  const courseId = parseInt(id);
   if (isNaN(courseId)) {
-    return notFound(); // แสดง 404 ถ้า ID ไม่ใช่ตัวเลข
+    return notFound();
   }
 
   // --- vvvv 4. ตรวจสอบ Enrollment vvvv ---

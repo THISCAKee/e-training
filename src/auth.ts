@@ -2,10 +2,8 @@
 
 import NextAuth, { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // ประกาศประเภทข้อมูลเพิ่มเติมสำหรับ session และ token
 declare module "next-auth" {

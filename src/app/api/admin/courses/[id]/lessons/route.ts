@@ -1,18 +1,8 @@
 // src/app/api/admin/courses/[id]/lessons/route.ts
 
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
-
-const prisma = new PrismaClient();
-
-// 1. แก้ไข RouteContext
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type RouteContext = {
-  params: {
-    id: string; // Course ID
-  };
-};
 
 // --- GET ---
 export async function GET(

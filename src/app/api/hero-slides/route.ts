@@ -3,8 +3,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export const dynamic = "force-dynamic"; // ให้ข้อมูลอัปเดตเสมอ
-
 export async function GET(request: Request) {
   try {
     const slides = await prisma.heroSlide.findMany({

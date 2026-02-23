@@ -2,13 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface RouteContext {
-  params: {
-    id: string; // lessonId
-  };
-}
-
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },

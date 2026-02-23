@@ -1,19 +1,8 @@
 // src/app/api/admin/courses/[id]/lessons/[lessonId]/route.ts
 
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
-
-const prisma = new PrismaClient();
-
-// 1. Interface ต้องมี params ทั้งสองตัว
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface RouteContext {
-  params: {
-    id?: string; // Course ID
-    lessonId?: string; // Lesson ID
-  };
-}
 
 // --- GET: ดึง Lesson เดียว ---
 export async function GET(

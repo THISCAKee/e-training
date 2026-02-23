@@ -1,18 +1,16 @@
 // src/app/api/admin/users/[id]/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
-
-const prisma = new PrismaClient();
 
 // === เพิ่มฟังก์ชัน GET นี้ลงไป ===
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const session = await auth();
-  
+
   if (session?.user?.role !== "ADMIN") {
     return new NextResponse("Unauthorized", { status: 403 });
   }
@@ -27,12 +25,12 @@ export async function GET(
               select: {
                 id: true,
                 title: true,
-              }
-            }
+              },
+            },
           },
-          orderBy: { enrolledAt: 'desc' }
-        }
-      }
+          orderBy: { enrolledAt: "desc" },
+        },
+      },
     });
 
     if (!user) {
@@ -45,7 +43,6 @@ export async function GET(
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
-
 
 // === PATCH function ===
 export async function PATCH(

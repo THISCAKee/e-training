@@ -11,18 +11,9 @@ interface CertificatePageProps {
   }>;
 }
 
-// (ฟังก์ชันแก้ปัญหา Next.js 15)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-
-export default async function CertificatePage(
-  contextPromise: Promise<CertificatePageProps>,
-) {
-  const { params } = await contextPromise;
+export default async function CertificatePage({
+  params,
+}: CertificatePageProps) {
   const session = await auth();
 
   if (!session?.user?.id) {

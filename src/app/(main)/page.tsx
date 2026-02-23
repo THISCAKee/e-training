@@ -3,10 +3,7 @@
 import CourseCard from "@/components/CourseCard";
 import type { Course } from "@/data/courses";
 import Link from "next/link";
-import Image from "next/image";
 import HeroCarousel from "@/components/HeroCarousel";
-import { BrainCircuit, HeartHandshake, FlaskConical } from "lucide-react";
-// (เราจะไม่ใช้ <Image> ในส่วนนี้ จะใช้ CSS background แทน)
 
 async function getRecentCourses(): Promise<Course[]> {
   try {
@@ -15,7 +12,7 @@ async function getRecentCourses(): Promise<Course[]> {
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses`,
       {
         cache: "no-store",
-      }
+      },
     );
 
     if (!res.ok) return [];
@@ -36,20 +33,15 @@ async function getRecentCourses(): Promise<Course[]> {
 export default async function HomePage() {
   const recentCourses = await getRecentCourses();
 
-  // 1. นี่คือลิงก์รูปภาพโดยตรงจาก Unsplash ID (trJEbYWZ_Z4) ที่คุณให้มา
-  const heroImageUrl = "/bg-hero.jpg";
-  // (Component ย่อยสำหรับ Category Card)
   const CategoryCard = ({
     title,
     description,
     theme,
-    // icon,
     href,
   }: {
     title: string;
     description: string;
     theme: string;
-    // icon: React.ReactNode;
     href: string;
   }) => (
     <Link
@@ -57,15 +49,9 @@ export default async function HomePage() {
       className="block bg-white p-6 rounded-lg shadow-lg  hover:-translate-y-1 transition-transform duration-300"
     >
       <div className="text-center space-x-4 mb-3">
-        {/*<div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-          {icon}
-        </div>*/}
-        <h1 className="text-6xl font-bold text-gray-800">{theme}</h1>
+        <span className="text-6xl font-bold text-gray-800 block">{theme}</span>
       </div>
       <div className="text-center space-x-4 mb-3">
-        {/*<div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-          {icon}
-        </div>*/}
         <p className="text-2xl font-normal text-gray-800">{title}</p>
       </div>
       <p className="text-center text-gray-600">{description}</p>

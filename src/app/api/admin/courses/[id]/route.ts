@@ -2,11 +2,8 @@
 // src/app/api/admin/courses/[id]/route.ts
 
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
-
-export const dynamic = "force-dynamic";
-const prisma = new PrismaClient();
 
 // === GET function ===
 export async function GET(
