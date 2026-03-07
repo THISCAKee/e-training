@@ -1,9 +1,11 @@
 // src/app/page.tsx (ฉบับแก้ไข: ใช้รูปภาพเป็นพื้นหลัง Hero)
 
-import CourseCard from "@/components/CourseCard";
 import type { Course } from "@/data/courses";
-import Link from "next/link";
 import HeroCarousel from "@/components/HeroCarousel";
+import HomeModes from "@/components/HomeModes";
+import CourseCard from "@/components/CourseCard";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 async function getRecentCourses(): Promise<Course[]> {
   try {
@@ -33,91 +35,44 @@ async function getRecentCourses(): Promise<Course[]> {
 export default async function HomePage() {
   const recentCourses = await getRecentCourses();
 
-  const CategoryCard = ({
-    title,
-    description,
-    theme,
-    href,
-  }: {
-    title: string;
-    description: string;
-    theme: string;
-    href: string;
-  }) => (
-    <Link
-      href={href}
-      className="block bg-white p-6 rounded-lg shadow-lg  hover:-translate-y-1 transition-transform duration-300"
-    >
-      <div className="text-center space-x-4 mb-3">
-        <span className="text-6xl font-bold text-gray-800 block">{theme}</span>
-      </div>
-      <div className="text-center space-x-4 mb-3">
-        <p className="text-2xl font-normal text-gray-800">{title}</p>
-      </div>
-      <p className="text-center text-gray-600">{description}</p>
-    </Link>
-  );
-
   return (
     <>
-      {/* --- vvvv Hero Section (แก้ไขใหม่ทั้งหมด) vvvv --- */}
       <HeroCarousel />
-      <div className="bg-white py-16 j">
-        {" "}
-        {/* ใช้พื้นหลังสีขาว หรือสีอ่อนๆ */}
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-medium text-center text-gray-800 mb-8">
-            CATEGORY
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            <CategoryCard
-              theme="C"
-              title="AI For Creative"
-              description="เครื่องมือ AI สำหรับงานสร้างสรรค์และออกแบบ"
-              // icon={<BrainCircuit size={28} className="text-blue-600" />}
-              href="/category/AI For Creative" // <-- ลิงก์ไปยัง Category "Creative"
-            />
-            <CategoryCard
-              theme="L"
-              title="AI For Life"
-              description="การประยุกต์ใช้ AI ในชีวิตประจำวันและสังคม"
-              // icon={<HeartHandshake size={28} className="text-blue-600" />}
-              href="/category/AI For Life" // <-- ลิงก์ไปยัง Category "Life"
-            />
-            <CategoryCard
-              theme="R"
-              title="AI For Research"
-              description="AI สำหรับการวิจัย การวิเคราะห์ข้อมูลขั้นสูง"
-              // icon={<FlaskConical size={28} className="text-blue-600" />}
-              href="/category/AI For Research" // <-- ลิงก์ไปยัง Category "Research"
-            />
-          </div>
-        </div>
-      </div>
+      <HomeModes />
 
-      {/* Recent Courses Section (ส่วนนี้เหมือนเดิม) */}
-      <div className="bg-gray-50 py-16">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-semiboldbold text-center text-gray-800 mb-8">
-            หลักสูตรแนะนำ
-          </h2>
-          {recentCourses.length > 0 ? (
+      {/* Recent Courses Section (ย้ายออกมาอยู่นอกสุด) */}
+      <div className="bg-gray-50 py-16 border-t border-gray-100">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              หลักสูตรแนะนำ
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              เริ่มต้นเส้นทางการเรียนรู้ AI
+              ของคุณด้วยหลักสูตรที่ได้รับความนิยมและมีคุณภาพครอบคลุมทุกระดับตั้งแต่พื้นฐานจนถึงขั้นสูง
+            </p>
+          </div>
+
+          {recentCourses && recentCourses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {recentCourses.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500">
-              ยังไม่มีหลักสูตรในขณะนี้
-            </p>
+            <div className="bg-white p-12 rounded-2xl text-center border border-gray-100">
+              <p className="text-xl text-gray-500 font-medium">
+                ยังไม่มีหลักสูตรในขณะนี้
+              </p>
+            </div>
           )}
+
           <div className="text-center mt-12">
             <Link
               href="/courses"
-              className="bg-blue-600 text-white font-normal px-8 py-3 rounded-md hover:bg-blue-700 transition duration-300"
+              className="inline-flex items-center bg-gray-900 text-white font-medium px-8 py-3.5 rounded-full hover:bg-gray-800 transition-colors duration-300 hover:shadow-lg"
             >
-              ดูหลักสูตรทั้งหมด
+              ดูหลักสูตรทั้งหมด <ChevronRight className="ml-2" size={20} />
             </Link>
           </div>
         </div>
