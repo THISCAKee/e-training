@@ -184,7 +184,14 @@ export default function UserList() {
                   key={user.id}
                   className="hover:bg-blue-50/50 transition-colors"
                 >
-                  <td className="py-3 px-4 text-sm">{user.name}</td>
+                  <td className="py-3 px-4 text-sm font-semibold">
+                    <Link
+                      href={`/admin/users/${user.id}`}
+                      className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    >
+                      {user.name || "Unknown"}
+                    </Link>
+                  </td>
                   <td className="py-3 px-4 text-sm text-gray-600">
                     {user.email}
                   </td>
