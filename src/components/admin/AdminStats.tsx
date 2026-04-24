@@ -4,10 +4,16 @@
 import { useState, useEffect } from "react";
 import { Users, BookOpen, BarChart3, TrendingUp, Activity } from "lucide-react";
 
+type CategoryStat = {
+  name: string;
+  count: number;
+};
+
 type Stats = {
   userCount: number;
   courseCount: number;
   enrollmentCount: number;
+  categoryStats: CategoryStat[];
 };
 
 const StatCard = ({
@@ -122,19 +128,49 @@ export default function AdminStats() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-bold text-gray-800">สถิติการเข้าเรียน (Enrollment Trends)</h2>
-              <p className="text-sm text-gray-500">จำนวนการลงทะเบียนเรียนในแต่ละเดือน</p>
+              <h2 className="text-lg font-bold text-gray-800">สถิติการเข้าเรียนแยกตามหมวดหมู่ (Category Stats)</h2>
+              <p className="text-sm text-gray-500">จำนวนการลงทะเบียนเรียนในแต่ละหมวดหมู่ (Category)</p>
             </div>
             <select className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none">
-              <option>ปีนี้ (This Year)</option>
-              <option>ปีที่แล้ว (Last Year)</option>
+              <option>เรียงจากมากไปน้อย</option>
             </select>
           </div>
           
-          <div className="w-full h-[300px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
-             <BarChart3 size={48} className="mb-4 text-blue-300" />
-             <p className="font-medium text-gray-600">พื้นที่สำหรับแสดงกราฟ (Chart Area)</p>
-             <p className="text-sm">สามารถใช้งานร่วมกับ Recharts หรือ Chart.js</p>
+          <div className="w-full space-y-6">
+            {stats.categoryStats && stats.categoryStats.length > 0 ? (
+              stats.categoryStats.map((cat, idx) => {
+                const maxCount = Math.max(...stats.categoryStats.map(c => c.count));
+                const percentage = maxCount === 0 ? 0 : (cat.count / maxCount) * 100;
+                // สลับสีไล่ระดับสำหรับแต่ละบาร์เพื่อให้ดูน่าสนใจ
+                const colors = [
+                  "bg-blue-500", "bg-emerald-500", "bg-purple-500", 
+                  "bg-amber-500", "bg-rose-500", "bg-teal-500"
+                ];
+                const barColor = colors[idx % colors.length];
+
+                return (
+                  <div key={idx} className="flex items-center">
+                    <div className="w-1/3 text-sm font-semibold text-gray-700 truncate pr-4" title={cat.name}>
+                      {cat.name}
+                    </div>
+                    <div className="w-2/3 flex items-center">
+                      <div className="w-full bg-gray-100 rounded-full h-4 relative overflow-hidden flex-1">
+                        <div 
+                          className={`${barColor} h-4 rounded-full transition-all duration-1000 ease-out`} 
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                      <span className="ml-4 text-sm font-bold text-gray-800 w-10 text-right">{cat.count}</span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="w-full h-[300px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
+                <BarChart3 size={48} className="mb-4 text-blue-300" />
+                <p className="font-medium text-gray-600">ไม่มีข้อมูลหมวดหมู่ (No Data)</p>
+              </div>
+            )}
           </div>
         </div>
 
