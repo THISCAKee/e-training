@@ -3,7 +3,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
-import { Search, X, User as UserIcon } from "lucide-react";
+import { Search, X, User as UserIcon, Plus } from "lucide-react";
 
 type Category = {
   id: number;
@@ -52,6 +52,7 @@ export default function CourseList() {
 
   // States for Pagination and Search
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -61,6 +62,17 @@ export default function CourseList() {
   const [modalTab, setModalTab] = useState<"IN_PROGRESS" | "COMPLETED">(
     "IN_PROGRESS"
   );
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (debouncedSearch !== search) {
+        setDebouncedSearch(search);
+        setCurrentPage(1); // Reset to page 1 on new search
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search, debouncedSearch]);
 
   const fetchCourses = async (page = 1, searchTerm = "") => {
     setLoading(true);
@@ -102,8 +114,9 @@ export default function CourseList() {
   }, []);
 
   useEffect(() => {
-    fetchCourses(currentPage, search);
-  }, [currentPage, search]);
+    fetchCourses(currentPage, debouncedSearch);
+  }, [currentPage, debouncedSearch]);
+  
   const handleAddNew = () => {
     setCurrentCourse(emptyCourse);
     setIsFormVisible(true);
@@ -117,7 +130,7 @@ export default function CourseList() {
   const handleDelete = async (courseId: number) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
       await fetch(`/api/admin/courses/${courseId}`, { method: "DELETE" });
-      fetchCourses(); // Refresh list
+      fetchCourses(currentPage, debouncedSearch); // Refresh list
     }
   };
 
@@ -137,12 +150,11 @@ export default function CourseList() {
       body: JSON.stringify(currentCourse),
     });
 
+    setIsSubmitting(false);
     setIsFormVisible(false);
     setCurrentCourse(emptyCourse);
-    fetchCourses(); // Refresh list after save
+    fetchCourses(currentPage, debouncedSearch); // Refresh list after save
   };
-
-  if (loading) return <p>Loading courses...</p>;
 
   const openStudentList = (
     course: Course,
@@ -154,221 +166,226 @@ export default function CourseList() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Course Management</h2>
-        <Link
-          onClick={handleAddNew}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          href={""}
-        >
-          + Add New Course
-        </Link>
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Course Management</h2>
+
+        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+          {/* Search Input */}
+          <div className="relative w-full sm:w-72 text-gray-700">
+            <input
+              type="text"
+              placeholder="ค้นหาหลักสูตร..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full p-2.5 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          </div>
+
+          <button
+            onClick={handleAddNew}
+            className="w-full sm:w-auto flex items-center justify-center bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm font-medium"
+          >
+            <Plus size={18} className="mr-2" />
+            Add New Course
+          </button>
+        </div>
       </div>
 
       {isFormVisible && (
         <form
           onSubmit={handleSubmit}
-          className="mb-6 p-4 bg-gray-100 rounded-lg space-y-4"
+          className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-xl space-y-5 animate-fade-in-up"
         >
-          <h3 className="text-xl font-semibold">
-            {currentCourse.id ? "Edit Course" : "Add New Course"}
-          </h3>
-          <div>
-            <label className="block text-sm font-medium">Title</label>
-            <input
-              type="text"
-              value={currentCourse.title}
-              onChange={(e) =>
-                setCurrentCourse({ ...currentCourse, title: e.target.value })
-              }
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Description</label>
-            <textarea
-              value={currentCourse.description}
-              onChange={(e) =>
-                setCurrentCourse({
-                  ...currentCourse,
-                  description: e.target.value,
-                })
-              }
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Image URL</label>
-            <input
-              type="text"
-              value={currentCourse.imageUrl || ""}
-              onChange={(e) =>
-                setCurrentCourse({ ...currentCourse, imageUrl: e.target.value })
-              }
-              className="w-full p-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Category</label>
-            <select
-              value={currentCourse.categoryId || ""} // ถ้าเป็น null ให้เป็น string ว่าง
-              onChange={(e) =>
-                setCurrentCourse({
-                  ...currentCourse,
-                  // แปลงกลับเป็น number หรือ null
-                  categoryId: e.target.value ? parseInt(e.target.value) : null,
-                })
-              }
-              className="w-full p-2 border rounded"
-              disabled={loadingCategories}
-            >
-              <option value="">-- No Category --</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            {loadingCategories && (
-              <span className="text-xs">Loading categories...</span>
-            )}
-          </div>
-          {/*<div>
-            <label className="block text-sm font-medium">Video URL</label>
-            <input
-              type="url"
-              value={currentCourse.videoUrl || ""}
-              onChange={(e) =>
-                setCurrentCourse({ ...currentCourse, videoUrl: e.target.value })
-              }
-              className="w-full p-2 border rounded"
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-          </div>*/}
-          <div className="flex space-x-2">
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-            >
-              Save
-            </button>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-xl font-bold text-gray-800">
+              {currentCourse.id ? "Edit Course" : "Add New Course"}
+            </h3>
             <button
               type="button"
               onClick={() => setIsFormVisible(false)}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
+              <input
+                type="text"
+                value={currentCourse.title}
+                onChange={(e) =>
+                  setCurrentCourse({ ...currentCourse, title: e.target.value })
+                }
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-800"
+                required
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+              <textarea
+                value={currentCourse.description}
+                onChange={(e) =>
+                  setCurrentCourse({
+                    ...currentCourse,
+                    description: e.target.value,
+                  })
+                }
+                rows={3}
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-800"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Image URL</label>
+              <input
+                type="text"
+                value={currentCourse.imageUrl || ""}
+                onChange={(e) =>
+                  setCurrentCourse({ ...currentCourse, imageUrl: e.target.value })
+                }
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-800"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Category</label>
+              <select
+                value={currentCourse.categoryId || ""}
+                onChange={(e) =>
+                  setCurrentCourse({
+                    ...currentCourse,
+                    categoryId: e.target.value ? parseInt(e.target.value) : null,
+                  })
+                }
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-800 bg-white"
+                disabled={loadingCategories}
+              >
+                <option value="">-- No Category --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              {loadingCategories && (
+                <span className="text-xs text-blue-500 mt-1 block">Loading categories...</span>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => setIsFormVisible(false)}
+              className="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-50 transition font-medium"
             >
               Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50"
+            >
+              {isSubmitting ? "Saving..." : "Save Course"}
             </button>
           </div>
         </form>
       )}
 
-      {/* Search Input */}
-      <div className="mb-4">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search by course title..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-2 pl-10 border rounded-md"
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        </div>
-      </div>
-
       {/* Table to display courses */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="min-w-full bg-white text-black">
-          <thead className="bg-gray-100">
+          <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
             <tr>
-              <th className="py-2 px-4 border-b text-left">Title</th>
-              <th className="py-2 px-4 border-b text-center">Lessons</th>
-              {/* --- vvv เพิ่ม Header --- */}
-              <th className="py-2 px-4 border-b text-center">กำลังเรียน</th>
-              <th className="py-2 px-4 border-b text-center text-green-600">
+              <th className="py-3 px-4 border-b text-left font-medium">Title</th>
+              <th className="py-3 px-4 border-b text-center font-medium">Lessons</th>
+              <th className="py-3 px-4 border-b text-center font-medium">กำลังเรียน</th>
+              <th className="py-3 px-4 border-b text-center font-medium text-green-600">
                 สำเร็จ/สอบผ่าน
               </th>
-              {/* --- ^^^ --------------- */}
-              <th className="py-2 px-4 border-b text-center">Actions</th>
+              <th className="py-3 px-4 border-b text-center font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {loading ? (
+          <tbody className="divide-y divide-gray-100">
+            {loading && courses.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-6">
-                  Loading...
+                <td colSpan={5} className="text-center py-8 text-gray-400">
+                  <div className="flex justify-center items-center space-x-2">
+                    <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span>กำลังโหลดข้อมูล...</span>
+                  </div>
                 </td>
               </tr>
             ) : courses.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-6">
-                  No courses found.
+                <td colSpan={5} className="text-center py-12 text-gray-500">
+                  <div className="flex flex-col items-center justify-center">
+                    <Search className="w-12 h-12 text-gray-300 mb-3" />
+                    <p className="text-lg font-medium">ไม่พบหลักสูตรที่ค้นหา</p>
+                    <p className="text-sm">ลองเปลี่ยนคำค้นหาใหม่</p>
+                  </div>
                 </td>
               </tr>
             ) : (
               courses.map((course) => {
-                // --- vvv คำนวณจำนวนผู้เรียนในแต่ละรอบ vvv ---
                 const studyingCount = course.enrollments.filter(
                   (e) => e.status === "IN_PROGRESS"
                 ).length;
                 const completedCount = course.enrollments.filter(
                   (e) => e.status === "COMPLETED"
                 ).length;
-                // --- ^^^ ----------------------------------
 
                 return (
-                  <tr key={course.id} className="hover:bg-gray-50">
-                    <td className="py-2 px-4 border-b">
-                      <div className="font-medium">{course.title}</div>
-                      {/* (Optional) แสดงหมวดหมู่ถ้ามี */}
-                      {/* <div className="text-xs text-gray-500">{course.category?.name}</div> */}
+                  <tr key={course.id} className="hover:bg-blue-50/50 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="font-semibold text-gray-800">{course.title}</div>
+                      <div className="text-xs text-gray-500 truncate max-w-xs">{course.description}</div>
                     </td>
-                    <td className="py-2 px-4 border-b text-center">
+                    <td className="py-3 px-4 text-center text-gray-600">
                       {course._count.lessons}
                     </td>
 
-                    {/* ปุ่มแสดงจำนวนคนกำลังเรียน */}
-                    <td className="py-2 px-4 border-b text-center">
+                    <td className="py-3 px-4 text-center">
                       <button
                         onClick={() => openStudentList(course, "IN_PROGRESS")}
-                        className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition text-xs font-semibold px-3 py-1 rounded-full cursor-pointer"
+                        className="bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition text-xs font-bold px-3 py-1.5 rounded-full cursor-pointer shadow-sm"
                       >
                         {studyingCount} คน
                       </button>
                     </td>
 
-                    {/* ปุ่มแสดงจำนวนคนเรียนจบ */}
-                    <td className="py-2 px-4 border-b text-center">
+                    <td className="py-3 px-4 text-center">
                       <button
                         onClick={() => openStudentList(course, "COMPLETED")}
-                        className="bg-green-100 text-green-800 hover:bg-green-200 transition text-xs font-semibold px-3 py-1 rounded-full cursor-pointer"
+                        className="bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition text-xs font-bold px-3 py-1.5 rounded-full cursor-pointer shadow-sm"
                       >
                         {completedCount} คน
                       </button>
                     </td>
-                    <td className="py-2 px-4 border-b text-center space-x-2">
-                      <Link
-                        href={`/admin/courses/${course.id}`}
-                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs font-semibold"
-                      >
-                        จัดการบทเรียน
-                      </Link>
-                      <button // เปลี่ยนจาก Link เป็น button เพื่อความถูกต้องตาม accessibility
-                        onClick={() => handleEdit(course)}
-                        className="text-blue-500 hover:text-blue-700 text-sm underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(course.id)}
-                        className="text-red-500 hover:text-red-700 text-sm underline"
-                      >
-                        Delete
-                      </button>
+                    <td className="py-3 px-4 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <Link
+                          href={`/admin/courses/${course.id}`}
+                          className="bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-md text-xs font-semibold transition"
+                        >
+                          จัดการบทเรียน
+                        </Link>
+                        <button
+                          onClick={() => handleEdit(course)}
+                          className="bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-md text-xs font-semibold transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(course.id)}
+                          className="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-md text-xs font-semibold transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -377,30 +394,31 @@ export default function CourseList() {
           </tbody>
         </table>
       </div>
-      {/* --- ส่วน Modal แสดงรายชื่อ --- */}
+
+      {/* Modal แสดงรายชื่อ */}
       {showModal && selectedCourse && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden animate-fade-in-up">
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up">
             {/* Header Modal */}
-            <div className="flex justify-between items-center p-4 border-b bg-gray-50">
+            <div className="flex justify-between items-center p-5 border-b border-gray-100">
               <h3 className="font-bold text-lg text-gray-800 truncate pr-4">
                 {selectedCourse.title}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-full transition"
               >
                 <X size={24} />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b text-sm">
+            <div className="flex border-b border-gray-100 text-sm">
               <button
-                className={`flex-1 py-3 font-medium ${
+                className={`flex-1 py-3.5 font-semibold transition-colors ${
                   modalTab === "IN_PROGRESS"
-                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
-                    : "text-gray-500 hover:bg-gray-50"
+                    ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                 }`}
                 onClick={() => setModalTab("IN_PROGRESS")}
               >
@@ -413,10 +431,10 @@ export default function CourseList() {
                 )
               </button>
               <button
-                className={`flex-1 py-3 font-medium ${
+                className={`flex-1 py-3.5 font-semibold transition-colors ${
                   modalTab === "COMPLETED"
-                    ? "text-green-600 border-b-2 border-green-600 bg-green-50"
-                    : "text-gray-500 hover:bg-gray-50"
+                    ? "text-emerald-600 border-b-2 border-emerald-600 bg-emerald-50/50"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                 }`}
                 onClick={() => setModalTab("COMPLETED")}
               >
@@ -431,31 +449,27 @@ export default function CourseList() {
             </div>
 
             {/* List Content */}
-            <div className="p-0 max-h-[60vh] overflow-y-auto">
+            <div className="p-0 max-h-[50vh] overflow-y-auto">
               {selectedCourse.enrollments.filter((e) => e.status === modalTab)
                 .length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  ไม่มีผู้เรียนในสถานะนี้
+                <div className="py-12 flex flex-col items-center justify-center text-gray-500">
+                  <UserIcon size={40} className="text-gray-300 mb-3" />
+                  <p className="font-medium">ไม่มีผู้เรียนในสถานะนี้</p>
                 </div>
               ) : (
-                <ul className="divide-y divide-gray-100">
+                <ul className="divide-y divide-gray-50">
                   {selectedCourse.enrollments
                     .filter((e) => e.status === modalTab)
                     .map((enroll, index) => (
                       <li
                         key={index}
-                        className="flex items-center p-4 hover:bg-gray-50 transition"
+                        className="flex items-center p-4 hover:bg-blue-50/30 transition-colors"
                       >
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-3 shrink-0">
-                          {/* แสดงรูปถ้ามี หรือแสดง icon คน */}
-                          {/* {enroll.user.image ? (
-                             <img src={enroll.user.image} alt="" className="w-10 h-10 rounded-full object-cover" />
-                           ) : (
-                             <UserIcon size={20} />
-                           )} */}
+                        <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-4 shrink-0 font-bold shadow-sm">
+                           {enroll.user.name ? enroll.user.name.charAt(0).toUpperCase() : <UserIcon size={20} />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-semibold text-gray-800 truncate">
                             {enroll.user.name || "Unknown Name"}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
@@ -468,10 +482,10 @@ export default function CourseList() {
                             )}
                           </p>
                         </div>
-                        <div className="ml-2">
+                        <div className="ml-3">
                           <Link
                             href={`/admin/users/${enroll.user.id}`}
-                            className="text-xs border border-blue-200 text-blue-600 px-2 py-1 rounded hover:bg-blue-50"
+                            className="text-xs font-medium border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors"
                           >
                             ดูข้อมูล
                           </Link>
@@ -482,12 +496,12 @@ export default function CourseList() {
               )}
             </div>
 
-            <div className="p-4 border-t bg-gray-50 text-right">
+            <div className="p-4 border-t border-gray-100 bg-gray-50 text-right">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-sm font-medium"
+                className="px-5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors shadow-sm"
               >
-                ปิด
+                ปิดหน้าต่าง
               </button>
             </div>
           </div>
@@ -495,30 +509,26 @@ export default function CourseList() {
       )}
 
       {/* Pagination */}
-      <div className="mt-6 flex justify-between items-center">
-        <span className="text-sm text-gray-600">
-          Total {totalCount} courses
-        </span>
-        <div className="flex space-x-2">
-          <Link
+      <div className="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600 gap-4">
+        <span>ข้อมูลทั้งหมด <span className="font-bold text-gray-900">{totalCount}</span> รายการ</span>
+        <div className="flex items-center space-x-2 bg-gray-50 p-1 rounded-lg border border-gray-200">
+          <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            // disabled={currentPage === 1 || loading}
-            className="px-4 py-2 text-sm bg-gray-200 rounded-md disabled:opacity-50"
-            href={""}
+            disabled={currentPage === 1 || loading}
+            className="px-4 py-2 bg-white rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-white transition-colors border border-gray-200 shadow-sm"
           >
-            Previous
-          </Link>
-          <span className="px-4 py-2 text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
+            ก่อนหน้า
+          </button>
+          <span className="px-4 py-2 font-medium">
+            หน้า {currentPage} จาก {totalPages}
           </span>
-          <Link
+          <button
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            // disabled={currentPage === totalPages || loading}
-            className="px-4 py-2 text-sm bg-gray-200 rounded-md disabled:opacity-50"
-            href={""}
+            disabled={currentPage === totalPages || loading || totalPages === 0}
+            className="px-4 py-2 bg-white rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-white transition-colors border border-gray-200 shadow-sm"
           >
-            Next
-          </Link>
+            ถัดไป
+          </button>
         </div>
       </div>
     </div>
