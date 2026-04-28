@@ -1,12 +1,14 @@
 // src/app/admin/page.tsx
 "use client"; // 1. เปลี่ยนเป็น Client Component เพื่อจัดการ State ของ Tab
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react"; // 2. Import useSession
+import { useRouter } from "next/navigation";
 import UserList from "@/components/admin/UserList";
 import CourseList from "@/components/admin/CourseList";
 import AdminStats from "@/components/admin/AdminStats";
 import HeroSliderManagement from "@/components/admin/HeroSliderManagement";
+import OrganizationList from "@/components/admin/OrganizationList";
 import {
   LayoutDashboard,
   Users,
@@ -14,24 +16,74 @@ import {
   Presentation,
   ChevronRight,
   Settings,
+  Building2,
+  ShieldAlert,
 } from "lucide-react";
 
-type Tab = "dashboard" | "users" | "courses" | "slides";
+type Tab = "dashboard" | "users" | "courses" | "slides" | "organizations";
 
 export default function AdminDashboardPage() {
-  const { data: session } = useSession(); // 3. ใช้ useSession
-  const [activeTab, setActiveTab] = useState<Tab>("dashboard"); // 4. State สำหรับ Tab
+  const { data: session, status } = useSession(); // 3. ใช้ useSession
+  const router = useRouter();
+  const userRole = session?.user?.role;
+  const isOrgAdmin = userRole === "ORG_ADMIN";
+  const isAdmin = userRole === "ADMIN";
+
+  // ORG_ADMIN เริ่มที่แท็บ courses เลย, ADMIN เริ่มที่ dashboard
+  const [activeTab, setActiveTab] = useState<Tab>(isOrgAdmin ? "courses" : "dashboard");
+
+  // ตรวจสอบสิทธิ์: ถ้าไม่ใช่ ADMIN หรือ ORG_ADMIN ให้ redirect กลับหน้าหลัก
+  useEffect(() => {
+    if (status === "loading") return; // รอให้ session โหลดเสร็จ
+    if (!session?.user || (userRole !== "ADMIN" && userRole !== "ORG_ADMIN")) {
+      router.push("/");
+    }
+  }, [session, status, userRole, router]);
+
+  // อัปเดต default tab เมื่อ role โหลดเสร็จ
+  useEffect(() => {
+    if (isOrgAdmin) {
+      setActiveTab("courses");
+    }
+  }, [isOrgAdmin]);
+
+  // แสดง Loading ขณะตรวจสอบ session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 font-medium">กำลังตรวจสอบสิทธิ์...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ถ้าไม่มีสิทธิ์ แสดงหน้า Access Denied
+  if (!isAdmin && !isOrgAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center space-y-3 text-center">
+          <ShieldAlert className="w-16 h-16 text-red-400" />
+          <h2 className="text-xl font-bold text-gray-800">ไม่มีสิทธิ์เข้าถึง</h2>
+          <p className="text-gray-500">คุณไม่มีสิทธิ์ในการเข้าถึงหน้านี้</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {
       case "dashboard":
         return <AdminStats />;
       case "users":
-        return <UserList />;
+        return isAdmin ? <UserList /> : null;
       case "courses":
         return <CourseList />;
+      case "organizations":
+        return isAdmin ? <OrganizationList /> : null;
       case "slides":
-        return <HeroSliderManagement />;
+        return isAdmin ? <HeroSliderManagement /> : null;
       default:
         return null;
     }
@@ -48,12 +100,23 @@ export default function AdminDashboardPage() {
                 <span>ระบบจัดการ</span>
                 <ChevronRight size={14} />
                 <span className="text-white">แดชบอร์ด</span>
+                {isOrgAdmin && (
+                  <>
+                    <ChevronRight size={14} />
+                    <span className="text-yellow-300 font-semibold">หน่วยงาน</span>
+                  </>
+                )}
               </div>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-                Admin Dashboard
+                {isOrgAdmin ? "Organization Dashboard" : "Admin Dashboard"}
               </h1>
               <p className="text-blue-100/80 text-lg">
                 ยินดีต้อนรับ, {session?.user?.name || "ผู้ดูแลระบบ"}
+                {isOrgAdmin && (
+                  <span className="ml-2 inline-flex items-center bg-yellow-400/20 text-yellow-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-yellow-400/30">
+                    ผู้ดูแลหน่วยงาน
+                  </span>
+                )}
               </p>
             </div>
             <div className="flex items-center space-x-3">
@@ -68,6 +131,7 @@ export default function AdminDashboardPage() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-16">
         {/* Navigation Cards / Tabs */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-8 flex flex-wrap gap-2 md:flex-nowrap">
+          {/* ORG_ADMIN แสดงเฉพาะ Dashboard + Courses */}
           <TabButton
             icon={<LayoutDashboard size={20} />}
             label="ภาพรวมสถิติ"
@@ -75,13 +139,15 @@ export default function AdminDashboardPage() {
             isActive={activeTab === "dashboard"}
             onClick={() => setActiveTab("dashboard")}
           />
-          <TabButton
-            icon={<Users size={20} />}
-            label="จัดการผู้ใช้"
-            subLabel="Users"
-            isActive={activeTab === "users"}
-            onClick={() => setActiveTab("users")}
-          />
+          {isAdmin && (
+            <TabButton
+              icon={<Users size={20} />}
+              label="จัดการผู้ใช้"
+              subLabel="Users"
+              isActive={activeTab === "users"}
+              onClick={() => setActiveTab("users")}
+            />
+          )}
           <TabButton
             icon={<BookOpen size={20} />}
             label="จัดการหลักสูตร"
@@ -89,6 +155,15 @@ export default function AdminDashboardPage() {
             isActive={activeTab === "courses"}
             onClick={() => setActiveTab("courses")}
           />
+          {isAdmin && (
+            <TabButton
+              icon={<Building2 size={20} />}
+              label="จัดการหน่วยงาน"
+              subLabel="Organizations"
+              isActive={activeTab === "organizations"}
+              onClick={() => setActiveTab("organizations")}
+            />
+          )}
           {/* <TabButton
             icon={<Presentation size={20} />}
             label="จัดการแบนเนอร์"

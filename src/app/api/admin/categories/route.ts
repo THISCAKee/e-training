@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "ORG_ADMIN") {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 

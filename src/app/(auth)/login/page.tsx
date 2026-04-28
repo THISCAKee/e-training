@@ -2,33 +2,74 @@
 
 import { useState, Suspense } from "react"; // 1. เพิ่ม import Suspense
 import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { signIn, useSession, getSession } from "next-auth/react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 // 2. เปลี่ยนชื่อ Component เดิมจาก LoginPage เป็น "LoginForm" (เพื่อเป็นไส้ใน)
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
-  const error =
+
+  // Error จาก URL params (กรณี redirect มาจากหน้าอื่น)
+  const urlError =
     searchParams.get("error") === "CredentialsSignin"
       ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
       : null;
 
+  // รวม error ทั้ง 2 แหล่ง
+  const error = loginError || urlError;
+
+  // ถ้า login แล้วและเป็น ORG_ADMIN หรือ ADMIN ให้ redirect ไปหน้า admin
+  useEffect(() => {
+    if (session?.user) {
+      if (session.user.role === "ORG_ADMIN" || session.user.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push(callbackUrl);
+      }
+    }
+  }, [session, router, callbackUrl]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
+    setLoginError(null);
 
-    await signIn("credentials", {
+    // ORG_ADMIN และ ADMIN จะถูก redirect ไปหน้า /admin โดย useEffect ด้านบน
+    // เมื่อ session ถูกสร้างเรียบร้อยแล้ว
+    const result = await signIn("credentials", {
       email,
       password,
-      callbackUrl,
+      redirect: false, // ป้องกันการ redirect อัตโนมัติ เพื่อให้เราจัดการ redirect เอง
     });
 
-    setIsLoading(false);
+    if (result?.error) {
+      setLoginError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      setIsLoading(false);
+    } else if (result?.ok) {
+      // ดึง session ใหม่หลังจาก login สำเร็จ โดยข้าม cache ของ next-auth
+      const res = await fetch("/api/auth/session", { credentials: "include" });
+      const newSession = await res.json();
+      
+      if (newSession?.user?.role === "ORG_ADMIN" || newSession?.user?.role === "ADMIN") {
+        window.location.href = "/admin";
+      } else {
+        // ป้องกันไม่ให้ redirect กลับมาหน้า login
+        if (callbackUrl.includes("/login")) {
+          window.location.href = "/";
+        } else {
+          window.location.href = callbackUrl;
+        }
+      }
+    }
   };
 
   return (

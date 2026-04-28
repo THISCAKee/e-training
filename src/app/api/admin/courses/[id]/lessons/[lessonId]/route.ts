@@ -14,7 +14,10 @@ export async function GET(
   const { id, lessonId } = await params;
 
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
@@ -47,7 +50,10 @@ export async function PATCH(
   const { id, lessonId } = await params;
 
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
@@ -84,7 +90,10 @@ export async function DELETE(
   const { id, lessonId } = await params;
 
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 

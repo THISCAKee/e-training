@@ -21,9 +21,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
-  // กฎข้อที่ 2: ป้องกันหน้า Admin - ต้องเป็น ADMIN เท่านั้น
+  // กฎข้อที่ 2: ป้องกันหน้า Admin - ต้องเป็น ADMIN หรือ ORG_ADMIN เท่านั้น
   if (pathname.startsWith("/admin")) {
-    if (userRole !== "ADMIN") {
+    if (userRole !== "ADMIN" && userRole !== "ORG_ADMIN") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }

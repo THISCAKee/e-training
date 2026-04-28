@@ -14,6 +14,7 @@ declare module "next-auth" {
       name?: string | null;
       role: string;
       studentId?: string | null;
+      organizationId?: number | null;
     };
   }
 
@@ -23,6 +24,7 @@ declare module "next-auth" {
     name?: string | null;
     role: string;
     studentId?: string | null;
+    organizationId?: number | null;
   }
 }
 
@@ -31,6 +33,7 @@ declare module "next-auth/jwt" {
     sub: string;
     role?: string;
     studentId?: string | null;
+    organizationId?: number | null;
   }
 }
 
@@ -76,7 +79,7 @@ export const authOptions: NextAuthOptions = {
         token.sub = user.id; // เพิ่ม user id ลงใน token (sub คือ standard field สำหรับ subject)
         token.role = (user as { role?: string })?.role;
         token.studentId = (user as { studentId?: string | null })?.studentId;
-        // เพิ่ม role ลงใน token
+        token.organizationId = (user as { organizationId?: number | null })?.organizationId;
       }
       return token;
     },
@@ -86,6 +89,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub; // ดึง id จาก token (token.sub คือ user id)
         session.user.role = token.role as string; // ดึง role จาก token
         session.user.studentId = token.studentId as string | null;
+        session.user.organizationId = token.organizationId as number | null;
       }
       return session;
     },

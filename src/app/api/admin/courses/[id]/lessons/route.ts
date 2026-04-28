@@ -14,7 +14,10 @@ export async function GET(
   // const { params } = await contextPromise;
 
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -44,7 +47,10 @@ export async function POST(
   // 3. Await Promise
 
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

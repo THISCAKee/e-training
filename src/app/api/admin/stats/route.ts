@@ -6,24 +6,49 @@ import { auth } from "@/auth";
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  
+  if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
+  const isOrgAdmin = session.user.role === "ORG_ADMIN";
+  const orgId = session.user.organizationId;
+
+  if (isOrgAdmin && !orgId) {
+    return new NextResponse("Organization not found", { status: 400 });
+  }
+
   try {
-    const userCount = await prisma.user.count();
-    const courseCount = await prisma.course.count();
-    const lessonCount = await prisma.lesson.count();
+    const userWhere = isOrgAdmin ? { organizationId: orgId } : {};
+    const courseWhere = isOrgAdmin ? { organizationId: orgId } : {};
+    const enrollmentWhere = isOrgAdmin 
+      ? { status: "IN_PROGRESS" as const, course: { organizationId: orgId } }
+      : { status: "IN_PROGRESS" as const };
+
+    const userCount = await prisma.user.count({ where: userWhere });
+    const courseCount = await prisma.course.count({ where: courseWhere });
+    
+    // For lessons, we count lessons that belong to courses of the organization
+    const lessonCount = await prisma.lesson.count({
+      where: isOrgAdmin ? { course: { organizationId: orgId } } : {}
+    });
+    
     const enrollmentCount = await prisma.userCourseEnrollment.count({
-      where: { status: "IN_PROGRESS" },
+      where: enrollmentWhere,
     });
 
-    // ดึงข้อมูลการลงทะเบียนทั้งหมดพร้อมข้อมูลหมวดหมู่ของคอร์ส
+    // ดึงข้อมูลการลงทะเบียนทั้งหมดพร้อมข้อมูลหมวดหมู่ของคอร์ส และข้อมูลผู้ใช้
     const enrollments = await prisma.userCourseEnrollment.findMany({
+      where: isOrgAdmin ? { course: { organizationId: orgId } } : {},
       include: {
         course: {
           include: {
             category: true,
+          },
+        },
+        user: {
+          select: {
+            faculty: true,
           },
         },
       },
@@ -31,19 +56,27 @@ export async function GET(request: Request) {
 
     // คำนวณสถิติแยกตามหมวดหมู่
     const categoryMap: Record<string, number> = {};
+    const facultyMap: Record<string, number> = {};
+
     enrollments.forEach((enrollment) => {
+      // หมวดหมู่
       const categoryName = enrollment.course?.category?.name || "ไม่มีหมวดหมู่";
-      if (categoryMap[categoryName]) {
-        categoryMap[categoryName]++;
-      } else {
-        categoryMap[categoryName] = 1;
-      }
+      categoryMap[categoryName] = (categoryMap[categoryName] || 0) + 1;
+
+      // คณะ
+      const facultyName = enrollment.user?.faculty || "ไม่ระบุคณะ";
+      facultyMap[facultyName] = (facultyMap[facultyName] || 0) + 1;
     });
 
-    // แปลง object เป็น array สำหรับใช้ทำกราฟ และเรียงจากมากไปน้อย
+    // แปลง object เป็น array และเรียงจากมากไปน้อย
     const categoryStats = Object.keys(categoryMap).map((name) => ({
       name,
       count: categoryMap[name],
+    })).sort((a, b) => b.count - a.count);
+
+    const facultyStats = Object.keys(facultyMap).map((name) => ({
+      name,
+      count: facultyMap[name],
     })).sort((a, b) => b.count - a.count);
 
     return NextResponse.json(
@@ -53,6 +86,7 @@ export async function GET(request: Request) {
         lessonCount,
         enrollmentCount,
         categoryStats,
+        facultyStats,
       },
       { status: 200 },
     );

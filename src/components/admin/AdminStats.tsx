@@ -14,6 +14,7 @@ type Stats = {
   courseCount: number;
   enrollmentCount: number;
   categoryStats: CategoryStat[];
+  facultyStats: CategoryStat[];
 };
 
 const StatCard = ({
@@ -174,32 +175,83 @@ export default function AdminStats() {
           </div>
         </div>
 
-        {/* Secondary Chart / List Placeholder */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-800 mb-2">ข้อมูลผู้ใช้ใหม่ (New Users)</h2>
-          <p className="text-sm text-gray-500 mb-6">สัดส่วนผู้ใช้ใหม่เปรียบเทียบกับผู้ใช้เดิม</p>
-          
-          <div className="w-full h-[200px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 mb-6">
-             <div className="w-24 h-24 rounded-full border-8 border-emerald-400 border-r-blue-500 flex items-center justify-center">
-               <span className="text-xs font-bold text-gray-500">Pie Chart</span>
-             </div>
+        {/* Secondary Chart - Faculty Stats (Pie Chart) */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-gray-800">สถิติคณะที่ลงเรียน (Faculty Stats)</h2>
           </div>
+          
+          <div className="flex-1 flex flex-col items-center justify-center">
+            {stats.facultyStats && stats.facultyStats.length > 0 ? (
+              <div className="w-full space-y-8">
+                {/* Visual Pie Chart (using conic-gradient) */}
+                <div className="flex justify-center mb-6">
+                  <div className="relative w-48 h-48 rounded-full shadow-inner border-4 border-white overflow-hidden group">
+                    <div 
+                      className="absolute inset-0 transition-transform duration-1000 ease-out group-hover:scale-105"
+                      style={{
+                        background: `conic-gradient(${
+                          stats.facultyStats.map((faculty, idx, arr) => {
+                            const total = stats.enrollmentCount;
+                            const prevSum = arr.slice(0, idx).reduce((acc, curr) => acc + curr.count, 0);
+                            const startPercent = (prevSum / total) * 100;
+                            const endPercent = ((prevSum + faculty.count) / total) * 100;
+                            
+                            const colors = [
+                              "#3b82f6", "#10b981", "#8b5cf6", 
+                              "#f59e0b", "#ef4444", "#14b8a6",
+                              "#6366f1", "#f43f5e", "#84cc16"
+                            ];
+                            const color = colors[idx % colors.length];
+                            
+                            return `${color} ${startPercent}% ${endPercent}%`;
+                          }).join(", ")
+                        })`
+                      }}
+                    ></div>
+                    {/* Inner Circle for Donut Effect */}
+                    <div className="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm">
+                       <div className="text-center">
+                          <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider leading-none">Total</p>
+                          <p className="text-xl font-black text-gray-800">{stats.enrollmentCount}</p>
+                       </div>
+                    </div>
+                  </div>
+                </div>
 
-          <div className="space-y-4">
-             <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                   <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                   <span className="text-sm text-gray-600">ผู้ใช้ใหม่</span>
+                {/* Legend */}
+                <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                  {stats.facultyStats.map((faculty, idx) => {
+                    const colors = [
+                      "#3b82f6", "#10b981", "#8b5cf6", 
+                      "#f59e0b", "#ef4444", "#14b8a6",
+                      "#6366f1", "#f43f5e", "#84cc16"
+                    ];
+                    const color = colors[idx % colors.length];
+                    const percentage = stats.enrollmentCount === 0 ? 0 : (faculty.count / stats.enrollmentCount) * 100;
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center space-x-3 overflow-hidden">
+                          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }}></div>
+                          <span className="text-xs font-semibold text-gray-600 truncate" title={faculty.name}>
+                            {faculty.name}
+                          </span>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-2">
+                           <span className="text-xs font-bold text-gray-800">{faculty.count} คน</span>
+                           <span className="text-[10px] text-gray-400 block">{percentage.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <span className="text-sm font-bold text-gray-800">65%</span>
-             </div>
-             <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                   <div className="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
-                   <span className="text-sm text-gray-600">ผู้ใช้เดิม</span>
-                </div>
-                <span className="text-sm font-bold text-gray-800">35%</span>
-             </div>
+              </div>
+            ) : (
+              <div className="w-full h-[300px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
+                <p className="text-sm">ไม่มีข้อมูลคณะ</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -99,12 +99,12 @@ export default function Header() {
                   {/* ลิงก์ Dashboard */}
                   <Link
                     href={
-                      session.user?.role === "ADMIN" ? "/admin" : "/dashboard"
+                      session.user?.role === "ADMIN" || session.user?.role === "ORG_ADMIN" ? "/admin" : "/dashboard"
                     }
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setIsDropdownOpen(false)} // คลิกแล้วให้ปิด
                   >
-                    {session.user?.role === "ADMIN"
+                    {session.user?.role === "ADMIN" || session.user?.role === "ORG_ADMIN"
                       ? "Dashboard"
                       : "หลักสูตรที่ลงเรียน"}
                   </Link>

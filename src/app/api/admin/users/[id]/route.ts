@@ -11,7 +11,7 @@ export async function GET(
   const { id } = await params;
   const session = await auth();
 
-  if (session?.user?.role !== "ADMIN") {
+  if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 

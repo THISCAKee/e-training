@@ -1,9 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2"; // นำเข้า SweetAlert2
+import { Search, ChevronDown } from "lucide-react";
+
+const FACULTIES = [
+  "คณะวิทยาศาสตร์",
+  "คณะเทคโนโลยี",
+  "คณะวิศวกรรมศาสตร์",
+  "คณะสถาปัตยกรรมศาสตร์ ผังเมือง และนฤมิตศิลป์",
+  "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์",
+  "คณะวิทยาการสารสนเทศ",
+  "คณะพยาบาลศาสตร์",
+  "คณะเภสัชศาสตร์",
+  "คณะสาธารณสุขศาสตร์",
+  "คณะแพทยศาสตร์",
+  "คณะสัตวแพทยศาสตร์",
+  "คณะมนุษยศาสตร์และสังคมศาสตร์",
+  "คณะศึกษาศาสตร์",
+  "คณะการบัญชีและการจัดการ",
+  "คณะศิลปกรรมศาสตร์และวัฒนธรรมศาสตร์",
+  "คณะการท่องเที่ยวและการโรงแรม",
+  "วิทยาลัยการเมืองการปกครอง",
+  "คณะนิติศาสตร์",
+];
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -22,6 +44,24 @@ export default function RegisterPage() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isFacultyOpen, setIsFacultyOpen] = useState(false);
+  const [facultySearch, setFacultySearch] = useState("");
+  const facultyRef = useRef<HTMLDivElement>(null);
+
+  // ปิด dropdown เมื่อคลิกที่อื่น
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (facultyRef.current && !facultyRef.current.contains(event.target as Node)) {
+        setIsFacultyOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredFaculties = FACULTIES.filter((f) =>
+    f.toLowerCase().includes(facultySearch.toLowerCase())
+  );
 
   // ฟังก์ชันจัดการการเปลี่ยนค่าใน Input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,15 +211,54 @@ export default function RegisterPage() {
 
           {/* Faculty & Major Row */}
           <div className="flex gap-4">
-            <input
-              name="faculty"
-              type="text"
-              required
-              className="text-gray-900 w-1/2 rounded-md border border-gray-300 px-3 py-3 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-              placeholder="คณะ"
-              value={formData.faculty}
-              onChange={handleChange}
-            />
+            <div className="w-1/2 relative" ref={facultyRef}>
+              <div 
+                className="relative cursor-pointer"
+                onClick={() => setIsFacultyOpen(!isFacultyOpen)}
+              >
+                <input
+                  name="faculty"
+                  type="text"
+                  required
+                  readOnly={!isFacultyOpen}
+                  className="text-gray-900 w-full rounded-md border border-gray-300 px-3 py-3 pr-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm cursor-pointer"
+                  placeholder="ค้นหาคณะ"
+                  value={isFacultyOpen ? facultySearch : formData.faculty}
+                  onChange={(e) => setFacultySearch(e.target.value)}
+                  onFocus={() => {
+                    setIsFacultyOpen(true);
+                    setFacultySearch("");
+                  }}
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  {isFacultyOpen ? <Search size={16} /> : <ChevronDown size={16} />}
+                </div>
+              </div>
+
+              {isFacultyOpen && (
+                <div className="absolute z-50 mt-1 w-[200%] sm:w-[250%] left-0 bg-white border border-gray-200 rounded-md shadow-xl max-h-60 overflow-y-auto">
+                  {filteredFaculties.length > 0 ? (
+                    filteredFaculties.map((f) => (
+                      <div
+                        key={f}
+                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 transition-colors border-b border-gray-50 last:border-0"
+                        onClick={() => {
+                          setFormData((prev) => ({ ...prev, faculty: f }));
+                          setIsFacultyOpen(false);
+                          setFacultySearch("");
+                        }}
+                      >
+                        {f}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-3 text-sm text-gray-400 text-center">
+                      ไม่พบผลการค้นหา
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <input
               name="major"
               type="text"

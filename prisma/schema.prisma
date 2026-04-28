@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  //url = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
 enum EnrollmentStatus {
@@ -29,22 +29,29 @@ model User {
   lessonProgress UserLessonProgress[]
   enrollments    UserCourseEnrollment[]
   department     String? // เก็บข้อมูล สังกัด/คณะ
+  organizationId Int? // FK ไปยังหน่วยงาน (สำหรับ ORG_ADMIN)
+  organization   Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
 }
 
 model Course {
-  id          Int                    @id @default(autoincrement())
-  title       String
-  description String                 @db.Text
-  imageUrl    String?                @db.Text
-  videoUrl    String?                @db.Text
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  lessons     Lesson[]
-  enrollments UserCourseEnrollment[]
-  categoryId  Int? // Foreign Key (อาจจะไม่มีก็ได้)
-  category    Category?              @relation(fields: [categoryId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+  id             Int                    @id @default(autoincrement())
+  title          String
+  description    String                 @db.Text
+  imageUrl       String?                @db.Text
+  videoUrl       String?                @db.Text
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  lessons        Lesson[]
+  enrollments    UserCourseEnrollment[]
+  categoryId     Int? // Foreign Key (อาจจะไม่มีก็ได้)
+  category       Category?              @relation(fields: [categoryId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+  organizationId Int? // FK ไปยังหน่วยงานที่สร้างคอร์สนี้
+  organization   Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
 
   @@index([categoryId]) // (Optional) เพิ่ม index เพื่อ performance
+  @@index([organizationId])
 }
 
 model Lesson {
@@ -168,4 +175,15 @@ model Category {
 enum Role {
   USER
   ADMIN
+  ORG_ADMIN // ผู้ดูแลหน่วยงาน (จัดการได้เฉพาะคอร์สของหน่วยงานตัวเอง)
+}
+
+model Organization {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // ชื่อหน่วยงาน
+  description String?  @db.Text // รายละเอียดหน่วยงาน
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[] // ผู้ใช้ที่สังกัดหน่วยงานนี้
+  courses     Course[] // คอร์สที่หน่วยงานนี้สร้าง
 }

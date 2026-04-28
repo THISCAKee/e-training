@@ -6,6 +6,8 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 // ฟังก์ชันนี้จะดึงข้อมูลหลักสูตรทั้งหมด
 export async function GET(request: Request) {
+  const session = await auth();
+
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
@@ -14,11 +16,17 @@ export async function GET(request: Request) {
 
     const skip = (page - 1) * pageSize;
 
-    const whereCondition = search
-      ? {
-          title: { contains: search },
-        }
-      : {};
+    // ORG_ADMIN: ดูได้เฉพาะคอร์สของหน่วยงานตัวเอง
+    // ADMIN: ดูได้ทั้งหมด
+    const orgFilter =
+      session?.user?.role === "ORG_ADMIN" && session.user.organizationId
+        ? { organizationId: session.user.organizationId }
+        : {};
+
+    const whereCondition = {
+      ...(search ? { title: { contains: search } } : {}),
+      ...orgFilter,
+    };
 
     const [courses, totalCount] = await prisma.$transaction([
       prisma.course.findMany({
@@ -26,18 +34,17 @@ export async function GET(request: Request) {
         orderBy: { createdAt: "desc" },
         include: {
           _count: { select: { lessons: true } },
-          category: { select: { name: true } }, // (เพิ่ม) นับจำนวนบทเรียน
+          category: { select: { name: true } },
+          organization: { select: { id: true, name: true } },
           enrollments: {
             select: {
               status: true,
-              enrolledAt: true, // ดูวันที่เริ่มเรียน
+              enrolledAt: true,
               user: {
-                // ดึงข้อมูล User ออกมาด้วย
                 select: {
                   id: true,
                   name: true,
                   email: true,
-                  // image: true,
                 },
               },
             },
@@ -68,7 +75,11 @@ export async function GET(request: Request) {
 // === เพิ่มฟังก์ชัน POST สำหรับสร้าง Course ใหม่ ===
 export async function POST(request: Request) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  // อนุญาตให้ ADMIN และ ORG_ADMIN สร้างคอร์สได้
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
@@ -82,20 +93,29 @@ export async function POST(request: Request) {
       });
     }
 
-    // Only include fields that exist on the Prisma Course model
+    // ORG_ADMIN: ผูกคอร์สกับหน่วยงานของตัวเองอัตโนมัติ
+    // ADMIN: สามารถเลือกหน่วยงานได้ หรือไม่ผูกก็ได้
+    const organizationId =
+      session.user.role === "ORG_ADMIN"
+        ? session.user.organizationId
+        : body.organizationId
+          ? parseInt(body.organizationId)
+          : null;
+
     const newCourse = await prisma.course.create({
       data: {
         title,
         description,
         imageUrl,
         categoryId: categoryId ? parseInt(categoryId) : null,
+        organizationId,
       },
     });
 
-    return NextResponse.json(newCourse, { status: 201 }); // 201 Created
+    return NextResponse.json(newCourse, { status: 201 });
   } catch (error) {
     console.error("CREATE_COURSE_ERROR", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
-// ฟังก์ชันนี้จะสร้างหลักสูตรใหม่
+

@@ -13,20 +13,25 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
+    const role = searchParams.get("role") || "";
     const page = parseInt(searchParams.get("page") || "1");
     const pageSize = parseInt(searchParams.get("pageSize") || "10");
 
     const skip = (page - 1) * pageSize;
 
-    const whereCondition = search
-      ? {
-          OR: [
-            { name: { contains: search } },
-            { email: { contains: search } },
-            { studentId: { contains: search } },
-          ],
-        }
-      : {};
+    const whereCondition: any = {};
+    
+    if (search) {
+      whereCondition.OR = [
+        { name: { contains: search } },
+        { email: { contains: search } },
+        { studentId: { contains: search } },
+      ];
+    }
+    
+    if (role && role !== "ALL") {
+      whereCondition.role = role;
+    }
 
     const [users, totalCount] = await prisma.$transaction([
       prisma.user.findMany({

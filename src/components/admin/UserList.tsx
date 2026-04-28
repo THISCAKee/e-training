@@ -29,6 +29,7 @@ export default function UserList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [activeRole, setActiveRole] = useState("ALL");
 
   // Debounce search input to allow smooth free-text typing
   useEffect(() => {
@@ -41,12 +42,12 @@ export default function UserList() {
     return () => clearTimeout(timer);
   }, [search, debouncedSearch]);
 
-  const fetchUsers = async (page = 1, searchTerm = "") => {
+  const fetchUsers = async (page = 1, searchTerm = "", role = "ALL") => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(
-        `/api/admin/users?page=${page}&pageSize=10&search=${searchTerm}`,
+        `/api/admin/users?page=${page}&pageSize=10&search=${searchTerm}&role=${role}`,
       );
       if (!response.ok) throw new Error("Failed to fetch users");
       const data = await response.json();
@@ -62,8 +63,8 @@ export default function UserList() {
   };
 
   useEffect(() => {
-    fetchUsers(currentPage, debouncedSearch);
-  }, [currentPage, debouncedSearch]);
+    fetchUsers(currentPage, debouncedSearch, activeRole);
+  }, [currentPage, debouncedSearch, activeRole]);
 
   // 3. ฟังก์ชันสำหรับเปลี่ยน Role
   const handleRoleChange = async (userId: number, newRole: string) => {
@@ -129,6 +130,31 @@ export default function UserList() {
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
+        {[
+          { id: "ALL", label: "ทั้งหมด" },
+          { id: "USER", label: "ผู้เรียน" },
+          { id: "ORG_ADMIN", label: "ผู้ดูแลหน่วยงาน" },
+          { id: "ADMIN", label: "ผู้ดูแลระบบ" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => {
+              setActiveRole(tab.id);
+              setCurrentPage(1);
+            }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+              activeRole === tab.id
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {error && <div className="text-red-500 mb-4">Error: {error}</div>}
@@ -203,9 +229,15 @@ export default function UserList() {
                   </td>
                   <td className="py-3 px-4 text-center">
                     <span
-                      className={`px-2.5 py-1 text-xs font-semibold rounded-full ${user.role === "ADMIN" ? "bg-purple-100 text-purple-700" : "bg-gray-100 text-gray-700"}`}
+                      className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
+                        user.role === "ADMIN" 
+                          ? "bg-purple-100 text-purple-700" 
+                          : user.role === "ORG_ADMIN"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
                     >
-                      {user.role}
+                      {user.role === "ADMIN" ? "ผู้ดูแลระบบ" : user.role === "ORG_ADMIN" ? "ผู้ดูแลหน่วยงาน" : "ผู้เรียน"}
                     </span>
                   </td>
                   {/* --- vvvv (เพิ่ม) นำคอลัมน์ Actions กลับมา vvvv --- */}
@@ -220,8 +252,9 @@ export default function UserList() {
                           }
                           className="text-xs p-1.5 border border-gray-300 rounded-md outline-none focus:border-blue-500 text-gray-700 bg-white cursor-pointer"
                         >
-                          <option value="USER">USER</option>
-                          <option value="ADMIN">ADMIN</option>
+                          <option value="USER">ผู้เรียน (USER)</option>
+                          <option value="ORG_ADMIN">ผู้ดูแลหน่วยงาน (ORG_ADMIN)</option>
+                          <option value="ADMIN">ผู้ดูแลระบบ (ADMIN)</option>
                         </select>
                         <Link
                           onClick={(e) => {
