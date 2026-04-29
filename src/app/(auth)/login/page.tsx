@@ -31,7 +31,7 @@ function LoginForm() {
   useEffect(() => {
     if (session?.user) {
       if (session.user.role === "ORG_ADMIN" || session.user.role === "ADMIN") {
-        router.push("/admin");
+        router.push("/");
       } else {
         router.push(callbackUrl);
       }
@@ -60,7 +60,7 @@ function LoginForm() {
       const newSession = await res.json();
       
       if (newSession?.user?.role === "ORG_ADMIN" || newSession?.user?.role === "ADMIN") {
-        window.location.href = "/admin";
+        window.location.href = "/";
       } else {
         // ป้องกันไม่ให้ redirect กลับมาหน้า login
         if (callbackUrl.includes("/login")) {
