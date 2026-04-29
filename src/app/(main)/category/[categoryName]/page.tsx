@@ -2,7 +2,9 @@
 
 import CourseCard from "@/components/CourseCard";
 import type { Course } from "@/data/courses"; // ใช้ Type เดิม
-import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 // (แก้ปัญหา Next.js 15+)
 interface CategoryPageProps {
@@ -14,14 +16,17 @@ interface CategoryPageProps {
 // ฟังก์ชันสำหรับดึงข้อมูลคอร์สที่กรองแล้ว
 async function getFilteredCourses(categoryName: string): Promise<Course[]> {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/courses/category/${categoryName}`,
-      { cache: "no-store" },
-    );
-    if (!res.ok) {
-      throw new Error("Failed to fetch courses for this category");
-    }
-    return res.json();
+    return await prisma.course.findMany({
+      where: {
+        category: {
+          name: categoryName,
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        category: { select: { name: true } },
+      },
+    });
   } catch (error) {
     console.error("GET_FILTERED_COURSES_ERROR", error);
     return []; // คืนค่า Array ว่างถ้า Error

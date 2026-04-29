@@ -1,6 +1,7 @@
 // src/app/api/admin/users/route.ts
 
 import { NextResponse } from "next/server";
+import { Role, type Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma"; // (Import prisma client ของคุณ)
 import { auth } from "@/auth";
 
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
 
     const skip = (page - 1) * pageSize;
 
-    const whereCondition: any = {};
+    const whereCondition: Prisma.UserWhereInput = {};
     
     if (search) {
       whereCondition.OR = [
@@ -29,8 +30,8 @@ export async function GET(request: Request) {
       ];
     }
     
-    if (role && role !== "ALL") {
-      whereCondition.role = role;
+    if (role && role !== "ALL" && Object.values(Role).includes(role as Role)) {
+      whereCondition.role = role as Role;
     }
 
     const [users, totalCount] = await prisma.$transaction([

@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react"; // 1. เพิ่ม import Suspense
 import Link from "next/link";
-import { signIn, useSession, getSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 

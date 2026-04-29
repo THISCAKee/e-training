@@ -2,23 +2,18 @@
 
 import CourseCard from "@/components/CourseCard";
 import type { Course } from "@/data/courses"; // เรายังใช้ Type เดิมได้
+import prisma from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 // ฟังก์ชันสำหรับดึงข้อมูลจาก API ของเรา
 async function getCourses(): Promise<Course[]> {
-  // ใน môi trường production ควรเปลี่ยนเป็น URL เต็ม
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/courses`, // <-- **ต้องเป็น /api/courses** (ไม่มี /admin)
-    {
-      cache: "no-store",
+  return prisma.course.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      category: { select: { name: true } },
     },
-  );
-  // --- ^^^^ สิ้นสุดการแก้ไข ^^^^ ---
-
-  if (!res.ok) {
-    // <-- บรรทัดที่ 13
-    throw new Error("Failed to fetch courses"); // <-- บรรทัดที่ 14 (ที่เกิด Error)
-  }
-  return res.json();
+  });
 }
 
 export default async function CoursesPage() {

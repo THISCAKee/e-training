@@ -144,7 +144,7 @@ export default async function QuizPage({ params }: QuizPageProps) {
     title: quiz.title,
     lessonTitle: quiz.lesson.title,
     courseId: quiz.lesson.courseId,
-    questions: quiz.questions.map((q: any) => ({
+    questions: quiz.questions.map((q) => ({
       id: q.id,
       text: q.text,
       options: q.options,

@@ -77,7 +77,7 @@ export default function RegisterStaffPage() {
         });
         // setError(msg); // ไม่ต้อง set error text แล้วเพราะใช้ Popup แทน
       }
-    } catch (err) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",

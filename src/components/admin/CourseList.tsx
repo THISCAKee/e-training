@@ -48,7 +48,6 @@ export default function CourseList() {
   const [currentCourse, setCurrentCourse] =
     useState<Partial<Course>>(emptyCourse);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
 
   // States for Pagination and Search
   const [search, setSearch] = useState("");
@@ -137,7 +136,6 @@ export default function CourseList() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true); // (เพิ่ม) เริ่มโหลด
-    setFormError(null); // (เพิ่ม) เคลียร์ Error เก่า
     const isEditing = currentCourse.id;
     const url = isEditing
       ? `/api/admin/courses/${currentCourse.id}`

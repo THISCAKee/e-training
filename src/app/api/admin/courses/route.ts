@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/app/api/admin/courses/route.ts
 
 import { NextResponse } from "next/server";
@@ -7,6 +6,12 @@ import { auth } from "@/auth";
 // ฟังก์ชันนี้จะดึงข้อมูลหลักสูตรทั้งหมด
 export async function GET(request: Request) {
   const session = await auth();
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
+    return new NextResponse("Unauthorized", { status: 403 });
+  }
 
   try {
     const { searchParams } = new URL(request.url);
@@ -118,4 +123,3 @@ export async function POST(request: Request) {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
-

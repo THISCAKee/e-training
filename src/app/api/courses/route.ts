@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma"; // (Import prisma client ของคุณ)
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // ดึงข้อมูล Course ทั้งหมด
     const courses = await prisma.course.findMany({

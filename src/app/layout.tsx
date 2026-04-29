@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 // 1. นำเข้าฟอนต์ Anuphan
 import { Anuphan } from "next/font/google";
 import "./globals.css";
-import Header from "../components/Header";
 import Footer from "@/components/Footer";
 import AuthProvider from "@/components/AuthProvider";
 

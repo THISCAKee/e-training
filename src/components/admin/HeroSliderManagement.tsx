@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import Link from "next/link"; // ใช้ Link สำหรับ linkUrl
 
 type Slide = {
   id: number;

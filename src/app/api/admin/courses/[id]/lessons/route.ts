@@ -4,6 +4,22 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+async function canManageCourse(courseId: number) {
+  const session = await auth();
+  if (!session?.user) return false;
+  if (session.user.role === "ADMIN") return true;
+  if (session.user.role !== "ORG_ADMIN" || !session.user.organizationId) {
+    return false;
+  }
+
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { organizationId: true },
+  });
+
+  return course?.organizationId === session.user.organizationId;
+}
+
 // --- GET ---
 export async function GET(
   request: Request,
@@ -13,19 +29,15 @@ export async function GET(
   // 3. Await Promise
   // const { params } = await contextPromise;
 
-  const session = await auth();
-  if (
-    !session?.user ||
-    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
-  ) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-  }
-
   try {
     const { id } = await params;
+    const courseId = parseInt(id, 10);
+    if (Number.isNaN(courseId) || !(await canManageCourse(courseId))) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+    }
 
     const lessons = await prisma.lesson.findMany({
-      where: { courseId: parseInt(id) },
+      where: { courseId },
       orderBy: { order: "asc" },
       include: { quiz: { select: { id: true, title: true } } },
     });
@@ -46,16 +58,13 @@ export async function POST(
 ) {
   // 3. Await Promise
 
-  const session = await auth();
-  if (
-    !session?.user ||
-    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
-  ) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-  }
-
   try {
     const { id } = await params; // 4. ใช้งาน params.id
+    const courseId = parseInt(id, 10);
+    if (Number.isNaN(courseId) || !(await canManageCourse(courseId))) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { title, videoUrl, duration } = body;
 
@@ -67,7 +76,7 @@ export async function POST(
     }
 
     const lastLesson = await prisma.lesson.findFirst({
-      where: { courseId: parseInt(id) },
+      where: { courseId },
       orderBy: { order: "desc" },
       select: { order: true },
     });
@@ -79,7 +88,7 @@ export async function POST(
         videoUrl,
         duration: duration ? parseInt(duration) : null,
         order: nextOrder,
-        courseId: parseInt(id),
+        courseId,
       },
     });
     return NextResponse.json(newLesson, { status: 201 });

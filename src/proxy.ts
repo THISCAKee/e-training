@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
   // Get token from request
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
   });
 
   const isLoggedIn = !!token;

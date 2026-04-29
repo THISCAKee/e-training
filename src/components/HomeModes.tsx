@@ -12,24 +12,23 @@ import {
   Construction,
   MonitorPlay,
   Podcast,
+  type LucideIcon,
 } from "lucide-react";
 
-export default function HomeModes() {
-  const [activeMode, setActiveMode] = useState<
-    "training" | "learning" | "elearning" | "podcast"
-  >("training");
+type CategoryCardProps = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  href: string;
+};
 
-  const CategoryCard = ({
-    title,
-    description,
-    icon: Icon,
-    href,
-  }: {
-    title: string;
-    description: string;
-    icon: any;
-    href: string;
-  }) => (
+function CategoryCard({
+  title,
+  description,
+  icon: Icon,
+  href,
+}: CategoryCardProps) {
+  return (
     <Link
       href={href}
       className="group relative flex flex-col bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
@@ -49,6 +48,12 @@ export default function HomeModes() {
       </div>
     </Link>
   );
+}
+
+export default function HomeModes() {
+  const [activeMode, setActiveMode] = useState<
+    "training" | "learning" | "elearning" | "podcast"
+  >("training");
 
   return (
     <div className="bg-gray-50/50 py-16">

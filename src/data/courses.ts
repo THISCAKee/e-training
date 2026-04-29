@@ -2,11 +2,11 @@
 
 // --- vvvv แก้ไข Type นี้ vvvv ---
 export type Course = {
-  videoUrl: any;
+  videoUrl?: string | null;
   id: number;
   title: string;
   description: string;
-  imageUrl: string;
+  imageUrl?: string | null;
   // (เพิ่ม) category อาจจะมีหรือไม่มีก็ได้ (เป็น optional)
   category?: {
     name: string;

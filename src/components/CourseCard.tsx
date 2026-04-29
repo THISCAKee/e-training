@@ -9,11 +9,13 @@ type CourseCardProps = {
 };
 
 export default function CourseCard({ course }: CourseCardProps) {
+  const imageUrl = course.imageUrl || "/bg-hero.jpg";
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
       <Link href={`/courses/${course.id}`}>
         <Image
-          src={course.imageUrl}
+          src={imageUrl}
           alt={course.title}
           width={600}
           height={400}

@@ -13,7 +13,6 @@ import {
   LayoutDashboard,
   Users,
   BookOpen,
-  Presentation,
   ChevronRight,
   Settings,
   Building2,
@@ -31,6 +30,7 @@ export default function AdminDashboardPage() {
 
   // ORG_ADMIN เริ่มที่แท็บ courses เลย, ADMIN เริ่มที่ dashboard
   const [activeTab, setActiveTab] = useState<Tab>(isOrgAdmin ? "courses" : "dashboard");
+  const currentTab = isOrgAdmin && activeTab === "dashboard" ? "courses" : activeTab;
 
   // ตรวจสอบสิทธิ์: ถ้าไม่ใช่ ADMIN หรือ ORG_ADMIN ให้ redirect กลับหน้าหลัก
   useEffect(() => {
@@ -39,13 +39,6 @@ export default function AdminDashboardPage() {
       router.push("/");
     }
   }, [session, status, userRole, router]);
-
-  // อัปเดต default tab เมื่อ role โหลดเสร็จ
-  useEffect(() => {
-    if (isOrgAdmin) {
-      setActiveTab("courses");
-    }
-  }, [isOrgAdmin]);
 
   // แสดง Loading ขณะตรวจสอบ session
   if (status === "loading") {
@@ -73,7 +66,7 @@ export default function AdminDashboardPage() {
   }
 
   const renderTabContent = () => {
-    switch (activeTab) {
+    switch (currentTab) {
       case "dashboard":
         return <AdminStats />;
       case "users":
@@ -136,7 +129,7 @@ export default function AdminDashboardPage() {
             icon={<LayoutDashboard size={20} />}
             label="ภาพรวมสถิติ"
             subLabel="Overview"
-            isActive={activeTab === "dashboard"}
+            isActive={currentTab === "dashboard"}
             onClick={() => setActiveTab("dashboard")}
           />
           {isAdmin && (
@@ -144,7 +137,7 @@ export default function AdminDashboardPage() {
               icon={<Users size={20} />}
               label="จัดการผู้ใช้"
               subLabel="Users"
-              isActive={activeTab === "users"}
+              isActive={currentTab === "users"}
               onClick={() => setActiveTab("users")}
             />
           )}
@@ -152,7 +145,7 @@ export default function AdminDashboardPage() {
             icon={<BookOpen size={20} />}
             label="จัดการหลักสูตร"
             subLabel="Courses"
-            isActive={activeTab === "courses"}
+            isActive={currentTab === "courses"}
             onClick={() => setActiveTab("courses")}
           />
           {isAdmin && (
@@ -160,7 +153,7 @@ export default function AdminDashboardPage() {
               icon={<Building2 size={20} />}
               label="จัดการหน่วยงาน"
               subLabel="Organizations"
-              isActive={activeTab === "organizations"}
+              isActive={currentTab === "organizations"}
               onClick={() => setActiveTab("organizations")}
             />
           )}

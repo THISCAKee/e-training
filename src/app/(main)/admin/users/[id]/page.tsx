@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Trash2, KeyRound } from "lucide-react";
 
@@ -29,7 +29,7 @@ type UserDetail = {
 
 export default function AdminUserDetailPage() {
   const params = useParams();
-  const router = useRouter();
+  const userId = String(params.id);
   const [user, setUser] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   // เพิ่ม State สำหรับจัดการรหัสผ่านใหม่
@@ -37,9 +37,9 @@ export default function AdminUserDetailPage() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // ดึงข้อมูล User
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/users/${params.id}`);
+      const res = await fetch(`/api/admin/users/${userId}`);
       if (!res.ok) throw new Error("Failed to fetch user");
       const data = await res.json();
       setUser(data);
@@ -49,11 +49,11 @@ export default function AdminUserDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchUser();
-  }, [params.id]);
+  }, [fetchUser]);
 
   // ฟังก์ชันลบคอร์ส
   const handleRemoveCourse = async (enrollmentId: number) => {

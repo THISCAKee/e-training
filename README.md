@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MSU e-Training
 
-## Getting Started
+Next.js application for course enrollment, lesson progress, quizzes, certificates, and admin course management.
 
-First, run the development server:
+## Requirements
+
+- Node.js 20+
+- MySQL
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env
+npx prisma migrate deploy
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Required variables:
 
-## Learn More
+- `DATABASE_URL`: MySQL connection string
+- `AUTH_SECRET`: NextAuth secret
+- `NEXTAUTH_URL`: Public app URL, for example `http://localhost:3000`
 
-To learn more about Next.js, take a look at the following resources:
+`NEXT_PUBLIC_BASE_URL` is no longer needed by server-rendered public pages. Keep it only if a browser-side feature explicitly needs an absolute public URL.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Checks
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run lint
+npm run typecheck
+npm run build
+npx prisma validate
+```
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Public course pages read from Prisma directly on the server.
+- Admin course APIs require `ADMIN` or `ORG_ADMIN`; organization admins are scoped to their own organization.

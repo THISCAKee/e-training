@@ -6,26 +6,19 @@ import HomeModes from "@/components/HomeModes";
 import CourseCard from "@/components/CourseCard";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import prisma from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 async function getRecentCourses(): Promise<Course[]> {
   try {
-    // 1. เรียก API โดยระบุว่าต้องการแค่ 4 รายการ (หน้า 1, ขนาด 4)
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/courses`,
-      {
-        cache: "no-store",
+    return await prisma.course.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 4,
+      include: {
+        category: { select: { name: true } },
       },
-    );
-
-    if (!res.ok) return [];
-
-    // 2. รับข้อมูลเป็น Object
-    const responseData = await res.json();
-
-    // 3. คืนค่าเฉพาะ Array ที่อยู่ใน .data
-    return responseData.data;
-
-    // --- ^^^^ สิ้นสุดการแก้ไข ^^^^ ---
+    });
   } catch (error) {
     console.error(error);
     return [];

@@ -5,6 +5,22 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+async function canManageCourse(courseId: number) {
+  const session = await auth();
+  if (!session?.user) return false;
+  if (session.user.role === "ADMIN") return true;
+  if (session.user.role !== "ORG_ADMIN" || !session.user.organizationId) {
+    return false;
+  }
+
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { organizationId: true },
+  });
+
+  return course?.organizationId === session.user.organizationId;
+}
+
 // === GET function ===
 export async function GET(
   request: Request,
@@ -12,8 +28,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const courseId = parseInt(id, 10);
+    if (Number.isNaN(courseId) || !(await canManageCourse(courseId))) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
     const course = await prisma.course.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: courseId },
       include: {
         lessons: {
           orderBy: {
@@ -36,21 +57,18 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth();
-  if (
-    !session?.user ||
-    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
-  ) {
-    return new NextResponse("Unauthorized", { status: 403 });
-  }
-
   try {
     const { id } = await params;
+    const courseId = parseInt(id, 10);
+    if (Number.isNaN(courseId) || !(await canManageCourse(courseId))) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
     const body = await request.json();
     const { title, description, imageUrl, videoUrl, categoryId } = body;
 
     const updatedCourse = await prisma.course.update({
-      where: { id: parseInt(id!) },
+      where: { id: courseId },
       data: {
         title,
         description,
@@ -71,18 +89,15 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await auth();
-  if (
-    !session?.user ||
-    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
-  ) {
-    return new NextResponse("Unauthorized", { status: 403 });
-  }
-
   try {
     const { id } = await params;
+    const courseId = parseInt(id, 10);
+    if (Number.isNaN(courseId) || !(await canManageCourse(courseId))) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
     await prisma.course.delete({
-      where: { id: parseInt(id!) },
+      where: { id: courseId },
     });
     return new NextResponse(null, { status: 204 });
   } catch (error) {
