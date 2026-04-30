@@ -47,31 +47,44 @@ export async function GET(
 // === PATCH function ===
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }, // 1. รับ params เป็น Promise
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params; // 2. Await ก่อนใช้งาน
+  const { id } = await params;
 
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "ORG_ADMIN") {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
   try {
     const body = await request.json();
-    const { role } = body;
+    const { role, name, studentId, faculty, major, year } = body;
 
-    if (!id || !["USER", "ADMIN"].includes(role)) {
+    if (!id) {
       return new NextResponse("Invalid data", { status: 400 });
     }
 
+    const dataToUpdate: any = {};
+    if (role && ["USER", "ORG_ADMIN", "ADMIN"].includes(role)) {
+      // Only ADMIN can change roles
+      if (session?.user?.role === "ADMIN") {
+        dataToUpdate.role = role;
+      }
+    }
+    if (name !== undefined) dataToUpdate.name = name;
+    if (studentId !== undefined) dataToUpdate.studentId = studentId;
+    if (faculty !== undefined) dataToUpdate.faculty = faculty;
+    if (major !== undefined) dataToUpdate.major = major;
+    if (year !== undefined) dataToUpdate.year = year;
+
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(id) },
-      data: { role: role },
+      data: dataToUpdate,
     });
 
     return NextResponse.json(updatedUser, { status: 200 });
   } catch (error) {
-    console.error("UPDATE_USER_ROLE_ERROR", error);
+    console.error("UPDATE_USER_ERROR", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

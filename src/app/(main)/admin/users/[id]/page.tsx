@@ -36,6 +36,12 @@ export default function AdminUserDetailPage() {
   const [newPassword, setNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  // Edit Profile States
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState<Partial<UserDetail>>({});
+  const [facultyList, setFacultyList] = useState<string[]>([]);
+  const [savingProfile, setSavingProfile] = useState(false);
+
   // ดึงข้อมูล User
   const fetchUser = useCallback(async () => {
     try {
@@ -43,6 +49,13 @@ export default function AdminUserDetailPage() {
       if (!res.ok) throw new Error("Failed to fetch user");
       const data = await res.json();
       setUser(data);
+      setEditedUser({
+        name: data.name,
+        studentId: data.studentId || "",
+        faculty: data.faculty || "",
+        major: data.major || "",
+        year: data.year || "",
+      });
     } catch (error) {
       console.error(error);
       alert("Error loading user data");
@@ -51,9 +64,22 @@ export default function AdminUserDetailPage() {
     }
   }, [userId]);
 
+  const fetchFaculties = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/faculties');
+      if (res.ok) {
+        const data = await res.json();
+        setFacultyList(data);
+      }
+    } catch (err) {
+      console.error("Error fetching faculties", err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchUser();
-  }, [fetchUser]);
+    fetchFaculties();
+  }, [fetchUser, fetchFaculties]);
 
   // ฟังก์ชันลบคอร์ส
   const handleRemoveCourse = async (enrollmentId: number) => {
@@ -77,6 +103,31 @@ export default function AdminUserDetailPage() {
   };
 
   // เพิ่มฟังก์ชันเปลี่ยนรหัสผ่าน
+  const handleSaveProfile = async () => {
+    if (!confirm("ยืนยันการบันทึกข้อมูล?")) return;
+    setSavingProfile(true);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editedUser),
+      });
+
+      if (res.ok) {
+        alert("บันทึกข้อมูลสำเร็จ!");
+        setIsEditing(false);
+        fetchUser(); // Reload data
+      } else {
+        alert("เกิดข้อผิดพลาดในการบันทึก");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPassword) return;
@@ -122,40 +173,118 @@ export default function AdminUserDetailPage() {
       </Link>
 
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h1 className="text-2xl font-bold mb-4 text-gray-800">
-          ข้อมูลผู้ใช้งาน
-        </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-black">
-          <p>
-            <strong>ชื่อ:</strong> {user.name}
-          </p>
-          <p>
-            <strong>อีเมล:</strong> {user.email}
-          </p>
-          <p>
-            <strong>สถานะ:</strong>{" "}
-            <span
-              className={`px-2 py-1 rounded text-xs ${
-                user.role === "ADMIN"
-                  ? "bg-purple-100 text-purple-800"
-                  : "bg-gray-100 text-gray-800"
-              }`}
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold text-gray-800">
+            ข้อมูลผู้ใช้งาน
+          </h1>
+          {!isEditing ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition"
             >
-              {user.role}
-            </span>
-          </p>
-          <p>
-            <strong>รหัสนิสิต:</strong> {user.studentId || "-"}
-          </p>
-          <p>
-            <strong>คณะ:</strong> {user.faculty || "-"}
-          </p>
-          <p>
-            <strong>สาขา:</strong> {user.major || "-"}
-          </p>
-          <p>
-            <strong>ชั้นปี:</strong> {user.year || "-"}
-          </p>
+              แก้ไขข้อมูล
+            </button>
+          ) : (
+            <div className="space-x-2">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition"
+                disabled={savingProfile}
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                className="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                disabled={savingProfile}
+              >
+                {savingProfile ? "กำลังบันทึก..." : "บันทึก"}
+              </button>
+            </div>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-black">
+          {!isEditing ? (
+            <>
+              <p><strong>ชื่อ:</strong> {user.name}</p>
+              <p><strong>อีเมล:</strong> {user.email}</p>
+              <p>
+                <strong>สถานะ:</strong>{" "}
+                <span className={`px-2 py-1 rounded text-xs ${user.role === "ADMIN" ? "bg-purple-100 text-purple-800" : user.role === "ORG_ADMIN" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}>
+                  {user.role}
+                </span>
+              </p>
+              <p><strong>รหัสนิสิต:</strong> {user.studentId || "-"}</p>
+              <p><strong>คณะ:</strong> {user.faculty || "-"}</p>
+              <p><strong>สาขา:</strong> {user.major || "-"}</p>
+              <p><strong>ชั้นปี:</strong> {user.year || "-"}</p>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">ชื่อ</label>
+                <input
+                  type="text"
+                  value={editedUser.name || ""}
+                  onChange={(e) => setEditedUser({ ...editedUser, name: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">อีเมล</label>
+                <input
+                  type="text"
+                  value={user.email}
+                  disabled
+                  className="w-full px-3 py-2 border rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">รหัสนิสิต</label>
+                <input
+                  type="text"
+                  value={editedUser.studentId || ""}
+                  onChange={(e) => setEditedUser({ ...editedUser, studentId: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">คณะ</label>
+                <input
+                  type="text"
+                  list="faculty-options"
+                  value={editedUser.faculty || ""}
+                  onChange={(e) => setEditedUser({ ...editedUser, faculty: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="พิมพ์หรือเลือกคณะ"
+                />
+                <datalist id="faculty-options">
+                  {facultyList.map((f, i) => (
+                    <option key={i} value={f} />
+                  ))}
+                </datalist>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">สาขา</label>
+                <input
+                  type="text"
+                  value={editedUser.major || ""}
+                  onChange={(e) => setEditedUser({ ...editedUser, major: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">ชั้นปี</label>
+                <input
+                  type="text"
+                  value={editedUser.year || ""}
+                  onChange={(e) => setEditedUser({ ...editedUser, year: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+            </>
+          )}
 
           {/* ปุ่มเปิดปิดฟอร์มเปลี่ยนรหัส */}
           <button
