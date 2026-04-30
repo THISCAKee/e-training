@@ -56,15 +56,29 @@ export async function GET() {
 
     // คำนวณสถิติแยกตามหมวดหมู่
     const categoryMap: Record<string, number> = {};
-    const facultyMap: Record<string, number> = {};
 
     enrollments.forEach((enrollment) => {
       // หมวดหมู่
       const categoryName = enrollment.course?.category?.name || "ไม่มีหมวดหมู่";
       categoryMap[categoryName] = (categoryMap[categoryName] || 0) + 1;
+    });
 
-      // คณะ
-      const facultyName = enrollment.user?.faculty || "ไม่ระบุคณะ";
+    // ดึงผู้ใช้ทั้งหมดที่ไม่ใช่ ADMIN และ ORG_ADMIN เพื่อคำนวณ facultyStats
+    const usersForFaculty = await prisma.user.findMany({
+      where: {
+        ...(isOrgAdmin ? { organizationId: orgId } : {}),
+        role: {
+          notIn: ["ADMIN", "ORG_ADMIN"]
+        }
+      },
+      select: {
+        faculty: true
+      }
+    });
+
+    const facultyMap: Record<string, number> = {};
+    usersForFaculty.forEach((user) => {
+      const facultyName = user.faculty || "ไม่ระบุคณะ";
       facultyMap[facultyName] = (facultyMap[facultyName] || 0) + 1;
     });
 
