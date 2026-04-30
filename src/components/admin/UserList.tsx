@@ -1,9 +1,9 @@
 // src/components/admin/UserList.tsx (ฉบับอัปเกรด)
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Search } from "lucide-react";
+import { Search, Pencil } from "lucide-react";
 import Link from "next/link";
 
 type User = {
@@ -30,6 +30,10 @@ export default function UserList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [activeRole, setActiveRole] = useState("ALL");
+  const [facultyList, setFacultyList] = useState<string[]>([]);
+  // { userId, value } for inline editing
+  const [editingFaculty, setEditingFaculty] = useState<{ userId: number; value: string } | null>(null);
+  const facultyInputRef = useRef<HTMLInputElement>(null);
 
   // Debounce search input to allow smooth free-text typing
   useEffect(() => {
@@ -66,6 +70,13 @@ export default function UserList() {
     fetchUsers(currentPage, debouncedSearch, activeRole);
   }, [currentPage, debouncedSearch, activeRole]);
 
+  useEffect(() => {
+    fetch("/api/admin/faculties")
+      .then((r) => r.json())
+      .then((data) => setFacultyList(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
   // 3. ฟังก์ชันสำหรับเปลี่ยน Role
   const handleRoleChange = async (userId: number, newRole: string) => {
     try {
@@ -82,6 +93,22 @@ export default function UserList() {
       );
     } catch (err) {
       alert(err instanceof Error ? err.message : "An error occurred");
+    }
+  };
+
+  const handleFacultyChange = async (userId: number, newFaculty: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ faculty: newFaculty }),
+      });
+      if (!response.ok) throw new Error("Failed to update faculty");
+      setUsers(users.map((u) => (u.id === userId ? { ...u, faculty: newFaculty } : u)));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setEditingFaculty(null);
     }
   };
 
@@ -225,7 +252,44 @@ export default function UserList() {
                     {user.studentId || "-"}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">
-                    {user.faculty || "-"}
+                    {editingFaculty?.userId === user.id ? (
+                      <div className="relative">
+                        <input
+                          ref={facultyInputRef}
+                          type="text"
+                          list="faculty-list-options"
+                          autoFocus
+                          value={editingFaculty.value}
+                          onChange={(e) =>
+                            setEditingFaculty({ userId: user.id, value: e.target.value })
+                          }
+                          onBlur={() =>
+                            handleFacultyChange(user.id, editingFaculty.value)
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleFacultyChange(user.id, editingFaculty.value);
+                            if (e.key === "Escape") setEditingFaculty(null);
+                          }}
+                          className="w-full border border-blue-400 rounded px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-blue-300"
+                        />
+                        <datalist id="faculty-list-options">
+                          {facultyList.map((f, i) => <option key={i} value={f} />)}
+                        </datalist>
+                      </div>
+                    ) : (
+                      <button
+                        className="flex items-center gap-1.5 text-left group/cell w-full"
+                        onClick={() =>
+                          setEditingFaculty({ userId: user.id, value: user.faculty || "" })
+                        }
+                        title="คลิกเพื่อแก้ไขคณะ"
+                      >
+                        <span className={user.faculty ? "" : "text-gray-400 italic"}>
+                          {user.faculty || "ไม่ระบุ"}
+                        </span>
+                        <Pencil size={12} className="text-gray-300 group-hover/cell:text-blue-400 flex-shrink-0" />
+                      </button>
+                    )}
                   </td>
                   <td className="py-3 px-4 text-center">
                     <span

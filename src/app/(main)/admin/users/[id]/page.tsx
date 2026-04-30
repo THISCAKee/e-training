@@ -66,7 +66,7 @@ export default function AdminUserDetailPage() {
 
   const fetchFaculties = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/faculties');
+      const res = await fetch("/api/admin/faculties");
       if (res.ok) {
         const data = await res.json();
         setFacultyList(data);
@@ -174,9 +174,7 @@ export default function AdminUserDetailPage() {
 
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">
-            ข้อมูลผู้ใช้งาน
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800">ข้อมูลผู้ใช้งาน</h1>
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
@@ -203,36 +201,56 @@ export default function AdminUserDetailPage() {
             </div>
           )}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-black">
           {!isEditing ? (
             <>
-              <p><strong>ชื่อ:</strong> {user.name}</p>
-              <p><strong>อีเมล:</strong> {user.email}</p>
+              <p>
+                <strong>ชื่อ:</strong> {user.name}
+              </p>
+              <p>
+                <strong>อีเมล:</strong> {user.email}
+              </p>
               <p>
                 <strong>สถานะ:</strong>{" "}
-                <span className={`px-2 py-1 rounded text-xs ${user.role === "ADMIN" ? "bg-purple-100 text-purple-800" : user.role === "ORG_ADMIN" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}>
+                <span
+                  className={`px-2 py-1 rounded text-xs ${user.role === "ADMIN" ? "bg-purple-100 text-purple-800" : user.role === "ORG_ADMIN" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
+                >
                   {user.role}
                 </span>
               </p>
-              <p><strong>รหัสนิสิต:</strong> {user.studentId || "-"}</p>
-              <p><strong>คณะ:</strong> {user.faculty || "-"}</p>
-              <p><strong>สาขา:</strong> {user.major || "-"}</p>
-              <p><strong>ชั้นปี:</strong> {user.year || "-"}</p>
+              <p>
+                <strong>รหัสนิสิต:</strong> {user.studentId || "-"}
+              </p>
+              <p>
+                <strong>คณะ:</strong> {user.faculty || "-"}
+              </p>
+              <p>
+                <strong>สาขา:</strong> {user.major || "-"}
+              </p>
+              <p>
+                <strong>ชั้นปี:</strong> {user.year || "-"}
+              </p>
             </>
           ) : (
             <>
               <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">ชื่อ</label>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">
+                  ชื่อ
+                </label>
                 <input
                   type="text"
                   value={editedUser.name || ""}
-                  onChange={(e) => setEditedUser({ ...editedUser, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">อีเมล</label>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">
+                  อีเมล
+                </label>
                 <input
                   type="text"
                   value={user.email}
@@ -241,21 +259,29 @@ export default function AdminUserDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">รหัสนิสิต</label>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">
+                  รหัสนิสิต
+                </label>
                 <input
                   type="text"
                   value={editedUser.studentId || ""}
-                  onChange={(e) => setEditedUser({ ...editedUser, studentId: e.target.value })}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, studentId: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">คณะ</label>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">
+                  คณะ
+                </label>
                 <input
                   type="text"
                   list="faculty-options"
                   value={editedUser.faculty || ""}
-                  onChange={(e) => setEditedUser({ ...editedUser, faculty: e.target.value })}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, faculty: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                   placeholder="พิมพ์หรือเลือกคณะ"
                 />
@@ -266,20 +292,28 @@ export default function AdminUserDetailPage() {
                 </datalist>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">สาขา</label>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">
+                  สาขา
+                </label>
                 <input
                   type="text"
                   value={editedUser.major || ""}
-                  onChange={(e) => setEditedUser({ ...editedUser, major: e.target.value })}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, major: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">ชั้นปี</label>
+                <label className="block text-sm font-semibold mb-1 text-gray-600">
+                  ชั้นปี
+                </label>
                 <input
                   type="text"
                   value={editedUser.year || ""}
-                  onChange={(e) => setEditedUser({ ...editedUser, year: e.target.value })}
+                  onChange={(e) =>
+                    setEditedUser({ ...editedUser, year: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
