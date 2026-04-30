@@ -49,6 +49,13 @@ model Course {
   category       Category?              @relation(fields: [categoryId], references: [id], onUpdate: NoAction, onDelete: SetNull)
   organizationId Int? // FK ไปยังหน่วยงานที่สร้างคอร์สนี้
   organization   Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  
+  // AI Literacy Skills
+  skillDataResearch         Boolean @default(false)
+  skillDataAnalysis         Boolean @default(false)
+  skillAcademicCommunication Boolean @default(false)
+  skillEnglishProficiency    Boolean @default(false)
+  skillDataPrivacy          Boolean @default(false)
 
   @@index([categoryId]) // (Optional) เพิ่ม index เพื่อ performance
   @@index([organizationId])

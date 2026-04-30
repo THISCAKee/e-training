@@ -90,7 +90,17 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, description, imageUrl, categoryId } = body;
+    const {
+      title,
+      description,
+      imageUrl,
+      categoryId,
+      skillDataResearch,
+      skillDataAnalysis,
+      skillAcademicCommunication,
+      skillEnglishProficiency,
+      skillDataPrivacy,
+    } = body;
 
     if (!title || !description) {
       return new NextResponse("Title and description are required", {
@@ -108,13 +118,19 @@ export async function POST(request: Request) {
           : null;
 
     const newCourse = await prisma.course.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: {
         title,
         description,
         imageUrl,
         categoryId: categoryId ? parseInt(categoryId) : null,
         organizationId,
-      },
+        skillDataResearch: !!skillDataResearch,
+        skillDataAnalysis: !!skillDataAnalysis,
+        skillAcademicCommunication: !!skillAcademicCommunication,
+        skillEnglishProficiency: !!skillEnglishProficiency,
+        skillDataPrivacy: !!skillDataPrivacy,
+      } as any,
     });
 
     return NextResponse.json(newCourse, { status: 201 });

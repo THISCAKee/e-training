@@ -65,17 +65,43 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, description, imageUrl, videoUrl, categoryId } = body;
+    const {
+      title,
+      description,
+      imageUrl,
+      videoUrl,
+      categoryId,
+      skillDataResearch,
+      skillDataAnalysis,
+      skillAcademicCommunication,
+      skillEnglishProficiency,
+      skillDataPrivacy,
+    } = body;
 
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: {
         title,
         description,
         imageUrl,
         videoUrl,
         categoryId: categoryId ? parseInt(categoryId) : null,
-      },
+        skillDataResearch:
+          skillDataResearch !== undefined ? !!skillDataResearch : undefined,
+        skillDataAnalysis:
+          skillDataAnalysis !== undefined ? !!skillDataAnalysis : undefined,
+        skillAcademicCommunication:
+          skillAcademicCommunication !== undefined
+            ? !!skillAcademicCommunication
+            : undefined,
+        skillEnglishProficiency:
+          skillEnglishProficiency !== undefined
+            ? !!skillEnglishProficiency
+            : undefined,
+        skillDataPrivacy:
+          skillDataPrivacy !== undefined ? !!skillDataPrivacy : undefined,
+      } as any,
     });
 
     return NextResponse.json(updatedCourse, { status: 200 });

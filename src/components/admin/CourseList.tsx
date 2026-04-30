@@ -26,9 +26,13 @@ type Course = {
       id: number;
       name: string | null;
       email: string | null;
-      // image: string | null;
     };
   }[];
+  skillDataResearch: boolean;
+  skillDataAnalysis: boolean;
+  skillAcademicCommunication: boolean;
+  skillEnglishProficiency: boolean;
+  skillDataPrivacy: boolean;
 };
 
 const emptyCourse = {
@@ -39,6 +43,11 @@ const emptyCourse = {
   // videoUrl: "",
   createdAt: "",
   categoryId: null,
+  skillDataResearch: false,
+  skillDataAnalysis: false,
+  skillAcademicCommunication: false,
+  skillEnglishProficiency: false,
+  skillDataPrivacy: false,
 };
 
 export default function CourseList() {
@@ -271,6 +280,77 @@ export default function CourseList() {
               {loadingCategories && (
                 <span className="text-xs text-blue-500 mt-1 block">Loading categories...</span>
               )}
+            </div>
+
+            {/* AI Literacy Skills */}
+            <div className="md:col-span-2 border-t border-gray-200 pt-4">
+              <label className="block text-sm font-bold text-gray-800 mb-3">AI Literacy (5 ทักษะ)</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    id="skillDataResearch"
+                    checked={currentCourse.skillDataResearch || false}
+                    onChange={(e) =>
+                      setCurrentCourse({ ...currentCourse, skillDataResearch: e.target.checked })
+                    }
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="skillDataResearch" className="text-sm text-gray-700 cursor-pointer">การค้นคว้าข้อมูล</label>
+                </div>
+
+                <div className="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    id="skillDataAnalysis"
+                    checked={currentCourse.skillDataAnalysis || false}
+                    onChange={(e) =>
+                      setCurrentCourse({ ...currentCourse, skillDataAnalysis: e.target.checked })
+                    }
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="skillDataAnalysis" className="text-sm text-gray-700 cursor-pointer">การวิเคราะห์ข้อมูล</label>
+                </div>
+
+                <div className="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    id="skillAcademicCommunication"
+                    checked={currentCourse.skillAcademicCommunication || false}
+                    onChange={(e) =>
+                      setCurrentCourse({ ...currentCourse, skillAcademicCommunication: e.target.checked })
+                    }
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="skillAcademicCommunication" className="text-sm text-gray-700 cursor-pointer">การสื่อสารเชิงวิชาการ</label>
+                </div>
+
+                <div className="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    id="skillEnglishProficiency"
+                    checked={currentCourse.skillEnglishProficiency || false}
+                    onChange={(e) =>
+                      setCurrentCourse({ ...currentCourse, skillEnglishProficiency: e.target.checked })
+                    }
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="skillEnglishProficiency" className="text-sm text-gray-700 cursor-pointer">การใช้ภาษาอังกฤษ</label>
+                </div>
+
+                <div className="flex items-center space-x-3 bg-white p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    id="skillDataPrivacy"
+                    checked={currentCourse.skillDataPrivacy || false}
+                    onChange={(e) =>
+                      setCurrentCourse({ ...currentCourse, skillDataPrivacy: e.target.checked })
+                    }
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="skillDataPrivacy" className="text-sm text-gray-700 cursor-pointer">ความเป็นส่วนตัวของข้อมูลและความมั่นคงปลอดภัยทางข้อมูล</label>
+                </div>
+              </div>
             </div>
           </div>
           

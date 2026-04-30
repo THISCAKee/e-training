@@ -11,6 +11,12 @@ export type Course = {
   category?: {
     name: string;
   } | null;
+  // AI Literacy Skills
+  skillDataResearch?: boolean;
+  skillDataAnalysis?: boolean;
+  skillAcademicCommunication?: boolean;
+  skillEnglishProficiency?: boolean;
+  skillDataPrivacy?: boolean;
 };
 // --- ^^^^ สิ้นสุดการแก้ไข ^^^^ ---
 
