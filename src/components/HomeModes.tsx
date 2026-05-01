@@ -52,7 +52,7 @@ function CategoryCard({
 
 export default function HomeModes() {
   const [activeMode, setActiveMode] = useState<
-    "training" | "learning" | "elearning" | "podcast"
+    "training" | "learning" | "podcast"
   >("training");
 
   return (
@@ -83,17 +83,15 @@ export default function HomeModes() {
               <BookOpen className="mr-2" size={22} />
               AI-Learning
             </button>
-            <button
-              onClick={() => setActiveMode("elearning")}
-              className={`flex items-center px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 ${
-                activeMode === "elearning"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20 transform scale-100"
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50 scale-95"
-              }`}
+            <a
+              href="http://202.28.34.38/elearning/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 text-gray-500 hover:text-gray-900 hover:bg-gray-50 scale-95"
             >
               <MonitorPlay className="mr-2" size={22} />
               E-Learning
-            </button>
+            </a>
             <button
               onClick={() => setActiveMode("podcast")}
               className={`flex items-center px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 ${
@@ -178,37 +176,6 @@ export default function HomeModes() {
               </h3>
               <p className="text-gray-500 text-lg max-w-md mx-auto">
                 เนื้อหาของฝั่ง AI-Learning กำลังเตรียมความพร้อม
-                เพื่อให้คุณได้รับประสบการณ์การเรียนรู้ที่ดีที่สุด
-              </p>
-            </div>
-          </div>
-
-          {/* e-Learning Mode */}
-          <div
-            className={`transition-all duration-500 transform w-full ${
-              activeMode === "elearning"
-                ? "opacity-100 translate-y-0 relative z-10"
-                : "opacity-0 absolute translate-y-4 pointer-events-none invisible"
-            }`}
-          >
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                ระบบ e-Learning
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                คอร์สเรียนออนไลน์เพื่อพัฒนาทักษะและการเรียนรู้ของคุณ
-              </p>
-            </div>
-
-            <div className="bg-white p-16 rounded-3xl text-center border border-gray-100 shadow-sm">
-              <div className="inline-flex justify-center items-center w-20 h-20 rounded-full bg-blue-50 text-blue-500 mb-6">
-                <Construction size={40} />
-              </div>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-3">
-                ระบบกำลังอยู่ระหว่างการพัฒนา
-              </h3>
-              <p className="text-gray-500 text-lg max-w-md mx-auto">
-                เนื้อหาของฝั่ง e-Learning กำลังเตรียมความพร้อม
                 เพื่อให้คุณได้รับประสบการณ์การเรียนรู้ที่ดีที่สุด
               </p>
             </div>
