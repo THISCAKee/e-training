@@ -10,7 +10,7 @@ const FACULTIES = [
   "คณะวิทยาศาสตร์",
   "คณะเทคโนโลยี",
   "คณะวิศวกรรมศาสตร์",
-  "คณะสถาปัตยกรรมศาสตร์ ผังเมือง และนฤมิตศิลป์",
+  "คณะสถาปัตยกรรมศาสตร์ผังเมืองและนฤมิตศิลป์",
   "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์",
   "คณะวิทยาการสารสนเทศ",
   "คณะพยาบาลศาสตร์",
@@ -25,6 +25,7 @@ const FACULTIES = [
   "คณะการท่องเที่ยวและการโรงแรม",
   "วิทยาลัยการเมืองการปกครอง",
   "คณะนิติศาสตร์",
+  "วิทยาลัยดุริยางคศิลป์",
 ];
 
 export default function RegisterPage() {
@@ -51,7 +52,10 @@ export default function RegisterPage() {
   // ปิด dropdown เมื่อคลิกที่อื่น
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (facultyRef.current && !facultyRef.current.contains(event.target as Node)) {
+      if (
+        facultyRef.current &&
+        !facultyRef.current.contains(event.target as Node)
+      ) {
         setIsFacultyOpen(false);
       }
     }
@@ -60,7 +64,7 @@ export default function RegisterPage() {
   }, []);
 
   const filteredFaculties = FACULTIES.filter((f) =>
-    f.toLowerCase().includes(facultySearch.toLowerCase())
+    f.toLowerCase().includes(facultySearch.toLowerCase()),
   );
 
   // ฟังก์ชันจัดการการเปลี่ยนค่าใน Input
@@ -212,7 +216,7 @@ export default function RegisterPage() {
           {/* Faculty & Major Row */}
           <div className="flex gap-4">
             <div className="w-1/2 relative" ref={facultyRef}>
-              <div 
+              <div
                 className="relative cursor-pointer"
                 onClick={() => setIsFacultyOpen(!isFacultyOpen)}
               >
@@ -231,7 +235,11 @@ export default function RegisterPage() {
                   }}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  {isFacultyOpen ? <Search size={16} /> : <ChevronDown size={16} />}
+                  {isFacultyOpen ? (
+                    <Search size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
                 </div>
               </div>
 

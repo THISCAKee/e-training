@@ -6,7 +6,7 @@ const PREDEFINED_FACULTIES = [
   "คณะวิทยาศาสตร์",
   "คณะเทคโนโลยี",
   "คณะวิศวกรรมศาสตร์",
-  "คณะสถาปัตยกรรมศาสตร์ ผังเมือง และนฤมิตศิลป์",
+  "คณะสถาปัตยกรรมศาสตร์ผังเมืองและนฤมิตศิลป์",
   "คณะสิ่งแวดล้อมและทรัพยากรศาสตร์",
   "คณะวิทยาการสารสนเทศ",
   "คณะพยาบาลศาสตร์",
@@ -21,12 +21,16 @@ const PREDEFINED_FACULTIES = [
   "คณะการท่องเที่ยวและการโรงแรม",
   "วิทยาลัยการเมืองการปกครอง",
   "คณะนิติศาสตร์",
+  "วิทยาลัยดุริยางคศิลป์",
 ];
 
 export async function GET() {
   const session = await auth();
-  
-  if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")) {
+
+  if (
+    !session?.user ||
+    (session.user.role !== "ADMIN" && session.user.role !== "ORG_ADMIN")
+  ) {
     return new NextResponse("Unauthorized", { status: 403 });
   }
 
@@ -40,11 +44,13 @@ export async function GET() {
           not: null,
         },
       },
-      distinct: ['faculty'],
+      distinct: ["faculty"],
     });
 
-    const dbFaculties = faculties.map(f => f.faculty).filter(Boolean) as string[];
-    
+    const dbFaculties = faculties
+      .map((f) => f.faculty)
+      .filter(Boolean) as string[];
+
     // รวมรายชื่อคณะที่ดึงมาจากฐานข้อมูลและรายชื่อเริ่มต้น จากนั้นตัดตัวซ้ำออก
     const facultySet = new Set([...PREDEFINED_FACULTIES, ...dbFaculties]);
     const facultyList = Array.from(facultySet).sort();
