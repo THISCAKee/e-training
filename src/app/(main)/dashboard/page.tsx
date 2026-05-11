@@ -11,7 +11,13 @@ import {
   GraduationCap,
   TrendingUp,
   CheckCircle,
-} from "lucide-react"; // เพิ่ม Icon
+  User,
+  BarChart3,
+  Star,
+  Play,
+  ExternalLink,
+  ChevronRight,
+} from "lucide-react";
 import Image from "next/image";
 
 export default async function DashboardPage() {
@@ -34,28 +40,24 @@ export default async function DashboardPage() {
     },
   });
 
-  // 1. ดึงข้อมูล Enrollments พร้อมข้อมูล Course
   const enrollments = await prisma.userCourseEnrollment.findMany({
     where: { userId: userId },
-    orderBy: { enrolledAt: "desc" }, // เรียงตามล่าสุด
+    orderBy: { enrolledAt: "desc" },
     include: {
       course: {
-        // ดึงข้อมูล Course ที่เกี่ยวข้อง
         select: {
           id: true,
           title: true,
           imageUrl: true,
-          _count: { select: { lessons: true } }, // นับจำนวนบทเรียน
+          _count: { select: { lessons: true } },
         },
       },
-      // (Optional) อาจจะ include UserLessonProgress เพื่อคำนวณ % ความก้าวหน้า
       user: {
-        // ดึงข้อมูล user มาด้วย (เผื่อใช้)
         select: {
           quizAttempts: {
-            where: { passed: true }, // เอาเฉพาะครั้งที่ผ่าน
-            orderBy: { createdAt: "desc" }, // เอาครั้งล่าสุด
-            take: 1, // เอาแค่ 1 รายการ
+            where: { passed: true },
+            orderBy: { createdAt: "desc" },
+            take: 1,
             select: {
               id: true,
               quizId: true,
@@ -68,14 +70,13 @@ export default async function DashboardPage() {
                   },
                 },
               },
-            }, // เอาแค่ ID ของ Attempt และ Quiz
+            },
           },
         },
       },
     },
   });
 
-  // (ส่วนดึง passedAttempts สำหรับ Certificate เหมือนเดิม)
   const passedAttempts = await prisma.quizAttempt.findMany({
     where: { userId: userId, passed: true },
     orderBy: { createdAt: "desc" },
@@ -97,23 +98,18 @@ export default async function DashboardPage() {
     },
   });
 
-  // คำนวณสถิติ
   const totalCourses = enrollments.length;
   const completedCourses = enrollments.filter(
-    (e) => e.status === "COMPLETED",
+    (e) => e.status === "COMPLETED"
   ).length;
   const inProgressCourses = enrollments.filter(
-    (e) => e.status === "IN_PROGRESS",
+    (e) => e.status === "IN_PROGRESS"
   ).length;
   const totalCertificates = passedAttempts.length;
 
-  // ดึงข้อมูล Quiz Attempts ทั้งหมด
   const allQuizAttempts = await prisma.quizAttempt.findMany({
     where: { userId: userId },
-    select: {
-      score: true,
-      passed: true,
-    },
+    select: { score: true, passed: true },
   });
 
   const totalQuizAttempts = allQuizAttempts.length;
@@ -126,257 +122,427 @@ export default async function DashboardPage() {
         ).toFixed(1)
       : 0;
 
-  // สร้าง Map ของ courseId กับ attempt ที่ผ่านล่าสุด
+  const passRate =
+    totalQuizAttempts > 0
+      ? Math.round((passedQuizAttempts / totalQuizAttempts) * 100)
+      : 0;
+
   const latestPassedAttemptByCourse = new Map();
   enrollments.forEach((enroll) => {
     if (enroll.user?.quizAttempts && enroll.user.quizAttempts.length > 0) {
       const attempt = enroll.user.quizAttempts[0];
-      // ตรวจสอบว่า attempt นี้เป็นของ course นี้จริงๆ
       if (attempt.quiz?.lesson?.courseId === enroll.courseId) {
         latestPassedAttemptByCourse.set(enroll.courseId, attempt);
       }
     }
   });
 
+  const completionRate =
+    totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0;
+
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* ส่วนข้อมูลผู้ใช้ */}
-      <div className="mb-6 text-black">
-        <h1 className="text-2xl font-medium ">ชื่อ {session.user.name}</h1>
-        <div className="text-lg mt-1 font-medium">
-          รหัสนิสิต: {user?.studentId}
-        </div>
-        <div>
-          <span className="font-medium text-lg">คณะ:</span>{" "}
-          {user?.faculty || "-"}
-        </div>
-        <div>
-          <span className="font-medium text-lg">สาขา:</span>{" "}
-          {user?.major || "-"}
-        </div>
-        <div>
-          <span className="font-medium text-lg">หลักสูตร:</span>{" "}
-          {user?.program || "-"}
-        </div>
-        <div>
-          <span className="font-medium text-lg">ชั้นปี:</span>{" "}
-          {user?.year ? `${user.year}` : "-"}
-        </div>
-      </div>
+    <div style={{ background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%)", minHeight: "100vh" }}>
+      <div className="container mx-auto py-8 px-4 max-w-7xl">
 
-      {/* ส่วนสถิติภาพรวม */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* การ์ดจำนวนหลักสูตรทั้งหมด */}
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">หลักสูตรทั้งหมด</p>
-              <p className="text-3xl font-bold text-blue-600">{totalCourses}</p>
+        {/* ===== HERO PROFILE SECTION ===== */}
+        <div
+          className="rounded-3xl p-8 mb-8 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, #1e3a8a 0%, #4f46e5 50%, #7c3aed 100%)",
+            boxShadow: "0 20px 60px rgba(79,70,229,0.35)",
+          }}
+        >
+          {/* decorative circles */}
+          <div style={{ position:"absolute", top:"-60px", right:"-60px", width:"200px", height:"200px", borderRadius:"50%", background:"rgba(255,255,255,0.08)" }} />
+          <div style={{ position:"absolute", bottom:"-40px", left:"30%", width:"150px", height:"150px", borderRadius:"50%", background:"rgba(255,255,255,0.05)" }} />
+
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative">
+            {/* Avatar */}
+            <div
+              className="flex-shrink-0 flex items-center justify-center rounded-2xl"
+              style={{
+                width: "80px",
+                height: "80px",
+                background: "rgba(255,255,255,0.15)",
+                backdropFilter: "blur(10px)",
+                border: "2px solid rgba(255,255,255,0.3)",
+              }}
+            >
+              <User size={40} className="text-white" />
             </div>
-            <BookOpen size={40} className="text-blue-500 opacity-70" />
-          </div>
-        </div>
 
-        {/* การ์ดกำลังเรียน */}
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">กำลังเรียน</p>
-              <p className="text-3xl font-bold text-yellow-600">
-                {inProgressCourses}
-              </p>
-            </div>
-            <TrendingUp size={40} className="text-yellow-500 opacity-70" />
-          </div>
-        </div>
-
-        {/* การ์ดเรียนจบแล้ว */}
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">เรียนจบแล้ว</p>
-              <p className="text-3xl font-bold text-green-600">
-                {completedCourses}
-              </p>
-            </div>
-            <CheckCircle size={40} className="text-green-500 opacity-70" />
-          </div>
-        </div>
-
-        {/* การ์ดใบประกาศนียบัตร */}
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">ใบประกาศนียบัตร</p>
-              <p className="text-3xl font-bold text-purple-600">
-                {totalCertificates}
-              </p>
-            </div>
-            <GraduationCap size={40} className="text-purple-500 opacity-70" />
-          </div>
-        </div>
-      </div>
-
-      {/* ส่วนข้อมูลเพิ่มเติม */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-xl font-bold mb-4 text-black">
-          สถิติการทำแบบทดสอบ
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <p className="text-gray-600 text-sm mb-2">
-              จำนวนครั้งที่ทำแบบทดสอบ
-            </p>
-            <p className="text-2xl font-bold text-blue-600">
-              {totalQuizAttempts} ครั้ง
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-gray-600 text-sm mb-2">จำนวนครั้งที่สอบผ่าน</p>
-            <p className="text-2xl font-bold text-green-600">
-              {passedQuizAttempts} ครั้ง
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-gray-600 text-sm mb-2">คะแนนเฉลี่ย</p>
-            <p className="text-2xl font-bold text-purple-600">
-              {averageScore}%
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* --- vvvv 2. เพิ่มส่วนแสดง My Courses vvvv --- */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-bold mb-4 text-black">หลักสูตรของคุณ</h2>
-        {enrollments.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {enrollments.map((enroll) => {
-              // หา attempt ที่ผ่านล่าสุดสำหรับ course นี้
-              const latestPassedAttemptInCourse =
-                latestPassedAttemptByCourse.get(enroll.courseId);
-
-              return (
-                <div
-                  key={enroll.id}
-                  className="border rounded-lg overflow-hidden flex flex-col bg-gray-50"
+            {/* Info */}
+            <div className="flex-grow">
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-3xl font-bold text-white">{session.user.name}</h1>
+                <span
+                  className="text-xs font-semibold px-3 py-1 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.2)", color: "white" }}
                 >
-                  {/* (Optional: ใส่รูปภาพ Course) */}
-                  {enroll.course.imageUrl && (
-                    <div className="relative h-40 w-full">
-                      <Image
-                        src={enroll.course.imageUrl}
-                        alt={enroll.course.title}
-                        fill
-                        style={{ objectFit: "cover" }}
-                        unoptimized
-                      />
-                    </div>
-                  )}
-                  <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-lg text-blue-800 mb-2">
-                      {enroll.course.title}
-                    </h3>
-                    <div className="text-sm text-gray-600 flex items-center mb-1">
-                      <BookOpen size={14} className="mr-2" />{" "}
-                      {enroll.course._count.lessons} บทเรียน
-                    </div>
-                    <div className="text-sm text-gray-600 flex items-center mb-4">
-                      <Clock size={14} className="mr-2" /> ลงทะเบียนเมื่อ:{" "}
-                      {enroll.enrolledAt.toLocaleDateString("th-TH", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </div>
-                    {/* (Optional: แสดง Progress Bar) */}
-                    {/* <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700"><div className="bg-blue-600 h-2.5 rounded-full" style={{width: '45%'}}></div></div> */}
+                  นิสิต
+                </span>
+              </div>
+              <p className="text-indigo-200 mb-4">รหัสนิสิต: {user?.studentId || "-"}</p>
 
-                    <div className="mt-auto">
-                      {" "}
-                      {/* ดันปุ่มลงล่าง */}
-                      {/* --- vvvv แก้ไข Logic ปุ่ม vvvv --- */}
-                      {enroll.status === "COMPLETED" &&
-                      latestPassedAttemptInCourse ? (
-                        // ถ้าเรียนจบแล้ว และหา Attempt ที่ผ่านเจอ
-                        <Link
-                          href={`/results/${latestPassedAttemptInCourse.id}`} // <-- ลิงก์ไปหน้าผลลัพธ์
-                          className="inline-flex items-center bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 text-sm"
-                        >
-                          <FileText size={16} className="mr-2" />
-                          สำเร็จการศึกษา (ดูผลคะแนน)
-                        </Link>
-                      ) : enroll.status === "COMPLETED" ? (
-                        // ถ้าเรียนจบ แต่หา Attempt ไม่เจอ (เผื่อกรณีข้อมูลไม่ครบ)
-                        <span className="inline-block bg-green-100 text-green-800 text-sm font-medium px-4 py-2 rounded-full">
-                          สำเร็จการศึกษา
-                        </span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: "คณะ", value: user?.faculty || "-" },
+                  { label: "สาขา", value: user?.major || "-" },
+                  { label: "หลักสูตร", value: user?.program || "-" },
+                  { label: "ชั้นปี", value: user?.year ? `ปีที่ ${user.year}` : "-" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-xl p-3"
+                    style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)" }}
+                  >
+                    <p style={{ color: "rgba(199,210,254,1)", fontSize: "11px", marginBottom: "2px" }}>{item.label}</p>
+                    <p className="text-white font-semibold text-sm truncate">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Progress ring summary */}
+            <div
+              className="flex-shrink-0 text-center rounded-2xl p-5"
+              style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", minWidth: "120px" }}
+            >
+              <p style={{ color: "rgba(199,210,254,1)", fontSize: "12px", marginBottom: "4px" }}>ความคืบหน้า</p>
+              <p className="text-4xl font-black text-white">{completionRate}%</p>
+              <p style={{ color: "rgba(167,243,208,1)", fontSize: "12px", marginTop: "4px" }}>เรียนจบแล้ว</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== STAT CARDS ===== */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {[
+            {
+              label: "หลักสูตรทั้งหมด",
+              value: totalCourses,
+              icon: <BookOpen size={28} />,
+              gradient: "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+              bg: "#eff6ff",
+              iconColor: "#3b82f6",
+            },
+            {
+              label: "กำลังเรียน",
+              value: inProgressCourses,
+              icon: <TrendingUp size={28} />,
+              gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
+              bg: "#fffbeb",
+              iconColor: "#f59e0b",
+            },
+            {
+              label: "เรียนจบแล้ว",
+              value: completedCourses,
+              icon: <CheckCircle size={28} />,
+              gradient: "linear-gradient(135deg, #10b981, #059669)",
+              bg: "#f0fdf4",
+              iconColor: "#10b981",
+            },
+            {
+              label: "ใบประกาศฯ",
+              value: totalCertificates,
+              icon: <GraduationCap size={28} />,
+              gradient: "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+              bg: "#faf5ff",
+              iconColor: "#8b5cf6",
+            },
+          ].map((card) => (
+            <div
+              key={card.label}
+              className="rounded-2xl p-5 relative overflow-hidden"
+              style={{
+                background: "white",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
+                border: "1px solid rgba(0,0,0,0.05)",
+                transition: "transform 0.2s, box-shadow 0.2s",
+              }}
+            >
+              <div
+                className="inline-flex items-center justify-center rounded-xl mb-3"
+                style={{ width: "52px", height: "52px", background: card.bg }}
+              >
+                <span style={{ color: card.iconColor }}>{card.icon}</span>
+              </div>
+              <p className="text-gray-500 text-sm mb-1">{card.label}</p>
+              <p className="text-4xl font-black" style={{ background: card.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                {card.value}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* ===== QUIZ STATS ===== */}
+        <div
+          className="rounded-2xl p-6 mb-8"
+          style={{ background: "white", boxShadow: "0 4px 20px rgba(0,0,0,0.07)", border: "1px solid rgba(0,0,0,0.05)" }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl" style={{ background: "#eff6ff" }}>
+              <BarChart3 size={22} style={{ color: "#3b82f6" }} />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">สถิติการทำแบบทดสอบ</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Total attempts */}
+            <div className="text-center">
+              <p className="text-gray-500 text-sm mb-2">จำนวนครั้งทั้งหมด</p>
+              <p className="text-4xl font-black text-blue-600 mb-1">{totalQuizAttempts}</p>
+              <p className="text-gray-400 text-xs">ครั้ง</p>
+            </div>
+
+            {/* Passed */}
+            <div className="text-center">
+              <p className="text-gray-500 text-sm mb-2">สอบผ่าน</p>
+              <p className="text-4xl font-black text-emerald-600 mb-1">{passedQuizAttempts}</p>
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <div className="flex-grow h-2 rounded-full bg-gray-100" style={{ maxWidth: "120px" }}>
+                  <div
+                    className="h-2 rounded-full"
+                    style={{ width: `${passRate}%`, background: "linear-gradient(90deg, #10b981, #059669)" }}
+                  />
+                </div>
+                <span className="text-xs text-emerald-600 font-semibold">{passRate}%</span>
+              </div>
+            </div>
+
+            {/* Avg Score */}
+            <div className="text-center">
+              <p className="text-gray-500 text-sm mb-2">คะแนนเฉลี่ย</p>
+              <p className="text-4xl font-black text-violet-600 mb-1">{averageScore}<span className="text-xl font-bold text-gray-400">%</span></p>
+              <div className="flex items-center justify-center gap-1 mt-1">
+                {[1,2,3,4,5].map((s) => (
+                  <Star
+                    key={s}
+                    size={14}
+                    fill={Number(averageScore) >= s * 20 ? "#f59e0b" : "none"}
+                    style={{ color: "#f59e0b" }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== MY COURSES ===== */}
+        <div
+          className="rounded-2xl p-6 mb-8"
+          style={{ background: "white", boxShadow: "0 4px 20px rgba(0,0,0,0.07)", border: "1px solid rgba(0,0,0,0.05)" }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl" style={{ background: "#faf5ff" }}>
+                <BookOpen size={22} style={{ color: "#8b5cf6" }} />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800">หลักสูตรของคุณ</h2>
+            </div>
+            <Link
+              href="/courses"
+              className="flex items-center gap-1 text-sm font-medium"
+              style={{ color: "#8b5cf6" }}
+            >
+              ดูทั้งหมด <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          {enrollments.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {enrollments.map((enroll) => {
+                const latestPassedAttemptInCourse = latestPassedAttemptByCourse.get(enroll.courseId);
+                const isCompleted = enroll.status === "COMPLETED";
+
+                return (
+                  <div
+                    key={enroll.id}
+                    className="rounded-2xl overflow-hidden flex flex-col"
+                    style={{
+                      border: "1px solid rgba(0,0,0,0.07)",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+                      transition: "transform 0.2s, box-shadow 0.2s",
+                    }}
+                  >
+                    {/* Course Image */}
+                    <div className="relative h-44 w-full flex-shrink-0" style={{ background: "linear-gradient(135deg, #c7d2fe, #ddd6fe)" }}>
+                      {enroll.course.imageUrl ? (
+                        <Image
+                          src={enroll.course.imageUrl}
+                          alt={enroll.course.title}
+                          fill
+                          style={{ objectFit: "cover" }}
+                          unoptimized
+                        />
                       ) : (
-                        // ถ้ายังไม่จบ (IN_PROGRESS)
-                        <Link
-                          href={`/courses/${enroll.courseId}/learn`}
-                          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 text-sm"
-                        >
-                          เรียนต่อ
-                        </Link>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <BookOpen size={48} style={{ color: "#8b5cf6", opacity: 0.5 }} />
+                        </div>
                       )}
-                      {/* --- ^^^^ สิ้นสุดการแก้ไข Logic ปุ่ม ^^^^ --- */}
+
+                      {/* Status Badge */}
+                      <div className="absolute top-3 right-3">
+                        <span
+                          className="text-xs font-bold px-3 py-1 rounded-full"
+                          style={
+                            isCompleted
+                              ? { background: "#d1fae5", color: "#065f46" }
+                              : { background: "#fef3c7", color: "#92400e" }
+                          }
+                        >
+                          {isCompleted ? "✓ เรียนจบแล้ว" : "กำลังเรียน"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 flex flex-col flex-grow" style={{ background: "#fafafa" }}>
+                      <h3 className="font-bold text-gray-800 mb-3 leading-snug line-clamp-2">
+                        {enroll.course.title}
+                      </h3>
+
+                      <div className="flex items-center gap-4 mb-4">
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <BookOpen size={12} /> {enroll.course._count.lessons} บทเรียน
+                        </span>
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <Clock size={12} />
+                          {enroll.enrolledAt.toLocaleDateString("th-TH", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="mb-4">
+                        <div className="h-1.5 rounded-full" style={{ background: "#e5e7eb" }}>
+                          <div
+                            className="h-1.5 rounded-full"
+                            style={{
+                              width: isCompleted ? "100%" : "50%",
+                              background: isCompleted
+                                ? "linear-gradient(90deg,#10b981,#059669)"
+                                : "linear-gradient(90deg,#f59e0b,#d97706)",
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-auto">
+                        {isCompleted && latestPassedAttemptInCourse ? (
+                          <Link
+                            href={`/results/${latestPassedAttemptInCourse.id}`}
+                            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white"
+                            style={{ background: "linear-gradient(135deg,#0d9488,#0f766e)" }}
+                          >
+                            <FileText size={15} /> ดูผลคะแนน
+                          </Link>
+                        ) : isCompleted ? (
+                          <span
+                            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold"
+                            style={{ background: "#d1fae5", color: "#065f46" }}
+                          >
+                            <CheckCircle size={15} /> สำเร็จแล้ว
+                          </span>
+                        ) : (
+                          <Link
+                            href={`/courses/${enroll.courseId}/learn`}
+                            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white"
+                            style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed)" }}
+                          >
+                            <Play size={15} fill="white" /> เรียนต่อ
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">
-            คุณยังไม่ได้ลงทะเบียนเรียนหลักสูตรใด
-          </p>
-        )}
-      </div>
-      {/* --- ^^^^ สิ้นสุดส่วน My Courses ^^^^ --- */}
-
-      {/* (ส่วนแสดง Certificate เหมือนเดิม) */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4 text-black">
-          ใบประกาศนียบัตรของคุณ
-        </h2>
-        {passedAttempts.length > 0 ? (
-          <ul className="space-y-4">
-            {passedAttempts.map((attempt) => (
-              <li
-                key={attempt.id}
-                className="flex justify-between items-center p-3 border-b"
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style={{ background: "#f3f4f6" }}>
+                <BookOpen size={36} style={{ color: "#d1d5db" }} />
+              </div>
+              <p className="text-gray-500 font-medium">คุณยังไม่ได้ลงทะเบียนเรียนหลักสูตรใด</p>
+              <Link
+                href="/courses"
+                className="inline-flex items-center gap-2 mt-4 px-6 py-2.5 rounded-xl text-sm font-bold text-white"
+                style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed)" }}
               >
-                <div>
-                  <h3 className="font-semibold  text-gray-600">
-                    {attempt.quiz?.lesson?.course?.title}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    สอบผ่านเมื่อ:{" "}
-                    {attempt.createdAt.toLocaleDateString("th-TH", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-                <a
-                  href={`/api/certificate/generate/${attempt.quizId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 text-sm"
+                เลือกหลักสูตร <ChevronRight size={16} />
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* ===== CERTIFICATES ===== */}
+        <div
+          className="rounded-2xl p-6"
+          style={{ background: "white", boxShadow: "0 4px 20px rgba(0,0,0,0.07)", border: "1px solid rgba(0,0,0,0.05)" }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-xl" style={{ background: "#fefce8" }}>
+              <Award size={22} style={{ color: "#d97706" }} />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">ใบประกาศนียบัตรของคุณ</h2>
+          </div>
+
+          {passedAttempts.length > 0 ? (
+            <div className="space-y-3">
+              {passedAttempts.map((attempt) => (
+                <div
+                  key={attempt.id}
+                  className="flex items-center justify-between p-4 rounded-xl"
+                  style={{ background: "#fffbeb", border: "1px solid #fde68a" }}
                 >
-                  <Award size={16} className="mr-2" />
-                  ดูใบประกาศนียบัตร
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-center text-gray-500">
-            คุณยังไม่มีใบประกาศนียบัตร
-          </p>
-        )}
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="flex-shrink-0 flex items-center justify-center rounded-xl"
+                      style={{ width: "44px", height: "44px", background: "linear-gradient(135deg,#f59e0b,#d97706)" }}
+                    >
+                      <Award size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-800 text-sm">
+                        {attempt.quiz?.lesson?.course?.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        สอบผ่านเมื่อ{" "}
+                        {attempt.createdAt.toLocaleDateString("th-TH", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={`/api/certificate/generate/${attempt.quizId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white flex-shrink-0"
+                    style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)" }}
+                  >
+                    <ExternalLink size={14} /> ดูใบประกาศฯ
+                  </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style={{ background: "#fef3c7" }}>
+                <Award size={36} style={{ color: "#fbbf24" }} />
+              </div>
+              <p className="text-gray-500 font-medium">คุณยังไม่มีใบประกาศนียบัตร</p>
+              <p className="text-gray-400 text-sm mt-1">เรียนจบและสอบผ่านเพื่อรับใบประกาศนียบัตร</p>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
