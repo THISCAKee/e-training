@@ -100,10 +100,10 @@ export default function AdminDashboardPage() {
                   </>
                 )}
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
                 {isOrgAdmin ? "Organization Dashboard" : "Admin Dashboard"}
               </h1>
-              <p className="text-blue-100/80 text-lg">
+              <p className="text-blue-100/80 text-base">
                 ยินดีต้อนรับ, {session?.user?.name || "ผู้ดูแลระบบ"}
                 {isOrgAdmin && (
                   <span className="ml-2 inline-flex items-center bg-yellow-400/20 text-yellow-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-yellow-400/30">

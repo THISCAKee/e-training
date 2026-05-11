@@ -3,7 +3,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Trash2, KeyRound } from "lucide-react";
+import {
+  ArrowLeft,
+  Trash2,
+  KeyRound,
+  User as UserIcon,
+  Mail,
+  Building,
+  GraduationCap,
+  Calendar,
+  IdCard,
+  CheckCircle,
+  AlertCircle,
+  Save,
+  X,
+  Edit3
+} from "lucide-react";
 
 type Enrollment = {
   id: number;
@@ -32,7 +47,6 @@ export default function AdminUserDetailPage() {
   const userId = String(params.id);
   const [user, setUser] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  // เพิ่ม State สำหรับจัดการรหัสผ่านใหม่
   const [newPassword, setNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
@@ -42,7 +56,7 @@ export default function AdminUserDetailPage() {
   const [facultyList, setFacultyList] = useState<string[]>([]);
   const [savingProfile, setSavingProfile] = useState(false);
 
-  // ดึงข้อมูล User
+  // Fetch User
   const fetchUser = useCallback(async () => {
     try {
       const res = await fetch(`/api/admin/users/${userId}`);
@@ -81,7 +95,6 @@ export default function AdminUserDetailPage() {
     fetchFaculties();
   }, [fetchUser, fetchFaculties]);
 
-  // ฟังก์ชันลบคอร์ส
   const handleRemoveCourse = async (enrollmentId: number) => {
     if (!confirm("คุณแน่ใจหรือไม่ว่าจะยกเลิกคอร์สเรียนนี้ของผู้ใช้?")) return;
 
@@ -91,8 +104,7 @@ export default function AdminUserDetailPage() {
       });
 
       if (res.ok) {
-        alert("ลบคอร์สเรียบร้อยแล้ว");
-        fetchUser(); // โหลดข้อมูลใหม่
+        fetchUser();
       } else {
         alert("เกิดข้อผิดพลาดในการลบ");
       }
@@ -102,7 +114,6 @@ export default function AdminUserDetailPage() {
     }
   };
 
-  // เพิ่มฟังก์ชันเปลี่ยนรหัสผ่าน
   const handleSaveProfile = async () => {
     if (!confirm("ยืนยันการบันทึกข้อมูล?")) return;
     setSavingProfile(true);
@@ -114,7 +125,6 @@ export default function AdminUserDetailPage() {
       });
 
       if (res.ok) {
-        alert("บันทึกข้อมูลสำเร็จ!");
         setIsEditing(false);
         fetchUser(); // Reload data
       } else {
@@ -147,8 +157,8 @@ export default function AdminUserDetailPage() {
 
       if (res.ok) {
         alert("เปลี่ยนรหัสผ่านสำเร็จ!");
-        setNewPassword(""); // ล้างช่อง input
-        setIsChangingPassword(false); // ปิดฟอร์ม
+        setNewPassword("");
+        setIsChangingPassword(false);
       } else {
         const msg = await res.text();
         alert(`เกิดข้อผิดพลาด: ${msg}`);
@@ -159,267 +169,372 @@ export default function AdminUserDetailPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (!user)
-    return <div className="p-8 text-center text-red-500">User not found</div>;
-
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <Link
-        href="/admin"
-        className="inline-flex items-center text-gray-500 hover:text-blue-600 mb-6"
-      >
-        <ArrowLeft size={20} className="mr-2" /> กลับไปหน้า Admin Dashboard
-      </Link>
-
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">ข้อมูลผู้ใช้งาน</h1>
-          {!isEditing ? (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition"
-            >
-              แก้ไขข้อมูล
-            </button>
-          ) : (
-            <div className="space-x-2">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition"
-                disabled={savingProfile}
-              >
-                ยกเลิก
-              </button>
-              <button
-                onClick={handleSaveProfile}
-                className="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                disabled={savingProfile}
-              >
-                {savingProfile ? "กำลังบันทึก..." : "บันทึก"}
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-black">
-          {!isEditing ? (
-            <>
-              <p>
-                <strong>ชื่อ:</strong> {user.name}
-              </p>
-              <p>
-                <strong>อีเมล:</strong> {user.email}
-              </p>
-              <p>
-                <strong>สถานะ:</strong>{" "}
-                <span
-                  className={`px-2 py-1 rounded text-xs ${user.role === "ADMIN" ? "bg-purple-100 text-purple-800" : user.role === "ORG_ADMIN" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
-                >
-                  {user.role}
-                </span>
-              </p>
-              <p>
-                <strong>รหัสนิสิต:</strong> {user.studentId || "-"}
-              </p>
-              <p>
-                <strong>คณะ:</strong> {user.faculty || "-"}
-              </p>
-              <p>
-                <strong>สาขา:</strong> {user.major || "-"}
-              </p>
-              <p>
-                <strong>ชั้นปี:</strong> {user.year || "-"}
-              </p>
-            </>
-          ) : (
-            <>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">
-                  ชื่อ
-                </label>
-                <input
-                  type="text"
-                  value={editedUser.name || ""}
-                  onChange={(e) =>
-                    setEditedUser({ ...editedUser, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">
-                  อีเมล
-                </label>
-                <input
-                  type="text"
-                  value={user.email}
-                  disabled
-                  className="w-full px-3 py-2 border rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">
-                  รหัสนิสิต
-                </label>
-                <input
-                  type="text"
-                  value={editedUser.studentId || ""}
-                  onChange={(e) =>
-                    setEditedUser({ ...editedUser, studentId: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">
-                  คณะ
-                </label>
-                <input
-                  type="text"
-                  list="faculty-options"
-                  value={editedUser.faculty || ""}
-                  onChange={(e) =>
-                    setEditedUser({ ...editedUser, faculty: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                  placeholder="พิมพ์หรือเลือกคณะ"
-                />
-                <datalist id="faculty-options">
-                  {facultyList.map((f, i) => (
-                    <option key={i} value={f} />
-                  ))}
-                </datalist>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">
-                  สาขา
-                </label>
-                <input
-                  type="text"
-                  value={editedUser.major || ""}
-                  onChange={(e) =>
-                    setEditedUser({ ...editedUser, major: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-600">
-                  ชั้นปี
-                </label>
-                <input
-                  type="text"
-                  value={editedUser.year || ""}
-                  onChange={(e) =>
-                    setEditedUser({ ...editedUser, year: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border rounded-md"
-                />
-              </div>
-            </>
-          )}
-
-          {/* ปุ่มเปิดปิดฟอร์มเปลี่ยนรหัส */}
-          <button
-            onClick={() => setIsChangingPassword(!isChangingPassword)}
-            className="flex items-center text-sm bg-blue-50 text-blue-600 px-3 py-2 rounded hover:bg-blue-100 transition w-35"
-          >
-            <KeyRound size={16} className="mr-2" />
-            {isChangingPassword ? "ยกเลิกการเปลี่ยนรหัส" : "เปลี่ยนรหัสผ่าน"}
-          </button>
-          {/* ปุ่มเปิดปิดฟอร์มเปลี่ยนรหัส */}
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 font-medium">กำลังโหลดข้อมูลผู้ใช้...</p>
         </div>
       </div>
+    );
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          คอร์สที่ลงทะเบียน ({user.enrollments.length})
-        </h2>
-        {/* --- vvv ส่วนฟอร์มเปลี่ยนรหัสผ่าน (แสดงเมื่อกดปุ่ม) vvv --- */}
-        {isChangingPassword && (
-          <div className="mt-6 p-4 border border-blue-200 bg-blue-50 rounded-lg animate-fade-in">
-            <h3 className="font-semibold text-blue-800 mb-2">
-              ตั้งรหัสผ่านใหม่
-            </h3>
-            <form
-              onSubmit={handleChangePassword}
-              className="flex gap-2 items-end"
+  if (!user)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50/50">
+        <AlertCircle className="w-16 h-16 text-red-400 mb-4" />
+        <p className="text-xl font-bold text-gray-800">ไม่พบข้อมูลผู้ใช้</p>
+        <Link href="/admin" className="mt-4 text-blue-600 hover:underline">
+          กลับสู่แดชบอร์ด
+        </Link>
+      </div>
+    );
+
+  return (
+    <div className="min-h-screen bg-gray-50/50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <Link
+              href="/admin"
+              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors mb-2"
             >
-              <div className="flex-1 max-w-md">
-                <label className="block text-xs text-gray-500 mb-1">
-                  รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)
-                </label>
-                <input
-                  type="text" // ใช้ text เพื่อให้ Admin เห็นว่าพิมพ์อะไรอยู่ (หรือใช้ password ก็ได้)
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2 border rounded text-black"
-                  placeholder="ระบุรหัสผ่านใหม่..."
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-medium"
-              >
-                บันทึก
-              </button>
-            </form>
+              <ArrowLeft size={16} className="mr-1.5" />
+              กลับไปหน้าจัดการผู้ใช้
+            </Link>
+            <h1 className="text-2xl font-bold text-gray-900">
+              รายละเอียดผู้ใช้งาน
+            </h1>
           </div>
-        )}
-        {/* --- ^^^ จบส่วนฟอร์มเปลี่ยนรหัสผ่าน ^^^ --- */}
+          <div className="flex items-center gap-3">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                user.role === "ADMIN"
+                  ? "bg-purple-100 text-purple-700 border border-purple-200"
+                  : user.role === "ORG_ADMIN"
+                    ? "bg-blue-100 text-blue-700 border border-blue-200"
+                    : "bg-gray-100 text-gray-700 border border-gray-200"
+              }`}
+            >
+              {user.role}
+            </span>
+          </div>
+        </div>
 
-        {user.enrollments.length === 0 ? (
-          <p className="text-gray-500">
-            ผู้ใช้นี้ยังไม่ได้ลงทะเบียนเรียนคอร์สใดๆ
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-black">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="py-3 px-4 text-left">ชื่อคอร์ส</th>
-                  <th className="py-3 px-4 text-center">สถานะการเรียน</th>
-                  <th className="py-3 px-4 text-center">วันที่ลงทะเบียน</th>
-                  <th className="py-3 px-4 text-center">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {user.enrollments.map((enroll) => (
-                  <tr key={enroll.id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">
-                      {enroll.course.title}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          enroll.status === "COMPLETED"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {enroll.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center text-sm text-gray-600">
-                      {new Date(enroll.enrolledAt).toLocaleDateString("th-TH")}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <button
-                        onClick={() => handleRemoveCourse(enroll.id)}
-                        className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50 transition-colors"
-                        title="ยกเลิกการลงทะเบียน"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column: User Profile & Password */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Profile Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 flex justify-between items-center border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center border border-gray-100">
+                    <UserIcon size={24} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900 leading-tight">
+                      {user.name || "ไม่ระบุชื่อ"}
+                    </h2>
+                    <p className="text-sm text-gray-500 truncate max-w-[150px]">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                {!isEditing ? (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white rounded-full transition-colors tooltip"
+                    title="แก้ไขข้อมูล"
+                  >
+                    <Edit3 size={18} />
+                  </button>
+                ) : (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-white rounded-full transition-colors"
+                      disabled={savingProfile}
+                      title="ยกเลิก"
+                    >
+                      <X size={18} />
+                    </button>
+                    <button
+                      onClick={handleSaveProfile}
+                      className="p-1.5 text-white bg-blue-600 hover:bg-blue-700 rounded-full transition-colors"
+                      disabled={savingProfile}
+                      title="บันทึก"
+                    >
+                      <Save size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6 space-y-4">
+                {/* Profile Fields */}
+                <div className="space-y-4">
+                  <ProfileField
+                    icon={<UserIcon size={16} />}
+                    label="ชื่อ-นามสกุล"
+                    value={editedUser.name}
+                    isEditing={isEditing}
+                    onChange={(val) =>
+                      setEditedUser({ ...editedUser, name: val })
+                    }
+                  />
+                  <ProfileField
+                    icon={<Mail size={16} />}
+                    label="อีเมล"
+                    value={user.email}
+                    isEditing={false}
+                  />
+                  <ProfileField
+                    icon={<IdCard size={16} />}
+                    label="รหัสนิสิต"
+                    value={editedUser.studentId}
+                    isEditing={isEditing}
+                    onChange={(val) =>
+                      setEditedUser({ ...editedUser, studentId: val })
+                    }
+                  />
+                  <div className="flex flex-col">
+                    <div className="flex items-center text-sm font-medium text-gray-500 mb-1">
+                      <Building size={16} className="mr-2 text-gray-400" />
+                      คณะ
+                    </div>
+                    {isEditing ? (
+                      <div>
+                        <input
+                          type="text"
+                          list="faculty-options"
+                          value={editedUser.faculty || ""}
+                          onChange={(e) =>
+                            setEditedUser({ ...editedUser, faculty: e.target.value })
+                          }
+                          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                          placeholder="เลือกหรือพิมพ์ชื่อคณะ"
+                        />
+                        <datalist id="faculty-options">
+                          {facultyList.map((f, i) => (
+                            <option key={i} value={f} />
+                          ))}
+                        </datalist>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-900 font-medium pl-6">
+                        {user.faculty || "-"}
+                      </div>
+                    )}
+                  </div>
+                  <ProfileField
+                    icon={<GraduationCap size={16} />}
+                    label="สาขา"
+                    value={editedUser.major}
+                    isEditing={isEditing}
+                    onChange={(val) =>
+                      setEditedUser({ ...editedUser, major: val })
+                    }
+                  />
+                  <ProfileField
+                    icon={<Calendar size={16} />}
+                    label="ชั้นปี"
+                    value={editedUser.year}
+                    isEditing={isEditing}
+                    onChange={(val) =>
+                      setEditedUser({ ...editedUser, year: val })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Password Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg">
+                    <KeyRound size={18} />
+                  </div>
+                  <h3 className="font-bold text-gray-800 text-sm">การรักษาความปลอดภัย</h3>
+                </div>
+                <button
+                  onClick={() => setIsChangingPassword(!isChangingPassword)}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
+                >
+                  {isChangingPassword ? "ยกเลิก" : "เปลี่ยนรหัสผ่าน"}
+                </button>
+              </div>
+
+              {isChangingPassword ? (
+                <form
+                  onSubmit={handleChangePassword}
+                  className="space-y-3 animate-fade-in"
+                >
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)
+                    </label>
+                    <input
+                      type="text"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                      placeholder="พิมพ์รหัสผ่านใหม่..."
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+                  >
+                    บันทึกรหัสผ่าน
+                  </button>
+                </form>
+              ) : (
+                <p className="text-xs text-gray-500">
+                  คุณสามารถตั้งรหัสผ่านใหม่ให้ผู้ใช้งานในกรณีที่ผู้ใช้งานลืมรหัสผ่าน
+                </p>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Right Column: Enrolled Courses */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full">
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    หลักสูตรที่ลงทะเบียน
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    ผู้ใช้นี้ได้ลงทะเบียนเรียนทั้งหมด {user.enrollments.length} หลักสูตร
+                  </p>
+                </div>
+                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <BookOpenIcon />
+                </div>
+              </div>
+
+              <div className="p-0 flex-1 overflow-x-auto">
+                {user.enrollments.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-12 text-gray-400">
+                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                      <GraduationCap size={24} className="text-gray-300" />
+                    </div>
+                    <p className="font-medium text-gray-500">
+                      ยังไม่มีประวัติการลงทะเบียน
+                    </p>
+                  </div>
+                ) : (
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-gray-50/50 text-gray-500 uppercase tracking-wider text-xs font-semibold">
+                      <tr>
+                        <th className="py-4 px-6 text-left w-1/2">ชื่อหลักสูตร</th>
+                        <th className="py-4 px-6 text-center">สถานะ</th>
+                        <th className="py-4 px-6 text-center">วันที่ลงทะเบียน</th>
+                        <th className="py-4 px-6 text-right">จัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-gray-700">
+                      {user.enrollments.map((enroll) => (
+                        <tr
+                          key={enroll.id}
+                          className="hover:bg-blue-50/30 transition-colors group"
+                        >
+                          <td className="py-4 px-6">
+                            <div className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                              {enroll.course.title}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-center">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                                enroll.status === "COMPLETED"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {enroll.status === "COMPLETED" ? (
+                                <CheckCircle size={12} />
+                              ) : (
+                                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                              )}
+                              {enroll.status}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-center text-gray-500 text-xs">
+                            {new Date(enroll.enrolledAt).toLocaleDateString("th-TH", {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <button
+                              onClick={() => handleRemoveCourse(enroll.id)}
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title="ยกเลิกการลงทะเบียน"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+// Subcomponent for Profile Fields
+function ProfileField({
+  icon,
+  label,
+  value,
+  isEditing,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value?: string | null;
+  isEditing: boolean;
+  onChange?: (val: string) => void;
+}) {
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center text-sm font-medium text-gray-500 mb-1">
+        <span className="text-gray-400 mr-2">{icon}</span>
+        {label}
+      </div>
+      {isEditing && onChange ? (
+        <input
+          type="text"
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+          placeholder={`ระบุ${label}`}
+        />
+      ) : (
+        <div className={`text-sm font-medium pl-6 ${value ? "text-gray-900" : "text-gray-400 italic"}`}>
+          {value || "-"}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BookOpenIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+    </svg>
+  );
+}
+

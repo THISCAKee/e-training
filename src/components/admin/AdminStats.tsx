@@ -55,7 +55,7 @@ const StatCard = ({
       )}
     </div>
     <div>
-      <h3 className="text-3xl font-bold text-gray-800 tracking-tight">
+      <h3 className="text-2xl font-bold text-gray-800 tracking-tight">
         {value}
       </h3>
       <p className="text-sm font-medium text-gray-500 mt-1">{title}</p>
