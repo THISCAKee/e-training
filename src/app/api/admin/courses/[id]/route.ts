@@ -2,6 +2,7 @@
 // src/app/api/admin/courses/[id]/route.ts
 
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
@@ -78,30 +79,31 @@ export async function PATCH(
       skillDataPrivacy,
     } = body;
 
+    const data: Prisma.CourseUncheckedUpdateInput = {
+      title,
+      description,
+      imageUrl,
+      videoUrl,
+      categoryId: categoryId ? parseInt(categoryId) : null,
+      skillDataResearch:
+        skillDataResearch !== undefined ? !!skillDataResearch : undefined,
+      skillDataAnalysis:
+        skillDataAnalysis !== undefined ? !!skillDataAnalysis : undefined,
+      skillAcademicCommunication:
+        skillAcademicCommunication !== undefined
+          ? !!skillAcademicCommunication
+          : undefined,
+      skillEnglishProficiency:
+        skillEnglishProficiency !== undefined
+          ? !!skillEnglishProficiency
+          : undefined,
+      skillDataPrivacy:
+        skillDataPrivacy !== undefined ? !!skillDataPrivacy : undefined,
+    };
+
     const updatedCourse = await prisma.course.update({
       where: { id: courseId },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: {
-        title,
-        description,
-        imageUrl,
-        videoUrl,
-        categoryId: categoryId ? parseInt(categoryId) : null,
-        skillDataResearch:
-          skillDataResearch !== undefined ? !!skillDataResearch : undefined,
-        skillDataAnalysis:
-          skillDataAnalysis !== undefined ? !!skillDataAnalysis : undefined,
-        skillAcademicCommunication:
-          skillAcademicCommunication !== undefined
-            ? !!skillAcademicCommunication
-            : undefined,
-        skillEnglishProficiency:
-          skillEnglishProficiency !== undefined
-            ? !!skillEnglishProficiency
-            : undefined,
-        skillDataPrivacy:
-          skillDataPrivacy !== undefined ? !!skillDataPrivacy : undefined,
-      } as any,
+      data,
     });
 
     return NextResponse.json(updatedCourse, { status: 200 });

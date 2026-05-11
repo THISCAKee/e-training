@@ -1,6 +1,7 @@
 // src/app/api/admin/courses/route.ts
 
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 // ฟังก์ชันนี้จะดึงข้อมูลหลักสูตรทั้งหมด
@@ -117,21 +118,20 @@ export async function POST(request: Request) {
           ? parseInt(body.organizationId)
           : null;
 
-    const newCourse = await prisma.course.create({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: {
-        title,
-        description,
-        imageUrl,
-        categoryId: categoryId ? parseInt(categoryId) : null,
-        organizationId,
-        skillDataResearch: !!skillDataResearch,
-        skillDataAnalysis: !!skillDataAnalysis,
-        skillAcademicCommunication: !!skillAcademicCommunication,
-        skillEnglishProficiency: !!skillEnglishProficiency,
-        skillDataPrivacy: !!skillDataPrivacy,
-      } as any,
-    });
+    const data: Prisma.CourseUncheckedCreateInput = {
+      title,
+      description,
+      imageUrl,
+      categoryId: categoryId ? parseInt(categoryId) : null,
+      organizationId,
+      skillDataResearch: !!skillDataResearch,
+      skillDataAnalysis: !!skillDataAnalysis,
+      skillAcademicCommunication: !!skillAcademicCommunication,
+      skillEnglishProficiency: !!skillEnglishProficiency,
+      skillDataPrivacy: !!skillDataPrivacy,
+    };
+
+    const newCourse = await prisma.course.create({ data });
 
     return NextResponse.json(newCourse, { status: 201 });
   } catch (error) {

@@ -1,5 +1,6 @@
 // src/app/api/admin/users/[id]/route.ts
 import { NextResponse } from "next/server";
+import { Role, type Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
@@ -64,11 +65,11 @@ export async function PATCH(
       return new NextResponse("Invalid data", { status: 400 });
     }
 
-    const dataToUpdate: any = {};
-    if (role && ["USER", "ORG_ADMIN", "ADMIN"].includes(role)) {
+    const dataToUpdate: Prisma.UserUpdateInput = {};
+    if (role && Object.values(Role).includes(role as Role)) {
       // Only ADMIN can change roles
       if (session?.user?.role === "ADMIN") {
-        dataToUpdate.role = role;
+        dataToUpdate.role = role as Role;
       }
     }
     if (name !== undefined) dataToUpdate.name = name;
