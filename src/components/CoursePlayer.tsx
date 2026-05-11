@@ -30,6 +30,7 @@ interface CoursePlayerProps {
   allLessonsCompleted: boolean;
   totalLessons: number;
   userRole?: string | null;
+  isReadOnly?: boolean;
 }
 
 export default function CoursePlayer({
@@ -38,6 +39,7 @@ export default function CoursePlayer({
   allLessonsCompleted,
   totalLessons,
   userRole,
+  isReadOnly = false,
 }: CoursePlayerProps) {
   const router = useRouter();
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
@@ -91,10 +93,10 @@ export default function CoursePlayer({
   // --- vvvv 2. (แก้ไข) เงื่อนไขการแสดงปุ่ม vvvv ---
   // ตรวจสอบว่าควรแสดงปุ่ม "ยืนยันว่าเรียนจบ" หรือไม่
   const shouldShowCompleteButton =
-    // กรณี 1: เป็น Admin (เห็นปุ่มเสมอ)
-    userRole === "ADMIN" ||
-    // กรณี 2: ไม่ใช่ Admin และวิดีโอเล่นจบแล้ว
-    (userRole !== "ADMIN" && isVideoEnded);
+    !isReadOnly && (
+      userRole === "ADMIN" ||
+      (userRole !== "ADMIN" && isVideoEnded)
+    );
   // --- ^^^^ สิ้นสุดการแก้ไข ^^^^ ---
 
   return (
@@ -190,7 +192,7 @@ export default function CoursePlayer({
                 </button>
 
                 {/* (ลอจิกปุ่ม Quiz) */}
-                {lesson.quiz && (
+                {lesson.quiz && !isReadOnly && (
                   <div className="mt-2 pl-8">
                     {allLessonsCompleted ? (
                       <Link

@@ -105,18 +105,19 @@ export default async function CourseLearnPage({
   // --- vvvv 4. ตรวจสอบ Enrollment vvvv ---
   const enrollment = await prisma.userCourseEnrollment.findUnique({
     where: { userId_courseId: { userId, courseId } },
-    select: { status: true }, // เอาแค่ status ก็พอ
+    select: { status: true },
   });
 
-  // ถ้าไม่พบ Enrollment (ยังไม่กด "เริ่มเรียน" จากหน้า Detail)
-  // หรือ Status ไม่ใช่ IN_PROGRESS (อาจจะ COMPLETED หรือมีสถานะอื่นในอนาคต)
-  // ให้ redirect กลับไปหน้า Course Detail พร้อมแจ้งเตือน
-  if (!enrollment || enrollment.status !== "IN_PROGRESS") {
+  // ถ้าไม่พบ Enrollment เลย → ไม่มีสิทธิ์
+  if (!enrollment) {
     console.warn(
-      `User ${userId} tried to access learn page for course ${courseId} without valid enrollment.`,
+      `User ${userId} tried to access learn page for course ${courseId} without enrollment.`,
     );
     redirect(`/courses/${courseId}?error=not_enrolled`);
   }
+
+  // โหมด rewatch: ถ้า COMPLETED อนุญาตให้ดูวิดีโอซ้ำได้ (read-only)
+  const isReadOnly = enrollment.status === "COMPLETED";
   // --- ^^^^ สิ้นสุดการตรวจสอบ Enrollment ^^^^ ---
 
   // 5. ดึงข้อมูล Course และ Progress
@@ -143,12 +144,22 @@ export default async function CourseLearnPage({
         {/* ProtectedContent อาจจะไม่จำเป็นแล้ว เพราะเราเช็ค Login ข้างบนแล้ว
             แต่ใส่ไว้ก็ไม่เสียหาย หรือจะลบออกก็ได้ */}
         <ProtectedContent>
+          {isReadOnly && (
+            <div
+              className="flex items-center gap-3 mb-6 px-4 py-3 rounded-2xl text-sm font-medium"
+              style={{ background: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7" }}
+            >
+              <span className="text-xl">🎓</span>
+              <span>คุณเรียนจบหลักสูตรนี้แล้ว — กำลังดูวิดีโอในโหมดทบทวน</span>
+            </div>
+          )}
           <CoursePlayer
             course={course}
             completedLessonIds={completedLessonIds}
             allLessonsCompleted={allLessonsCompleted}
             totalLessons={totalLessons}
             userRole={userRole}
+            isReadOnly={isReadOnly}
           />
         </ProtectedContent>
       </div>

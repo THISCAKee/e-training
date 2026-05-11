@@ -431,22 +431,28 @@ export default async function DashboardPage() {
                         </div>
                       </div>
 
-                      <div className="mt-auto">
-                        {isCompleted && latestPassedAttemptInCourse ? (
-                          <Link
-                            href={`/results/${latestPassedAttemptInCourse.id}`}
-                            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white"
-                            style={{ background: "linear-gradient(135deg,#0d9488,#0f766e)" }}
-                          >
-                            <FileText size={15} /> ดูผลคะแนน
-                          </Link>
-                        ) : isCompleted ? (
-                          <span
-                            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold"
-                            style={{ background: "#d1fae5", color: "#065f46" }}
-                          >
-                            <CheckCircle size={15} /> สำเร็จแล้ว
-                          </span>
+                      <div className="mt-auto flex flex-col gap-2">
+                        {isCompleted ? (
+                          <>
+                            {/* ปุ่มดูวิดีโอซ้ำ */}
+                            <Link
+                              href={`/courses/${enroll.courseId}/learn`}
+                              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white"
+                              style={{ background: "linear-gradient(135deg,#4f46e5,#7c3aed)" }}
+                            >
+                              <Play size={15} fill="white" /> ดูวิดีโอซ้ำ
+                            </Link>
+                            {/* ปุ่มดูผลคะแนน (ถ้ามี attempt) */}
+                            {latestPassedAttemptInCourse && (
+                              <Link
+                                href={`/results/${latestPassedAttemptInCourse.id}`}
+                                className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-sm font-semibold"
+                                style={{ background: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7" }}
+                              >
+                                <FileText size={14} /> ดูผลคะแนน
+                              </Link>
+                            )}
+                          </>
                         ) : (
                           <Link
                             href={`/courses/${enroll.courseId}/learn`}
