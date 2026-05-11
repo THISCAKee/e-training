@@ -32,7 +32,10 @@ export default function UserList() {
   const [activeRole, setActiveRole] = useState("ALL");
   const [facultyList, setFacultyList] = useState<string[]>([]);
   // { userId, value } for inline editing
-  const [editingFaculty, setEditingFaculty] = useState<{ userId: number; value: string } | null>(null);
+  const [editingFaculty, setEditingFaculty] = useState<{
+    userId: number;
+    value: string;
+  } | null>(null);
   const facultyInputRef = useRef<HTMLInputElement>(null);
 
   // Debounce search input to allow smooth free-text typing
@@ -104,7 +107,9 @@ export default function UserList() {
         body: JSON.stringify({ faculty: newFaculty }),
       });
       if (!response.ok) throw new Error("Failed to update faculty");
-      setUsers(users.map((u) => (u.id === userId ? { ...u, faculty: newFaculty } : u)));
+      setUsers(
+        users.map((u) => (u.id === userId ? { ...u, faculty: newFaculty } : u)),
+      );
     } catch (err) {
       alert(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -261,47 +266,68 @@ export default function UserList() {
                           autoFocus
                           value={editingFaculty.value}
                           onChange={(e) =>
-                            setEditingFaculty({ userId: user.id, value: e.target.value })
+                            setEditingFaculty({
+                              userId: user.id,
+                              value: e.target.value,
+                            })
                           }
                           onBlur={() =>
                             handleFacultyChange(user.id, editingFaculty.value)
                           }
                           onKeyDown={(e) => {
-                            if (e.key === "Enter") handleFacultyChange(user.id, editingFaculty.value);
+                            if (e.key === "Enter")
+                              handleFacultyChange(
+                                user.id,
+                                editingFaculty.value,
+                              );
                             if (e.key === "Escape") setEditingFaculty(null);
                           }}
                           className="w-full border border-blue-400 rounded px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-blue-300"
                         />
                         <datalist id="faculty-list-options">
-                          {facultyList.map((f, i) => <option key={i} value={f} />)}
+                          {facultyList.map((f, i) => (
+                            <option key={i} value={f} />
+                          ))}
                         </datalist>
                       </div>
                     ) : (
                       <button
                         className="flex items-center gap-1.5 text-left group/cell w-full"
                         onClick={() =>
-                          setEditingFaculty({ userId: user.id, value: user.faculty || "" })
+                          setEditingFaculty({
+                            userId: user.id,
+                            value: user.faculty || "",
+                          })
                         }
                         title="คลิกเพื่อแก้ไขคณะ"
                       >
-                        <span className={user.faculty ? "" : "text-gray-400 italic"}>
+                        <span
+                          className={user.faculty ? "" : "text-gray-400 italic"}
+                        >
                           {user.faculty || "ไม่ระบุ"}
                         </span>
-                        <Pencil size={12} className="text-gray-300 group-hover/cell:text-blue-400 flex-shrink-0" />
+                        <Pencil
+                          size={12}
+                          className="text-gray-300 group-hover/cell:text-blue-400 flex-shrink-0"
+                        />
                       </button>
                     )}
                   </td>
                   <td className="py-3 px-4 text-center">
                     <span
                       className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
-                        user.role === "ADMIN" 
-                          ? "bg-purple-100 text-purple-700" 
+                        user.role === "ADMIN"
+                          ? "bg-purple-100 text-purple-700"
                           : user.role === "ORG_ADMIN"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      {user.role === "ADMIN" ? "ผู้ดูแลระบบ" : user.role === "ORG_ADMIN" ? "ผู้ดูแลหน่วยงาน" : "ผู้เรียน"}
+                      {user.role === "ADMIN"
+                        ? "ผู้ดูแลระบบ"
+                        : user.role === "ORG_ADMIN"
+                          ? "ผู้ดูแลหน่วยงาน"
+                          : "ผู้เรียน"}
                     </span>
                   </td>
                   {/* --- vvvv (เพิ่ม) นำคอลัมน์ Actions กลับมา vvvv --- */}
@@ -317,7 +343,9 @@ export default function UserList() {
                           className="text-xs p-1.5 border border-gray-300 rounded-md outline-none focus:border-blue-500 text-gray-700 bg-white cursor-pointer"
                         >
                           <option value="USER">ผู้เรียน (USER)</option>
-                          <option value="ORG_ADMIN">ผู้ดูแลหน่วยงาน (ORG_ADMIN)</option>
+                          <option value="ORG_ADMIN">
+                            ผู้ดูแลหน่วยงาน (ORG_ADMIN)
+                          </option>
                           <option value="ADMIN">ผู้ดูแลระบบ (ADMIN)</option>
                         </select>
                         <Link
