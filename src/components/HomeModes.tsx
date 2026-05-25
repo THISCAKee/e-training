@@ -73,26 +73,6 @@ export default function HomeModes() {
               AI-Training
             </button>
             <button
-              onClick={() => setActiveMode("learning")}
-              className={`flex items-center px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 ${
-                activeMode === "learning"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20 transform scale-100"
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50 scale-95"
-              }`}
-            >
-              <BookOpen className="mr-2" size={22} />
-              AI-Learning
-            </button>
-            <a
-              href="http://202.28.34.38/elearning/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 text-gray-500 hover:text-gray-900 hover:bg-gray-50 scale-95"
-            >
-              <MonitorPlay className="mr-2" size={22} />
-              E-Learning
-            </a>
-            <button
               onClick={() => setActiveMode("podcast")}
               className={`flex items-center px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 ${
                 activeMode === "podcast"
@@ -103,6 +83,15 @@ export default function HomeModes() {
               <Podcast className="mr-2" size={22} />
               Podcast
             </button>
+            <a
+              href="http://202.28.34.38/elearning/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center px-8 py-3.5 rounded-full text-lg font-medium transition-all duration-300 text-gray-500 hover:text-gray-900 hover:bg-gray-50 scale-95"
+            >
+              <MonitorPlay className="mr-2" size={22} />
+              E-Learning
+            </a>
           </div>
         </div>
 
