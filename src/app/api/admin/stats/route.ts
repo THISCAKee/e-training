@@ -93,6 +93,24 @@ export async function GET() {
       count: facultyMap[name],
     })).sort((a, b) => b.count - a.count);
 
+    const courseEnrollmentStats = await prisma.course.findMany({
+      where: courseWhere,
+      select: {
+        id: true,
+        title: true,
+        _count: {
+          select: {
+            enrollments: true,
+          },
+        },
+      },
+      orderBy: {
+        enrollments: {
+          _count: "desc",
+        },
+      },
+    });
+
     return NextResponse.json(
       {
         userCount,
@@ -101,6 +119,7 @@ export async function GET() {
         enrollmentCount,
         categoryStats,
         facultyStats,
+        courseEnrollmentStats,
       },
       { status: 200 },
     );

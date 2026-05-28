@@ -59,6 +59,12 @@ export default function Header() {
           >
             หลักสูตรทั้งหมด
           </Link>
+          <Link
+            href="/stats"
+            className="text-gray-600 text-[18px] font-normal hover:text-blue-600 px-4"
+          >
+            ข้อมูลและสถิติ
+          </Link>
           {!session && status !== "loading" && (
             <Link
               href="/register"

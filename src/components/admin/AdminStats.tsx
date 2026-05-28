@@ -9,12 +9,21 @@ type CategoryStat = {
   count: number;
 };
 
+type CourseEnrollmentStat = {
+  id: number;
+  title: string;
+  _count: {
+    enrollments: number;
+  };
+};
+
 type Stats = {
   userCount: number;
   courseCount: number;
   enrollmentCount: number;
   categoryStats: CategoryStat[];
   facultyStats: CategoryStat[];
+  courseEnrollmentStats: CourseEnrollmentStat[];
 };
 
 const StatCard = ({
@@ -395,6 +404,52 @@ export default function AdminStats() {
           </div>
         </div>
       </div>
+
+      {/* Course Enrollment Stats */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <BookOpen className="text-blue-600" size={22} /> สถิติจำนวนผู้เรียนรายหลักสูตร (Learners per Course)
+            </h2>
+            <p className="text-sm text-gray-500">
+              จำนวนผู้เรียนที่ลงทะเบียนเรียนสะสมในแต่ละคอร์สเรียนทั้งหมด
+            </p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-100">
+            <thead>
+              <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 rounded-l-xl">หลักสูตร (Course)</th>
+                <th className="px-6 py-4 rounded-r-xl text-right">จำนวนผู้เรียน (Total Learners)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {stats.courseEnrollmentStats && stats.courseEnrollmentStats.length > 0 ? (
+                stats.courseEnrollmentStats.map((course) => (
+                  <tr key={course.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-800">
+                      {course.title}
+                    </td>
+                    <td className="px-6 py-4 text-right text-sm font-black text-blue-600">
+                      {course._count.enrollments} คน
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={2} className="px-6 py-10 text-center text-sm text-gray-400">
+                    ไม่มีข้อมูลคอร์สเรียน
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   );
 }

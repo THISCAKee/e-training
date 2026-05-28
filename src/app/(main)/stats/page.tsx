@@ -1,0 +1,460 @@
+// src/app/(main)/stats/page.tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  Users,
+  BookOpen,
+  BarChart3,
+  TrendingUp,
+  Activity,
+  Award,
+} from "lucide-react";
+
+type CategoryStat = {
+  name: string;
+  count: number;
+};
+
+type CourseEnrollmentStat = {
+  id: number;
+  title: string;
+  _count: {
+    enrollments: number;
+  };
+};
+
+type Stats = {
+  userCount: number;
+  courseCount: number;
+  enrollmentCount: number;
+  categoryStats: CategoryStat[];
+  facultyStats: CategoryStat[];
+  courseEnrollmentStats: CourseEnrollmentStat[];
+};
+
+const StatCard = ({
+  title,
+  value,
+  icon,
+  gradient,
+}: {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  gradient?: string;
+}) => (
+  <div className="relative overflow-hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between group hover:shadow-md transition-all duration-300">
+    <div
+      className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradient} opacity-10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110`}
+    ></div>
+    <div className="flex justify-between items-start mb-4">
+      <div
+        className={`p-3 rounded-xl bg-gradient-to-br ${gradient} text-white shadow-sm`}
+      >
+        {icon}
+      </div>
+    </div>
+    <div>
+      <h3 className="text-3xl font-black text-gray-800 tracking-tight mb-1">
+        {value}
+      </h3>
+      <p className="text-sm font-semibold text-gray-500">{title}</p>
+    </div>
+  </div>
+);
+
+export default function PublicStatsPage() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/public/stats");
+        if (!res.ok) throw new Error("Failed to fetch stats");
+        const data = await res.json();
+        setStats(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50/50 py-20 space-y-4">
+        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="text-gray-500 font-medium">กำลังโหลดข้อมูลสถิติ...</p>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50/50 py-20">
+        <div className="p-4 bg-red-50 text-red-600 rounded-full mb-4">
+          <Activity size={32} />
+        </div>
+        <p className="text-gray-800 font-medium text-lg">
+          ไม่สามารถโหลดข้อมูลสถิติได้
+        </p>
+        <p className="text-gray-500 text-sm mt-1">
+          กรุณาลองใหม่อีกครั้งในภายหลัง
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        background:
+          "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0fdf4 100%)",
+        minHeight: "100vh",
+      }}
+      className="py-12"
+    >
+      <div className="container mx-auto px-4 max-w-7xl">
+        {/* Header section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
+            ข้อมูลการใช้งานของแพลตฟอร์ม บทเรียนที่ได้รับความนิยม
+            และสถิติผู้เรียน
+          </h1>
+        </div>
+
+        {/* Top Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <StatCard
+            title="จำนวนผู้เรียน (Total Learners)"
+            value={stats.userCount}
+            icon={<Users size={24} />}
+            gradient="from-blue-500 to-indigo-600"
+          />
+          <StatCard
+            title="หลักสูตรทั้งหมด (Total Courses)"
+            value={stats.courseCount}
+            icon={<BookOpen size={24} />}
+            gradient="from-emerald-400 to-teal-500"
+          />
+          <StatCard
+            title="การลงทะเบียนเรียนทั้งหมด (Total Enrollments)"
+            value={stats.enrollmentCount}
+            icon={<BarChart3 size={24} />}
+            gradient="from-amber-400 to-orange-500"
+          />
+        </div>
+
+        {/* Charts and distributions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Categories Chart */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-800">
+                การเข้าเรียนแยกตามหมวดหมู่ (Course Enrollments by Category)
+              </h2>
+              <p className="text-sm text-gray-500">
+                สัดส่วนการลงเรียนสะสมในแต่ละหมวดวิชา
+              </p>
+            </div>
+
+            <div className="w-full space-y-6">
+              {stats.categoryStats && stats.categoryStats.length > 0 ? (
+                stats.categoryStats.map((cat, idx) => {
+                  const maxCount = Math.max(
+                    ...stats.categoryStats.map((c) => c.count),
+                  );
+                  const percentage =
+                    maxCount === 0 ? 0 : (cat.count / maxCount) * 100;
+                  const colors = [
+                    "bg-blue-500",
+                    "bg-emerald-500",
+                    "bg-purple-500",
+                    "bg-amber-500",
+                    "bg-rose-500",
+                    "bg-teal-500",
+                  ];
+                  const barColor = colors[idx % colors.length];
+
+                  return (
+                    <div key={idx} className="flex items-center">
+                      <div
+                        className="w-1/3 text-sm font-semibold text-gray-700 truncate pr-4"
+                        title={cat.name}
+                      >
+                        {cat.name}
+                      </div>
+                      <div className="w-2/3 flex items-center">
+                        <div className="w-full bg-gray-100 rounded-full h-4 relative overflow-hidden flex-1">
+                          <div
+                            className={`${barColor} h-4 rounded-full transition-all duration-1000 ease-out`}
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="ml-4 text-sm font-bold text-gray-800 w-12 text-right">
+                          {cat.count} ครั้ง
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="w-full h-[300px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
+                  <BarChart3 size={48} className="mb-4 text-blue-300" />
+                  <p className="font-medium text-gray-600">
+                    ไม่มีข้อมูลหมวดหมู่
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Faculty Chart */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-800">
+                สัดส่วนผู้เรียนแยกตามคณะ (Learners by Faculty)
+              </h2>
+              <p className="text-sm text-gray-500">
+                สถิติคณะ/สังกัดที่มีผู้สมัครเรียนสูงสุด
+              </p>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {stats.facultyStats && stats.facultyStats.length > 0 ? (
+                <div className="w-full space-y-6">
+                  {/* SVG Donut Chart */}
+                  <div className="flex justify-center mb-4 relative">
+                    <div className="relative w-48 h-48 group">
+                      <svg
+                        viewBox="0 0 120 120"
+                        className="w-full h-full transform -rotate-90 drop-shadow-sm"
+                      >
+                        {(() => {
+                          const totalStudents = stats.facultyStats.reduce(
+                            (sum, f) => sum + f.count,
+                            0,
+                          );
+                          const radius = 40;
+                          const circumference = 2 * Math.PI * radius;
+                          let currentOffset = 0;
+
+                          return stats.facultyStats.map((faculty, idx) => {
+                            const percentage =
+                              totalStudents === 0
+                                ? 0
+                                : faculty.count / totalStudents;
+                            const sliceCircumference =
+                              percentage === 1
+                                ? circumference - 0.01
+                                : percentage * circumference;
+                            const strokeDasharray = `${sliceCircumference} ${circumference}`;
+                            const strokeDashoffset = -currentOffset;
+                            currentOffset += sliceCircumference;
+
+                            const colors = [
+                              "#3b82f6",
+                              "#10b981",
+                              "#8b5cf6",
+                              "#f59e0b",
+                              "#ef4444",
+                              "#14b8a6",
+                              "#6366f1",
+                              "#f43f5e",
+                              "#84cc16",
+                            ];
+                            const color = colors[idx % colors.length];
+                            const isHovered = hoveredSlice === idx;
+
+                            return (
+                              <circle
+                                key={idx}
+                                cx="60"
+                                cy="60"
+                                r={radius}
+                                fill="transparent"
+                                stroke={color}
+                                strokeWidth={isHovered ? "24" : "20"}
+                                strokeDasharray={strokeDasharray}
+                                strokeDashoffset={strokeDashoffset}
+                                className={`transition-all duration-300 ease-out cursor-pointer ${hoveredSlice !== null && hoveredSlice !== idx ? "opacity-50" : "opacity-100"}`}
+                                onMouseEnter={() => setHoveredSlice(idx)}
+                                onMouseLeave={() => setHoveredSlice(null)}
+                              />
+                            );
+                          });
+                        })()}
+                      </svg>
+
+                      {/* Donut Center */}
+                      <div className="absolute inset-0 m-auto w-20 h-20 rounded-full bg-white flex items-center justify-center pointer-events-none shadow-inner border border-gray-50">
+                        <div className="text-center">
+                          <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                            Total
+                          </p>
+                          <p className="text-lg font-black text-gray-800">
+                            {stats.facultyStats.reduce(
+                              (sum, f) => sum + f.count,
+                              0,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tooltip Overlay */}
+                      {hoveredSlice !== null && (
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-28 w-44 bg-white border border-gray-100 shadow-xl rounded-lg p-2 z-10 pointer-events-none">
+                          {(() => {
+                            const faculty = stats.facultyStats[hoveredSlice];
+                            const totalStudents = stats.facultyStats.reduce(
+                              (sum, f) => sum + f.count,
+                              0,
+                            );
+                            const percentage =
+                              totalStudents === 0
+                                ? 0
+                                : (faculty.count / totalStudents) * 100;
+                            return (
+                              <div className="text-center">
+                                <p className="text-xs font-bold text-gray-800 line-clamp-1">
+                                  {faculty.name}
+                                </p>
+                                <p className="text-xs font-semibold text-blue-600 mt-0.5">
+                                  {faculty.count} คน ({percentage.toFixed(1)}%)
+                                </p>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Legend list */}
+                  <div className="grid grid-cols-1 gap-1 max-h-[180px] overflow-y-auto pr-1">
+                    {stats.facultyStats.map((faculty, idx) => {
+                      const colors = [
+                        "#3b82f6",
+                        "#10b981",
+                        "#8b5cf6",
+                        "#f59e0b",
+                        "#ef4444",
+                        "#14b8a6",
+                        "#6366f1",
+                        "#f43f5e",
+                        "#84cc16",
+                      ];
+                      const color = colors[idx % colors.length];
+                      const totalStudents = stats.facultyStats.reduce(
+                        (sum, f) => sum + f.count,
+                        0,
+                      );
+                      const percentage =
+                        totalStudents === 0
+                          ? 0
+                          : (faculty.count / totalStudents) * 100;
+                      const isHovered = hoveredSlice === idx;
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-center justify-between p-1.5 rounded-lg cursor-pointer transition-colors ${isHovered ? "bg-gray-100 shadow-sm" : "hover:bg-gray-50"}`}
+                          onMouseEnter={() => setHoveredSlice(idx)}
+                          onMouseLeave={() => setHoveredSlice(null)}
+                        >
+                          <div className="flex items-center space-x-2 overflow-hidden">
+                            <div
+                              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: color }}
+                            ></div>
+                            <span
+                              className={`text-xs font-semibold truncate ${isHovered ? "text-gray-900" : "text-gray-600"}`}
+                              title={faculty.name}
+                            >
+                              {faculty.name}
+                            </span>
+                          </div>
+                          <div className="text-right ml-2 flex-shrink-0">
+                            <span className="text-xs font-bold text-gray-800">
+                              {faculty.count} คน
+                            </span>
+                            <span className="text-[10px] text-gray-400 block">
+                              {percentage.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full h-[300px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
+                  <p className="text-sm">ไม่มีข้อมูลคณะ</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Course Enrollment Stats */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-8">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <BookOpen className="text-blue-600" size={24} />{" "}
+              สถิติจำนวนผู้เรียนรายหลักสูตร (Learners per Course)
+            </h2>
+            <p className="text-sm text-gray-500">
+              จำนวนผู้เรียนที่ลงทะเบียนเรียนสะสมในแต่ละคอร์สเรียนทั้งหมด
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead>
+                <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 rounded-l-xl">หลักสูตร (Course)</th>
+                  <th className="px-6 py-4 rounded-r-xl text-right">
+                    จำนวนผู้เรียน (Total Learners)
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {stats.courseEnrollmentStats &&
+                stats.courseEnrollmentStats.length > 0 ? (
+                  stats.courseEnrollmentStats.map((course) => (
+                    <tr
+                      key={course.id}
+                      className="hover:bg-gray-50/50 transition-colors"
+                    >
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-800">
+                        {course.title}
+                      </td>
+                      <td className="px-6 py-4 text-right text-sm font-black text-blue-600">
+                        {course._count.enrollments} คน
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={2}
+                      className="px-6 py-10 text-center text-sm text-gray-400"
+                    >
+                      ไม่มีข้อมูลคอร์สเรียน
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
