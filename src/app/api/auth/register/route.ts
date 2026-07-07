@@ -12,6 +12,11 @@ export async function POST(request: Request) {
       return new NextResponse("กรุณากรอกข้อมูลให้ครบถ้วน", { status: 400 });
     }
 
+    const nameParts = name.trim().split(/\s+/);
+    if (nameParts.length < 2 || nameParts[0].length === 0 || nameParts[1].length === 0) {
+      return new NextResponse("กรุณากรอกทั้งชื่อและนามสกุล", { status: 400 });
+    }
+
     // 1. เช็คว่ามีข้อมูลซ้ำในระบบหรือไม่ (Email, Student ID, หรือ Name)
     const existingUser = await prisma.user.findFirst({
       where: {

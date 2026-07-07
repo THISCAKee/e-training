@@ -78,6 +78,17 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     // 1. Validation เบื้องต้น
+    const nameParts = formData.name.trim().split(/\s+/);
+    if (nameParts.length < 2 || nameParts[0].length === 0 || nameParts[1].length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณาระบุนามสกุล",
+        text: "กรุณากรอกทั้งชื่อและนามสกุล โดยเว้นวรรคระหว่างชื่อและนามสกุล",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       Swal.fire({
         icon: "warning",

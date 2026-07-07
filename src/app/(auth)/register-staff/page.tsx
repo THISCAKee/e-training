@@ -22,6 +22,20 @@ export default function RegisterStaffPage() {
     setError("");
     setLoading(true);
 
+    // Validation ชื่อ-นามสกุล
+    const nameParts = formData.name.trim().split(/\s+/);
+    if (nameParts.length < 2 || nameParts[0].length === 0 || nameParts[1].length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณาระบุนามสกุล",
+        text: "กรุณากรอกทั้งชื่อและนามสกุล โดยเว้นวรรคระหว่างชื่อและนามสกุล",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#d33",
+      });
+      setLoading(false);
+      return;
+    }
+
     // ✅ 2. แจ้งเตือนรหัสผ่านไม่ตรงกัน
     if (formData.password !== formData.confirmPassword) {
       Swal.fire({

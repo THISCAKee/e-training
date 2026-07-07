@@ -10,6 +10,11 @@ export async function POST(request: Request) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
+    const nameParts = name.trim().split(/\s+/);
+    if (nameParts.length < 2 || nameParts[0].length === 0 || nameParts[1].length === 0) {
+      return new NextResponse("กรุณากรอกทั้งชื่อและนามสกุล", { status: 400 });
+    }
+
     // 1. เช็คว่ามีอีเมล หรือ ชื่อ นี้ในระบบหรือยัง
     const existingUser = await prisma.user.findFirst({
       where: {
