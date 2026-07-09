@@ -122,7 +122,7 @@ export default function AdminStats() {
       {/* Top Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
-          title="ผู้ใช้งานทั้งหมด (Total Users)"
+          title="จำนวนผู้เรียน (Total Learners)"
           value={stats.userCount}
           icon={<Users size={24} />}
           gradient="from-blue-500 to-indigo-600"
@@ -136,7 +136,7 @@ export default function AdminStats() {
           trend="neutral"
         />
         <StatCard
-          title="การลงทะเบียนเรียน (Active Enrollments)"
+          title="การลงทะเบียนเรียนทั้งหมด (Total Enrollments)"
           value={stats.enrollmentCount}
           icon={<BarChart3 size={24} />}
           gradient="from-amber-400 to-orange-500"

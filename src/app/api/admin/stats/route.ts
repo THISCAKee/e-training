@@ -19,11 +19,13 @@ export async function GET() {
   }
 
   try {
-    const userWhere = isOrgAdmin ? { organizationId: orgId } : {};
+    const userWhere = isOrgAdmin 
+      ? { organizationId: orgId, role: "USER" as const } 
+      : { role: "USER" as const };
     const courseWhere = isOrgAdmin ? { organizationId: orgId } : {};
     const enrollmentWhere = isOrgAdmin 
-      ? { status: "IN_PROGRESS" as const, course: { organizationId: orgId } }
-      : { status: "IN_PROGRESS" as const };
+      ? { course: { organizationId: orgId } }
+      : {};
 
     const userCount = await prisma.user.count({ where: userWhere });
     const courseCount = await prisma.course.count({ where: courseWhere });
