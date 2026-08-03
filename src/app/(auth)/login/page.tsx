@@ -5,10 +5,11 @@ import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { getLoginDestination } from "@/lib/auth/login-destination";
 
 // 2. เปลี่ยนชื่อ Component เดิมจาก LoginPage เป็น "LoginForm" (เพื่อเป็นไส้ใน)
 function LoginForm() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -21,20 +22,15 @@ function LoginForm() {
   // Error จาก URL params (กรณี redirect มาจากหน้าอื่น)
   const urlError =
     searchParams.get("error") === "CredentialsSignin"
-      ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+      ? "ชื่อผู้ใช้ อีเมล หรือรหัสผ่านไม่ถูกต้อง"
       : null;
 
   // รวม error ทั้ง 2 แหล่ง
   const error = loginError || urlError;
 
-  // ถ้า login แล้วและเป็น ORG_ADMIN หรือ ADMIN ให้ redirect ไปหน้า admin
   useEffect(() => {
     if (session?.user) {
-      if (session.user.role === "ORG_ADMIN" || session.user.role === "ADMIN") {
-        router.push("/");
-      } else {
-        router.push(callbackUrl);
-      }
+      router.replace(getLoginDestination(session.user.role, callbackUrl));
     }
   }, [session, router, callbackUrl]);
 
@@ -43,32 +39,23 @@ function LoginForm() {
     setIsLoading(true);
     setLoginError(null);
 
-    // ORG_ADMIN และ ADMIN จะถูก redirect ไปหน้า /admin โดย useEffect ด้านบน
-    // เมื่อ session ถูกสร้างเรียบร้อยแล้ว
     const result = await signIn("credentials", {
-      email,
+      identifier,
       password,
-      redirect: false, // ป้องกันการ redirect อัตโนมัติ เพื่อให้เราจัดการ redirect เอง
+      redirect: false,
     });
 
     if (result?.error) {
-      setLoginError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      setLoginError("ชื่อผู้ใช้ อีเมล หรือรหัสผ่านไม่ถูกต้อง");
       setIsLoading(false);
     } else if (result?.ok) {
-      // ดึง session ใหม่หลังจาก login สำเร็จ โดยข้าม cache ของ next-auth
       const res = await fetch("/api/auth/session", { credentials: "include" });
       const newSession = await res.json();
-      
-      if (newSession?.user?.role === "ORG_ADMIN" || newSession?.user?.role === "ADMIN") {
-        window.location.href = "/";
-      } else {
-        // ป้องกันไม่ให้ redirect กลับมาหน้า login
-        if (callbackUrl.includes("/login")) {
-          window.location.href = "/";
-        } else {
-          window.location.href = callbackUrl;
-        }
-      }
+      const destination = getLoginDestination(
+        newSession?.user?.role,
+        callbackUrl,
+      );
+      window.location.assign(destination);
     }
   };
 
@@ -88,14 +75,14 @@ function LoginForm() {
         <div className="space-y-4 rounded-md">
           <div>
             <input
-              id="email-address"
-              name="email"
-              type="email"
+              id="identifier"
+              name="identifier"
+              type="text"
               required
               className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
-              placeholder="อีเมล"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="อีเมลหรือ Username"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
             />
           </div>
           <div>

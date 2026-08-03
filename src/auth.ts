@@ -4,6 +4,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
+import { authorizeCredentials } from "@/lib/auth/authorize-credentials";
 
 // ประกาศประเภทข้อมูลเพิ่มเติมสำหรับ session และ token
 declare module "next-auth" {
@@ -47,28 +48,41 @@ export const authOptions: NextAuthOptions = {
     Credentials({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        identifier: { label: "อีเมลหรือ Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null;
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+        return authorizeCredentials(credentials ?? {}, {
+          findAdminByUsername: (username) =>
+            prisma.user.findFirst({
+              where: { username, role: "ADMIN" },
+              select: {
+                id: true,
+                email: true,
+                username: true,
+                name: true,
+                password: true,
+                role: true,
+                studentId: true,
+                organizationId: true,
+              },
+            }),
+          findNonAdminByEmail: (email) =>
+            prisma.user.findFirst({
+              where: { email, role: { in: ["USER", "ORG_ADMIN"] } },
+              select: {
+                id: true,
+                email: true,
+                username: true,
+                name: true,
+                password: true,
+                role: true,
+                studentId: true,
+                organizationId: true,
+              },
+            }),
+          comparePassword: bcrypt.compare,
         });
-        if (!user || !user.password) return null;
-
-        const isPasswordMatch = await bcrypt.compare(
-          credentials.password as string,
-          user.password,
-        );
-
-        if (isPasswordMatch) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { password, ...userWithoutPassword } = user;
-          return { ...userWithoutPassword, id: String(user.id) };
-        }
-        return null;
       },
     }),
   ],
