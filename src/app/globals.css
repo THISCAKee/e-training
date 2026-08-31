@@ -27,3 +27,25 @@ body {
 button {
     @apply cursor-pointer;
 }
+
+@keyframes stats-bar-grow {
+    from {
+        transform: scaleX(0);
+        opacity: 0.35;
+    }
+    to {
+        transform: scaleX(1);
+        opacity: 1;
+    }
+}
+
+.stats-bar-fill {
+    transform-origin: left center;
+    animation: stats-bar-grow 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stats-bar-fill {
+        animation: none;
+    }
+}
