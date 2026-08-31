@@ -16,9 +16,8 @@ interface RouteContext {
 } // ใช้ RouteContext เหมือน API
 
 export default async function ResultPage(
-  contextPromise: Promise<ResultPageProps>,
+  { params }: ResultPageProps,
 ) {
-  const { params } = await contextPromise;
   const session = await auth();
 
   if (!session?.user?.id) redirect("/login");

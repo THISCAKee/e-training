@@ -34,11 +34,9 @@ async function getFilteredCourses(categoryName: string): Promise<Course[]> {
 }
 
 export default async function CategoryPage(
-  contextPromise: Promise<CategoryPageProps>,
+  { params }: CategoryPageProps,
 ) {
-  const { params } = await contextPromise;
-  const resolvedParams = await params; // await params อีกครั้ง
-  const categoryName = decodeURIComponent(resolvedParams.categoryName);
+  const categoryName = decodeURIComponent((await params).categoryName);
 
   const filteredCourses = await getFilteredCourses(categoryName);
 

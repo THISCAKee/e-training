@@ -15,11 +15,11 @@
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.2",
     "lucide-react": "^0.546.0",
-    "next": "^16.2.6",
+    "next": "^16.3.3",
     "next-auth": "^4.24.13",
     "puppeteer": "^24.26.1",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "react-icons": "^5.5.0",
     "sweetalert2": "^11.26.18",
     "swiper": "^12.0.3"
@@ -29,18 +29,18 @@
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
     "baseline-browser-mapping": "^2.10.29",
     "eslint": "^9",
-    "eslint-config-next": "^16.2.6",
+    "eslint-config-next": "^16.3.3",
     "prisma": "^6.18.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
   },
   "overrides": {
-    "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2"
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5"
   }
 }
