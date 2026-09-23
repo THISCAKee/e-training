@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { getCertificateStats } from "@/lib/stats/presentation";
 
 export async function GET() {
   const session = await auth();
@@ -55,6 +56,8 @@ export async function GET() {
         },
       },
     });
+
+    const certificateStats = getCertificateStats(enrollments);
 
     // คำนวณสถิติแยกตามหมวดหมู่
     const categoryMap: Record<string, number> = {};
@@ -121,6 +124,7 @@ export async function GET() {
         enrollmentCount,
         categoryStats,
         facultyStats,
+        certificateStats,
         courseEnrollmentStats,
       },
       { status: 200 },

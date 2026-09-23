@@ -20,39 +20,10 @@ import UserList from "@/components/admin/UserList";
 import CourseList from "@/components/admin/CourseList";
 import AdminStats from "@/components/admin/AdminStats";
 import OrganizationList from "@/components/admin/OrganizationList";
+import { AdminBrand, AdminProfile } from "@/components/admin/AdminChrome";
 import { getAdminNavItems, type AdminNavItem } from "@/lib/admin/presentation";
 
 type Tab = AdminNavItem["id"];
-
-function AdminBrand() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0f766e] text-sm font-black text-white">
-        eT
-      </div>
-      <div>
-        <p className="text-sm font-bold tracking-tight text-white">e-Training</p>
-        <p className="text-[0.65rem] font-medium text-slate-400">Admin console</p>
-      </div>
-    </div>
-  );
-}
-
-function AdminProfile({ displayName, isOrgAdmin }: { displayName: string; isOrgAdmin: boolean }) {
-  const initials = displayName.trim().charAt(0).toUpperCase() || "A";
-
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d8efeb] text-sm font-bold text-[#0f766e]">
-        {initials}
-      </div>
-      <div className="hidden min-w-0 sm:block">
-        <p className="max-w-32 truncate text-sm font-semibold text-slate-800">{displayName}</p>
-        <p className="text-[0.68rem] text-slate-400">{isOrgAdmin ? "Organization admin" : "System admin"}</p>
-      </div>
-    </div>
-  );
-}
 
 function NavIcon({ id }: { id: Tab }) {
   if (id === "dashboard") return <LayoutDashboard size={18} strokeWidth={1.8} />;

@@ -15,7 +15,6 @@ import {
   getBarDelay,
   getBarScale,
   getSharePercentage,
-  sortStatsByCount,
 } from "@/lib/stats/presentation";
 
 type CategoryStat = {
@@ -38,6 +37,7 @@ type Stats = {
   enrollmentCount: number;
   categoryStats: CategoryStat[];
   facultyStats: CategoryStat[];
+  certificateStats: CategoryStat[];
   courseEnrollmentStats: CourseEnrollmentStat[];
 };
 
@@ -54,6 +54,7 @@ const facultyColors = [
   "#2f9e8f",
   "#64748b",
 ];
+const certificateColors = ["#0f766e", "#f5b942"];
 
 const formatNumber = (value: number) => value.toLocaleString("th-TH");
 
@@ -194,6 +195,7 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
   const radius = 41;
   const circumference = 2 * Math.PI * radius;
   const percentages = faculties.map((faculty) => (total > 0 ? faculty.count / total : 0));
+  const activeFaculty = hoveredSlice === null ? null : faculties[hoveredSlice];
 
   return (
     <div className="grid gap-6 sm:grid-cols-[minmax(170px,0.85fr)_1fr] sm:items-center">
@@ -227,14 +229,26 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
                 className={`cursor-pointer transition-all duration-300 ${isDimmed ? "opacity-30" : "opacity-100"}`}
                 onMouseEnter={() => setHoveredSlice(index)}
                 onMouseLeave={() => setHoveredSlice(null)}
+                onFocus={() => setHoveredSlice(index)}
+                onBlur={() => setHoveredSlice(null)}
+                tabIndex={0}
+                aria-label={`${faculty.name}: ${formatNumber(faculty.count)} คน`}
               />
             );
           })}
         </svg>
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-center">
-          <div>
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-slate-400">Learners</p>
-            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{formatNumber(total)}</p>
+          <div className="max-w-[9rem]">
+            <p
+              className="truncate text-[0.65rem] font-bold uppercase tracking-[0.12em] text-slate-400"
+              title={activeFaculty?.name ?? "Learners"}
+            >
+              {activeFaculty?.name ?? "Learners"}
+            </p>
+            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+              {formatNumber(activeFaculty?.count ?? total)}
+            </p>
+            {activeFaculty && <p className="text-[0.65rem] font-semibold text-slate-400">คน</p>}
           </div>
         </div>
       </div>
@@ -248,6 +262,9 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
               className={`flex items-center justify-between gap-3 rounded-xl px-2 py-2 transition-colors ${isHovered ? "bg-slate-50" : ""}`}
               onMouseEnter={() => setHoveredSlice(index)}
               onMouseLeave={() => setHoveredSlice(null)}
+              onFocus={() => setHoveredSlice(index)}
+              onBlur={() => setHoveredSlice(null)}
+              tabIndex={0}
             >
               <div className="flex min-w-0 items-center gap-2">
                 <span
@@ -307,38 +324,37 @@ function CourseRanking({ courses }: { courses: CourseEnrollmentStat[] }) {
   );
 }
 
-function FacultyEnrollmentBars({ faculties }: { faculties: CategoryStat[] }) {
-  if (!faculties.length) return <EmptyPanel label="ยังไม่มีข้อมูลคณะหรือหน่วยงาน" />;
+function CertificateBars({ certificates }: { certificates: CategoryStat[] }) {
+  if (!certificates.some((certificate) => certificate.count > 0)) {
+    return <EmptyPanel label="ยังไม่มีข้อมูลใบประกาศ" />;
+  }
 
-  const rankedFaculties = sortStatsByCount(faculties);
-  const maximum = Math.max(...rankedFaculties.map((faculty) => faculty.count), 1);
+  const maximum = Math.max(...certificates.map((certificate) => certificate.count), 1);
 
   return (
     <div
-      className="overflow-x-auto pb-2"
-      aria-label="กราฟแท่งแนวตั้งแสดงจำนวนผู้เรียนแยกตามคณะและหน่วยงาน"
+      className="flex min-h-56 items-end justify-center gap-5 px-1 pb-1 sm:gap-8"
+      aria-label="กราฟแท่งแนวตั้งแสดงจำนวนผู้เรียนที่ได้รับและยังไม่ได้รับใบประกาศ"
     >
-      <div className="flex min-w-max items-end gap-3 px-1 pt-2">
-        {rankedFaculties.map((faculty, index) => (
-          <div key={`${faculty.name}-${index}`} className="flex w-[4.75rem] flex-col items-center gap-2 sm:w-20">
-            <span className="text-xs font-bold text-slate-700">{formatNumber(faculty.count)}</span>
-            <div className="flex h-40 w-full items-end overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-1">
-              <div
-                className="stats-bar-fill stats-bar-fill--vertical w-full rounded-xl"
-                style={{
-                  height: `${getBarScale(faculty.count, maximum)}%`,
-                  backgroundColor: getBarColor(index, facultyColors),
-                  animationDelay: getBarDelay(index),
-                }}
-                aria-label={`${faculty.name}: ${formatNumber(faculty.count)} คน`}
-              />
-            </div>
-            <span className="w-full truncate text-center text-[0.68rem] font-semibold text-slate-600" title={faculty.name}>
-              {faculty.name}
-            </span>
+      {certificates.map((certificate, index) => (
+        <div key={certificate.name} className="flex w-32 flex-col items-center gap-2 sm:w-40">
+          <span className="text-xs font-bold text-slate-700">{formatNumber(certificate.count)} คน</span>
+          <div className="flex h-40 w-full items-end overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-1">
+            <div
+              className="stats-bar-fill stats-bar-fill--vertical w-full rounded-xl"
+              style={{
+                height: `${getBarScale(certificate.count, maximum)}%`,
+                backgroundColor: getBarColor(index, certificateColors),
+                animationDelay: getBarDelay(index),
+              }}
+              aria-label={`${certificate.name}: ${formatNumber(certificate.count)} คน`}
+            />
           </div>
-        ))}
-      </div>
+          <span className="w-full text-center text-sm font-semibold text-slate-600">
+            {certificate.name}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -416,11 +432,11 @@ export default function AdminStats() {
 
         <section className={`${panelClass} p-5 sm:p-6`}>
           <PanelHeader
-            eyebrow="Faculty reach"
-            title="จำนวนผู้เรียนแยกตามคณะ/หน่วยงาน"
-            detail="แสดงข้อมูลผู้เรียนของทุกคณะและหน่วยงาน"
+            eyebrow="Certificate status"
+            title="สถานะใบประกาศของผู้เรียน"
+            detail="นับผู้เรียนไม่ซ้ำคนจากหลักสูตรที่ลงทะเบียน"
           />
-          <FacultyEnrollmentBars faculties={stats.facultyStats} />
+          <CertificateBars certificates={stats.certificateStats} />
         </section>
       </div>
 

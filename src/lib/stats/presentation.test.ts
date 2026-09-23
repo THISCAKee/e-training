@@ -3,6 +3,7 @@ import {
   getBarDelay,
   getBarColor,
   getBarScale,
+  getCertificateStats,
   getSharePercentage,
   sortStatsByCount,
 } from "./presentation";
@@ -31,6 +32,20 @@ describe("public stats presentation helpers", () => {
     expect(getBarColor(0, colors)).toBe("#0f766e");
     expect(getBarColor(2, colors)).toBe("#f5b942");
     expect(getBarColor(3, colors)).toBe("#0f766e");
+  });
+
+  it("counts each learner once across certificate statuses", () => {
+    const enrollments = [
+      { userId: 1, status: "COMPLETED" },
+      { userId: 1, status: "IN_PROGRESS" },
+      { userId: 2, status: "IN_PROGRESS" },
+      { userId: 3, status: "COMPLETED" },
+    ];
+
+    expect(getCertificateStats(enrollments)).toEqual([
+      { name: "ได้รับใบประกาศ", count: 2 },
+      { name: "ยังไม่ได้รับใบประกาศ", count: 1 },
+    ]);
   });
 
   it("sorts every faculty or organization by learner count without mutating input", () => {
