@@ -44,6 +44,22 @@ button {
     animation: stats-bar-grow 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+@keyframes stats-bar-grow-vertical {
+    from {
+        transform: scaleY(0);
+        opacity: 0.35;
+    }
+    to {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+.stats-bar-fill--vertical {
+    transform-origin: center bottom;
+    animation: stats-bar-grow-vertical 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .stats-bar-fill {
         animation: none;

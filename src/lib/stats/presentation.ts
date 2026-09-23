@@ -11,3 +11,14 @@ export function getSharePercentage(value: number, total: number): string {
 export function getBarDelay(index: number): string {
   return `${Math.max(0, index) * 90}ms`;
 }
+
+export function getBarColor(index: number, colors: readonly string[]): string {
+  if (!colors.length) return "";
+  return colors[Math.max(0, index) % colors.length] ?? colors[0];
+}
+
+export function sortStatsByCount<T extends { name: string; count: number }>(
+  stats: readonly T[],
+): T[] {
+  return [...stats].sort((left, right) => right.count - left.count);
+}

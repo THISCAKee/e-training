@@ -10,7 +10,13 @@ import {
   Layers3,
   UsersRound,
 } from "lucide-react";
-import { getBarScale, getSharePercentage } from "@/lib/stats/presentation";
+import {
+  getBarColor,
+  getBarDelay,
+  getBarScale,
+  getSharePercentage,
+  sortStatsByCount,
+} from "@/lib/stats/presentation";
 
 type CategoryStat = {
   name: string;
@@ -187,7 +193,7 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
   const total = faculties.reduce((sum, faculty) => sum + faculty.count, 0);
   const radius = 41;
   const circumference = 2 * Math.PI * radius;
-  let currentOffset = 0;
+  const percentages = faculties.map((faculty) => (total > 0 ? faculty.count / total : 0));
 
   return (
     <div className="grid gap-6 sm:grid-cols-[minmax(170px,0.85fr)_1fr] sm:items-center">
@@ -200,10 +206,11 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
         >
           <circle cx="60" cy="60" r={radius} fill="none" stroke="#edf1f2" strokeWidth="15" />
           {faculties.map((faculty, index) => {
-            const percentage = total > 0 ? faculty.count / total : 0;
+            const percentage = percentages[index];
             const segment = Math.max(percentage * circumference - 1.5, 0);
-            const offset = currentOffset;
-            currentOffset += percentage * circumference;
+            const offset = percentages
+              .slice(0, index)
+              .reduce((sum, previousPercentage) => sum + previousPercentage * circumference, 0);
             const isDimmed = hoveredSlice !== null && hoveredSlice !== index;
 
             return (
@@ -213,7 +220,7 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
                 cy="60"
                 r={radius}
                 fill="none"
-                stroke={facultyColors[index % facultyColors.length]}
+                stroke={getBarColor(index, facultyColors)}
                 strokeWidth={hoveredSlice === index ? "18" : "15"}
                 strokeDasharray={`${segment} ${circumference}`}
                 strokeDashoffset={-offset}
@@ -245,7 +252,7 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
               <div className="flex min-w-0 items-center gap-2">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: facultyColors[index % facultyColors.length] }}
+                  style={{ backgroundColor: getBarColor(index, facultyColors) }}
                 />
                 <span className="truncate text-xs font-semibold text-slate-600" title={faculty.name}>
                   {faculty.name}
@@ -300,51 +307,37 @@ function CourseRanking({ courses }: { courses: CourseEnrollmentStat[] }) {
   );
 }
 
-function LearningPulse({ courses }: { courses: CourseEnrollmentStat[] }) {
-  if (!courses.length) return <EmptyPanel label="ยังไม่มี learning pulse" />;
+function FacultyEnrollmentBars({ faculties }: { faculties: CategoryStat[] }) {
+  if (!faculties.length) return <EmptyPanel label="ยังไม่มีข้อมูลคณะหรือหน่วยงาน" />;
 
-  const values = courses.slice(0, 7).map((course) => course._count.enrollments);
-  const maximum = Math.max(...values, 1);
-  const points = values
-    .map((value, index) => {
-      const x = values.length === 1 ? 50 : (index / (values.length - 1)) * 100;
-      const y = 88 - (value / maximum) * 68;
-      return `${x},${y}`;
-    })
-    .join(" ");
+  const rankedFaculties = sortStatsByCount(faculties);
+  const maximum = Math.max(...rankedFaculties.map((faculty) => faculty.count), 1);
 
   return (
-    <div>
-      <div className="relative h-44 overflow-hidden rounded-2xl bg-[#f0f8f6] px-3 py-4">
-        <div className="absolute inset-x-4 top-1/4 border-t border-dashed border-[#b7d8d1]" />
-        <div className="absolute inset-x-4 top-1/2 border-t border-dashed border-[#b7d8d1]" />
-        <div className="absolute inset-x-4 top-3/4 border-t border-dashed border-[#b7d8d1]" />
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="relative h-full w-full"
-          role="img"
-          aria-label="แนวโน้มการลงทะเบียนหลักสูตรยอดนิยม"
-        >
-          <polyline
-            points={points}
-            fill="none"
-            stroke="#0f766e"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-          {values.map((value, index) => {
-            const x = values.length === 1 ? 50 : (index / (values.length - 1)) * 100;
-            const y = 88 - (value / maximum) * 68;
-            return <circle key={`${value}-${index}`} cx={x} cy={y} r="2.6" fill="#f5b942" stroke="white" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />;
-          })}
-        </svg>
-      </div>
-      <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
-        <span>หลักสูตรที่มีผู้เรียนสูงสุด</span>
-        <span className="font-semibold text-[#0f766e]">{formatNumber(Math.max(...values))} learners</span>
+    <div
+      className="overflow-x-auto pb-2"
+      aria-label="กราฟแท่งแนวตั้งแสดงจำนวนผู้เรียนแยกตามคณะและหน่วยงาน"
+    >
+      <div className="flex min-w-max items-end gap-3 px-1 pt-2">
+        {rankedFaculties.map((faculty, index) => (
+          <div key={`${faculty.name}-${index}`} className="flex w-[4.75rem] flex-col items-center gap-2 sm:w-20">
+            <span className="text-xs font-bold text-slate-700">{formatNumber(faculty.count)}</span>
+            <div className="flex h-40 w-full items-end overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-1">
+              <div
+                className="stats-bar-fill stats-bar-fill--vertical w-full rounded-xl"
+                style={{
+                  height: `${getBarScale(faculty.count, maximum)}%`,
+                  backgroundColor: getBarColor(index, facultyColors),
+                  animationDelay: getBarDelay(index),
+                }}
+                aria-label={`${faculty.name}: ${formatNumber(faculty.count)} คน`}
+              />
+            </div>
+            <span className="w-full truncate text-center text-[0.68rem] font-semibold text-slate-600" title={faculty.name}>
+              {faculty.name}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -422,8 +415,12 @@ export default function AdminStats() {
         </section>
 
         <section className={`${panelClass} p-5 sm:p-6`}>
-          <PanelHeader eyebrow="Learning pulse" title="จังหวะการเรียนรู้" detail="ภาพรวม reach ของหลักสูตรยอดนิยม" />
-          <LearningPulse courses={stats.courseEnrollmentStats} />
+          <PanelHeader
+            eyebrow="Faculty reach"
+            title="จำนวนผู้เรียนแยกตามคณะ/หน่วยงาน"
+            detail="แสดงข้อมูลผู้เรียนของทุกคณะและหน่วยงาน"
+          />
+          <FacultyEnrollmentBars faculties={stats.facultyStats} />
         </section>
       </div>
 

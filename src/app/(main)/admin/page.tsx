@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -24,6 +23,36 @@ import OrganizationList from "@/components/admin/OrganizationList";
 import { getAdminNavItems, type AdminNavItem } from "@/lib/admin/presentation";
 
 type Tab = AdminNavItem["id"];
+
+function AdminBrand() {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0f766e] text-sm font-black text-white">
+        eT
+      </div>
+      <div>
+        <p className="text-sm font-bold tracking-tight text-white">e-Training</p>
+        <p className="text-[0.65rem] font-medium text-slate-400">Admin console</p>
+      </div>
+    </div>
+  );
+}
+
+function AdminProfile({ displayName, isOrgAdmin }: { displayName: string; isOrgAdmin: boolean }) {
+  const initials = displayName.trim().charAt(0).toUpperCase() || "A";
+
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#d8efeb] text-sm font-bold text-[#0f766e]">
+        {initials}
+      </div>
+      <div className="hidden min-w-0 sm:block">
+        <p className="max-w-32 truncate text-sm font-semibold text-slate-800">{displayName}</p>
+        <p className="text-[0.68rem] text-slate-400">{isOrgAdmin ? "Organization admin" : "System admin"}</p>
+      </div>
+    </div>
+  );
+}
 
 function NavIcon({ id }: { id: Tab }) {
   if (id === "dashboard") return <LayoutDashboard size={18} strokeWidth={1.8} />;
@@ -115,15 +144,7 @@ export default function AdminDashboardPage() {
           className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] shrink-0 flex-col border-r border-slate-800/80 bg-[#18232f] px-4 py-5 text-slate-300 shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shadow-none ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
-                <Image src="/logo_etraining.png" alt="MSU e-Training" width={40} height={40} className="h-full w-full object-cover" />
-              </div>
-              <div>
-                <p className="text-[0.67rem] font-bold uppercase tracking-[0.2em] text-[#8ad1c5]">MSU</p>
-                <p className="text-sm font-semibold text-white">e-Training</p>
-              </div>
-            </div>
+            <AdminBrand />
             <button
               type="button"
               aria-label="ปิดเมนู"
@@ -196,20 +217,16 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="flex items-center gap-2 sm:gap-3">
-                <button type="button" aria-label="การแจ้งเตือน" className="relative rounded-xl p-2 text-slate-500 hover:bg-white hover:text-[#0f766e]">
+                <button
+                  type="button"
+                  aria-label="การแจ้งเตือน"
+                  className="relative rounded-xl p-2 text-slate-500 hover:bg-white hover:text-[#0f766e]"
+                >
                   <Bell size={19} />
                   <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#ef6a5b]" />
                 </button>
                 <div className="hidden h-7 w-px bg-slate-200 sm:block" />
-                <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0f766e] text-xs font-bold text-white shadow-sm">
-                    displayName.slice(0, 1).toUpperCase()
-                  </div>
-                  <div className="hidden text-left sm:block">
-                    <p className="max-w-32 truncate text-xs font-bold text-slate-800">{displayName}</p>
-                    <p className="text-[0.68rem] text-slate-400">{isOrgAdmin ? "Organization Admin" : "Administrator"}</p>
-                  </div>
-                </div>
+                <AdminProfile displayName={displayName} isOrgAdmin={isOrgAdmin} />
               </div>
             </div>
           </header>

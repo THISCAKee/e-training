@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import prismaClientPackage from "@prisma/client/package.json";
 import { describe, expect, it } from "vitest";
 
 function readGeneratedClientVersion() {
@@ -12,7 +13,7 @@ function readGeneratedClientVersion() {
 
 describe("Prisma generated client", () => {
   it("matches the installed @prisma/client package", () => {
-    const installedClientVersion = require("@prisma/client/package.json").version;
+    const installedClientVersion = prismaClientPackage.version;
 
     expect(readGeneratedClientVersion()).toBe(installedClientVersion);
   });
