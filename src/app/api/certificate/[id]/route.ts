@@ -374,7 +374,7 @@ export async function GET(
     await page.setDefaultNavigationTimeout(60000);
 
     // 6. โหลด HTML
-    await page.setContent(certificateHtml, { waitUntil: "networkidle0" });
+    await page.setContent(certificateHtml, { waitUntil: "load" });
 
     // 7. รอให้รูปภาพโหลดเสร็จ
     await page.waitForSelector("img", { timeout: 10000 });

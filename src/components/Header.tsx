@@ -5,10 +5,12 @@ import Link from "next/link";
 // import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { CircleUserRound } from "lucide-react";
 import Image from "next/image";
 export default function Header() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +29,8 @@ export default function Header() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  if (pathname.startsWith("/admin")) return null;
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">

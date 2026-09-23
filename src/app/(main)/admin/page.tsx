@@ -1,72 +1,86 @@
-// src/app/admin/page.tsx
-"use client"; // 1. เปลี่ยนเป็น Client Component เพื่อจัดการ State ของ Tab
+"use client";
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react"; // 2. Import useSession
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import {
+  Bell,
+  BookOpen,
+  Building2,
+  ChevronRight,
+  LayoutDashboard,
+  Menu,
+  Search,
+  Settings2,
+  ShieldAlert,
+  UsersRound,
+  X,
+} from "lucide-react";
 import UserList from "@/components/admin/UserList";
 import CourseList from "@/components/admin/CourseList";
 import AdminStats from "@/components/admin/AdminStats";
-import HeroSliderManagement from "@/components/admin/HeroSliderManagement";
 import OrganizationList from "@/components/admin/OrganizationList";
-import {
-  LayoutDashboard,
-  Users,
-  BookOpen,
-  ChevronRight,
-  Settings,
-  Building2,
-  ShieldAlert,
-} from "lucide-react";
+import { getAdminNavItems, type AdminNavItem } from "@/lib/admin/presentation";
 
-type Tab = "dashboard" | "users" | "courses" | "slides" | "organizations";
+type Tab = AdminNavItem["id"];
+
+function NavIcon({ id }: { id: Tab }) {
+  if (id === "dashboard") return <LayoutDashboard size={18} strokeWidth={1.8} />;
+  if (id === "courses") return <BookOpen size={18} strokeWidth={1.8} />;
+  if (id === "users") return <UsersRound size={18} strokeWidth={1.8} />;
+  return <Building2 size={18} strokeWidth={1.8} />;
+}
+
+function LoadingState() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f7f8] px-6">
+      <div className="text-center">
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-[#0f766e]" />
+        <p className="mt-4 text-sm font-medium text-slate-500">กำลังตรวจสอบสิทธิ์...</p>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDashboardPage() {
-  const { data: session, status } = useSession(); // 3. ใช้ useSession
+  const { data: session, status } = useSession();
   const router = useRouter();
   const userRole = session?.user?.role;
   const isOrgAdmin = userRole === "ORG_ADMIN";
   const isAdmin = userRole === "ADMIN";
+  const navItems = getAdminNavItems(isOrgAdmin ? "ORG_ADMIN" : "ADMIN");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // ORG_ADMIN เริ่มที่แท็บ courses เลย, ADMIN เริ่มที่ dashboard
-  const [activeTab, setActiveTab] = useState<Tab>(isOrgAdmin ? "courses" : "dashboard");
-  const currentTab = isOrgAdmin && activeTab === "dashboard" ? "courses" : activeTab;
-
-  // ตรวจสอบสิทธิ์: ถ้าไม่ใช่ ADMIN หรือ ORG_ADMIN ให้ redirect กลับหน้าหลัก
   useEffect(() => {
-    if (status === "loading") return; // รอให้ session โหลดเสร็จ
-    if (!session?.user || (userRole !== "ADMIN" && userRole !== "ORG_ADMIN")) {
+    if (status === "loading") return;
+    if (!session?.user || (!isAdmin && !isOrgAdmin)) {
       router.push("/");
     }
-  }, [session, status, userRole, router]);
+  }, [isAdmin, isOrgAdmin, router, session, status]);
 
-  // แสดง Loading ขณะตรวจสอบ session
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center space-y-3">
-          <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-500 font-medium">กำลังตรวจสอบสิทธิ์...</p>
-        </div>
-      </div>
-    );
-  }
+  if (status === "loading") return <LoadingState />;
 
-  // ถ้าไม่มีสิทธิ์ แสดงหน้า Access Denied
   if (!isAdmin && !isOrgAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center space-y-3 text-center">
-          <ShieldAlert className="w-16 h-16 text-red-400" />
-          <h2 className="text-xl font-bold text-gray-800">ไม่มีสิทธิ์เข้าถึง</h2>
-          <p className="text-gray-500">คุณไม่มีสิทธิ์ในการเข้าถึงหน้านี้</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f7f8] px-6">
+        <div className="text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[#fff1ef] text-[#d85d4d]">
+            <ShieldAlert size={30} />
+          </div>
+          <h2 className="mt-5 text-xl font-bold text-slate-900">ไม่มีสิทธิ์เข้าถึง</h2>
+          <p className="mt-2 text-sm text-slate-500">คุณไม่มีสิทธิ์ในการเข้าถึงหน้านี้</p>
         </div>
       </div>
     );
   }
 
+  const currentNav = navItems.find((item) => item.id === activeTab) ?? navItems[0];
+  const displayName = session?.user?.name || "ผู้ดูแลระบบ";
+
   const renderTabContent = () => {
-    switch (currentTab) {
+    switch (activeTab) {
       case "dashboard":
         return <AdminStats />;
       case "users":
@@ -75,142 +89,154 @@ export default function AdminDashboardPage() {
         return <CourseList />;
       case "organizations":
         return isAdmin ? <OrganizationList /> : null;
-      case "slides":
-        return isAdmin ? <HeroSliderManagement /> : null;
       default:
         return null;
     }
   };
 
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
+    setIsSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-12">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 pb-24 pt-12 px-4 sm:px-6 lg:px-8 shadow-inner">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex flex-col md:flex-row md:items-center justify-between">
-            <div className="text-white mb-4 md:mb-0">
-              <div className="flex items-center text-blue-200 text-sm font-medium mb-2 space-x-2">
-                <span>ระบบจัดการ</span>
-                <ChevronRight size={14} />
-                <span className="text-white">แดชบอร์ด</span>
-                {isOrgAdmin && (
-                  <>
-                    <ChevronRight size={14} />
-                    <span className="text-yellow-300 font-semibold">หน่วยงาน</span>
-                  </>
-                )}
+    <div className="admin-dashboard min-h-screen bg-[#f5f7f8] text-slate-900">
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="ปิดเมนู"
+          className="fixed inset-0 z-40 bg-slate-950/35 backdrop-blur-[2px] lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className="flex min-h-screen">
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] shrink-0 flex-col border-r border-slate-800/80 bg-[#18232f] px-4 py-5 text-slate-300 shadow-2xl transition-transform duration-300 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shadow-none ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        >
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
+                <Image src="/logo_etraining.png" alt="MSU e-Training" width={40} height={40} className="h-full w-full object-cover" />
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
-                {isOrgAdmin ? "Organization Dashboard" : "Admin Dashboard"}
-              </h1>
-              <p className="text-blue-100/80 text-base">
-                ยินดีต้อนรับ, {session?.user?.name || "ผู้ดูแลระบบ"}
-                {isOrgAdmin && (
-                  <span className="ml-2 inline-flex items-center bg-yellow-400/20 text-yellow-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-yellow-400/30">
-                    ผู้ดูแลหน่วยงาน
-                  </span>
-                )}
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/20 hover:bg-white/20 transition cursor-pointer">
-                <Settings className="text-white" size={24} />
+              <div>
+                <p className="text-[0.67rem] font-bold uppercase tracking-[0.2em] text-[#8ad1c5]">MSU</p>
+                <p className="text-sm font-semibold text-white">e-Training</p>
               </div>
             </div>
+            <button
+              type="button"
+              aria-label="ปิดเมนู"
+              className="rounded-xl p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X size={18} />
+            </button>
           </div>
-        </div>
-      </div>
 
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-16">
-        {/* Navigation Cards / Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 mb-8 flex flex-wrap gap-2 md:flex-nowrap">
-          {/* ORG_ADMIN แสดงเฉพาะ Dashboard + Courses */}
-          <TabButton
-            icon={<LayoutDashboard size={20} />}
-            label="ภาพรวมสถิติ"
-            subLabel="Overview"
-            isActive={currentTab === "dashboard"}
-            onClick={() => setActiveTab("dashboard")}
-          />
-          {isAdmin && (
-            <TabButton
-              icon={<Users size={20} />}
-              label="จัดการผู้ใช้"
-              subLabel="Users"
-              isActive={currentTab === "users"}
-              onClick={() => setActiveTab("users")}
-            />
-          )}
-          <TabButton
-            icon={<BookOpen size={20} />}
-            label="จัดการหลักสูตร"
-            subLabel="Courses"
-            isActive={currentTab === "courses"}
-            onClick={() => setActiveTab("courses")}
-          />
-          {isAdmin && (
-            <TabButton
-              icon={<Building2 size={20} />}
-              label="จัดการหน่วยงาน"
-              subLabel="Organizations"
-              isActive={currentTab === "organizations"}
-              onClick={() => setActiveTab("organizations")}
-            />
-          )}
-          {/* <TabButton
-            icon={<Presentation size={20} />}
-            label="จัดการแบนเนอร์"
-            subLabel="Hero Slides"
-            isActive={activeTab === "slides"}
-            onClick={() => setActiveTab("slides")}
-          /> */}
-        </div>
+          <div className="mt-12">
+            <p className="px-3 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-slate-500">Workspace</p>
+            <nav className="mt-3 space-y-1.5" aria-label="เมนูผู้ดูแลระบบ">
+              {navItems.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={() => handleTabChange(item.id)}
+                    className={`group relative flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors ${isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-100"}`}
+                  >
+                    <span className={`absolute left-0 h-7 w-1 rounded-r-full bg-[#8ad1c5] transition-opacity ${isActive ? "opacity-100" : "opacity-0"}`} />
+                    <span className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${isActive ? "bg-[#0f766e] text-white" : "bg-white/[0.05] text-slate-400 group-hover:bg-white/10"}`}>
+                      <NavIcon id={item.id} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold">{item.label}</span>
+                      <span className={`mt-0.5 block truncate text-[0.68rem] ${isActive ? "text-[#bce8df]" : "text-slate-500"}`}>{item.description}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-        {/* Main Content Area */}
-        <div className="min-h-[400px]">{renderTabContent()}</div>
+          <div className="mt-auto rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+            <div className="flex items-center gap-2 text-[#f5b942]">
+              <Settings2 size={15} />
+              <span className="text-xs font-semibold">Admin workspace</span>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-400">จัดการหลักสูตรและติดตามการเรียนรู้ในพื้นที่ของคุณ</p>
+          </div>
+        </aside>
+
+        <div className="min-w-0 flex-1">
+          <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-[#f5f7f8]/90 backdrop-blur-xl">
+            <div className="mx-auto flex h-[4.5rem] max-w-[1600px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
+              <div className="flex min-w-0 items-center gap-3">
+                <button
+                  type="button"
+                  aria-label="เปิดเมนู"
+                  className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:border-slate-300 lg:hidden"
+                  onClick={() => setIsSidebarOpen(true)}
+                >
+                  <Menu size={19} />
+                </button>
+                <div className="flex min-w-0 items-center gap-2 text-sm">
+                  <span className="hidden font-medium text-slate-400 sm:inline">Admin</span>
+                  <ChevronRight size={15} className="hidden text-slate-300 sm:inline" />
+                  <span className="truncate font-semibold text-slate-800">{currentNav?.label}</span>
+                </div>
+              </div>
+
+              <div className="hidden w-full max-w-xs items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-400 shadow-sm md:flex">
+                <Search size={16} />
+                <input aria-label="ค้นหา" placeholder="ค้นหาหลักสูตร..." className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" />
+                <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[0.6rem] font-bold text-slate-400">⌘ K</span>
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button type="button" aria-label="การแจ้งเตือน" className="relative rounded-xl p-2 text-slate-500 hover:bg-white hover:text-[#0f766e]">
+                  <Bell size={19} />
+                  <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#ef6a5b]" />
+                </button>
+                <div className="hidden h-7 w-px bg-slate-200 sm:block" />
+                <div className="flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0f766e] text-xs font-bold text-white shadow-sm">
+                    displayName.slice(0, 1).toUpperCase()
+                  </div>
+                  <div className="hidden text-left sm:block">
+                    <p className="max-w-32 truncate text-xs font-bold text-slate-800">{displayName}</p>
+                    <p className="text-[0.68rem] text-slate-400">{isOrgAdmin ? "Organization Admin" : "Administrator"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main className="mx-auto max-w-[1600px] px-4 py-7 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+            <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-[#0f766e]">Learning operations</p>
+                <h1 className="mt-2 text-3xl font-bold tracking-[-0.03em] text-[#18232f] sm:text-4xl">
+                  {currentNav?.id === "dashboard" ? "ภาพรวมการเรียนรู้" : currentNav?.label}
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                  {currentNav?.id === "dashboard"
+                    ? `ยินดีต้อนรับ, ${displayName} — ติดตามภาพรวมของ e-Training ได้จากหน้านี้`
+                    : currentNav?.description}
+                </p>
+              </div>
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500 shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-[#0f766e]" />
+                {isOrgAdmin ? "Organization scope" : "System scope"}
+              </div>
+            </div>
+
+            <div className="min-h-[31rem]">{renderTabContent()}</div>
+          </main>
+        </div>
       </div>
     </div>
   );
 }
-
-// (Component ย่อยสำหรับปุ่ม Tab)
-const TabButton = ({
-  label,
-  subLabel,
-  icon,
-  isActive,
-  onClick,
-}: {
-  label: string;
-  subLabel: string;
-  icon: React.ReactNode;
-  isActive: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className={`flex-1 flex items-center justify-center md:justify-start space-x-3 px-6 py-4 rounded-xl transition-all duration-200
-      ${
-        isActive
-          ? "bg-blue-50/80 text-blue-700 shadow-sm border border-blue-100"
-          : "bg-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700 border border-transparent"
-      }
-    `}
-  >
-    <div className={`${isActive ? "text-blue-600" : "text-gray-400"}`}>
-      {icon}
-    </div>
-    <div className="text-left hidden sm:block">
-      <div
-        className={`text-sm font-bold ${isActive ? "text-blue-800" : "text-gray-700"}`}
-      >
-        {label}
-      </div>
-      <div
-        className={`text-xs ${isActive ? "text-blue-500" : "text-gray-400"}`}
-      >
-        {subLabel}
-      </div>
-    </div>
-  </button>
-);

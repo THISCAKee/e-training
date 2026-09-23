@@ -1,8 +1,16 @@
-// src/components/admin/AdminStats.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Users, BookOpen, BarChart3, TrendingUp, Activity } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Activity,
+  ArrowUpRight,
+  BarChart3,
+  BookOpen,
+  GraduationCap,
+  Layers3,
+  UsersRound,
+} from "lucide-react";
+import { getBarScale, getSharePercentage } from "@/lib/stats/presentation";
 
 type CategoryStat = {
   name: string;
@@ -20,62 +28,331 @@ type CourseEnrollmentStat = {
 type Stats = {
   userCount: number;
   courseCount: number;
+  lessonCount?: number;
   enrollmentCount: number;
   categoryStats: CategoryStat[];
   facultyStats: CategoryStat[];
   courseEnrollmentStats: CourseEnrollmentStat[];
 };
 
-const StatCard = ({
-  title,
+const panelClass =
+  "rounded-[1.35rem] border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]";
+
+const facultyColors = [
+  "#0f766e",
+  "#4f46e5",
+  "#f5b942",
+  "#0f4c5c",
+  "#a855f7",
+  "#ef6a5b",
+  "#2f9e8f",
+  "#64748b",
+];
+
+const formatNumber = (value: number) => value.toLocaleString("th-TH");
+
+function StatCard({
+  label,
   value,
+  detail,
   icon,
-  trend,
-  trendValue,
-  gradient,
+  accent,
 }: {
-  title: string;
-  value: string | number;
+  label: string;
+  value: number;
+  detail: string;
   icon: React.ReactNode;
-  trend?: "up" | "down" | "neutral";
-  trendValue?: string;
-  gradient?: string;
-}) => (
-  <div
-    className={`relative overflow-hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between group hover:shadow-md transition-all duration-300`}
-  >
-    <div
-      className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradient} opacity-10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110`}
-    ></div>
-    <div className="flex justify-between items-start mb-4">
+  accent: "teal" | "indigo" | "amber";
+}) {
+  const accentStyles = {
+    teal: {
+      icon: "bg-[#e4f4f0] text-[#0f766e]",
+      dot: "bg-[#0f766e]",
+      value: "text-[#0f766e]",
+    },
+    indigo: {
+      icon: "bg-[#e9e8ff] text-[#4f46e5]",
+      dot: "bg-[#4f46e5]",
+      value: "text-[#4f46e5]",
+    },
+    amber: {
+      icon: "bg-[#fff3d4] text-[#a16207]",
+      dot: "bg-[#f5b942]",
+      value: "text-[#a16207]",
+    },
+  }[accent];
+
+  return (
+    <article className={`${panelClass} group relative overflow-hidden p-5 sm:p-6`}>
       <div
-        className={`p-3 rounded-xl bg-gradient-to-br ${gradient} text-white shadow-sm`}
-      >
-        {icon}
-      </div>
-      {trendValue && (
-        <div
-          className={`flex items-center text-sm font-medium ${trend === "up" ? "text-emerald-500" : trend === "down" ? "text-rose-500" : "text-gray-500"}`}
-        >
-          {trend === "up" && <TrendingUp size={16} className="mr-1" />}
-          {trend === "down" && <Activity size={16} className="mr-1" />}
-          {trendValue}
+        className={`absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-60 transition-transform duration-500 group-hover:scale-125 ${accentStyles.dot}`}
+        aria-hidden="true"
+      />
+      <div className="relative flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-slate-500">{label}</p>
+          <p className={`mt-3 text-3xl font-bold tracking-tight ${accentStyles.value}`}>
+            {formatNumber(value)}
+          </p>
+          <p className="mt-2 text-xs text-slate-400">{detail}</p>
         </div>
+        <div className={`rounded-2xl p-3 ${accentStyles.icon}`}>{icon}</div>
+      </div>
+    </article>
+  );
+}
+
+function PanelHeader({
+  eyebrow,
+  title,
+  detail,
+}: {
+  eyebrow: string;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <div className="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#0f766e]">
+          {eyebrow}
+        </p>
+        <h2 className="mt-2 text-lg font-bold tracking-tight text-slate-900">
+          {title}
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">{detail}</p>
+      </div>
+      <div className="hidden rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[0.68rem] font-semibold text-slate-500 sm:block">
+        Live data
+      </div>
+    </div>
+  );
+}
+
+function EmptyPanel({ label }: { label: string }) {
+  return (
+    <div className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-5 text-center">
+      <div className="rounded-2xl bg-white p-3 text-slate-300 shadow-sm">
+        <BarChart3 size={22} />
+      </div>
+      <p className="mt-3 text-sm font-semibold text-slate-600">{label}</p>
+      <p className="mt-1 text-xs text-slate-400">ข้อมูลจะแสดงเมื่อมีการใช้งาน</p>
+    </div>
+  );
+}
+
+function CategoryBars({ categories }: { categories: CategoryStat[] }) {
+  if (!categories.length) return <EmptyPanel label="ยังไม่มีข้อมูลหมวดหมู่" />;
+
+  const visibleCategories = categories.slice(0, 6);
+  const maximum = Math.max(...visibleCategories.map((category) => category.count), 1);
+
+  return (
+    <div className="space-y-5">
+      {visibleCategories.map((category, index) => (
+        <div key={`${category.name}-${index}`}>
+          <div className="mb-2 flex items-center justify-between gap-4 text-sm">
+            <span className="min-w-0 truncate font-semibold text-slate-700" title={category.name}>
+              {category.name}
+            </span>
+            <span className="shrink-0 font-bold text-slate-900">
+              {formatNumber(category.count)}
+            </span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="stats-bar-fill h-full rounded-full bg-[#0f766e]"
+              style={{
+                width: `${getBarScale(category.count, maximum)}%`,
+                animationDelay: `${index * 80}ms`,
+              }}
+            />
+          </div>
+        </div>
+      ))}
+      {categories.length > visibleCategories.length && (
+        <p className="pt-1 text-xs font-medium text-slate-400">
+          แสดง {visibleCategories.length} จาก {categories.length} หมวดหมู่
+        </p>
       )}
     </div>
-    <div>
-      <h3 className="text-2xl font-bold text-gray-800 tracking-tight">
-        {value}
-      </h3>
-      <p className="text-sm font-medium text-gray-500 mt-1">{title}</p>
+  );
+}
+
+function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
+  const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
+
+  if (!faculties.length) return <EmptyPanel label="ยังไม่มีข้อมูลผู้เรียน" />;
+
+  const total = faculties.reduce((sum, faculty) => sum + faculty.count, 0);
+  const radius = 41;
+  const circumference = 2 * Math.PI * radius;
+  let currentOffset = 0;
+
+  return (
+    <div className="grid gap-6 sm:grid-cols-[minmax(170px,0.85fr)_1fr] sm:items-center">
+      <div className="relative mx-auto h-48 w-48">
+        <svg
+          viewBox="0 0 120 120"
+          className="h-full w-full -rotate-90"
+          role="img"
+          aria-label="สัดส่วนผู้เรียนตามหน่วยงาน"
+        >
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="#edf1f2" strokeWidth="15" />
+          {faculties.map((faculty, index) => {
+            const percentage = total > 0 ? faculty.count / total : 0;
+            const segment = Math.max(percentage * circumference - 1.5, 0);
+            const offset = currentOffset;
+            currentOffset += percentage * circumference;
+            const isDimmed = hoveredSlice !== null && hoveredSlice !== index;
+
+            return (
+              <circle
+                key={`${faculty.name}-${index}`}
+                cx="60"
+                cy="60"
+                r={radius}
+                fill="none"
+                stroke={facultyColors[index % facultyColors.length]}
+                strokeWidth={hoveredSlice === index ? "18" : "15"}
+                strokeDasharray={`${segment} ${circumference}`}
+                strokeDashoffset={-offset}
+                className={`cursor-pointer transition-all duration-300 ${isDimmed ? "opacity-30" : "opacity-100"}`}
+                onMouseEnter={() => setHoveredSlice(index)}
+                onMouseLeave={() => setHoveredSlice(null)}
+              />
+            );
+          })}
+        </svg>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-center">
+          <div>
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-slate-400">Learners</p>
+            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{formatNumber(total)}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {faculties.slice(0, 6).map((faculty, index) => {
+          const isHovered = hoveredSlice === index;
+          return (
+            <div
+              key={`${faculty.name}-legend-${index}`}
+              className={`flex items-center justify-between gap-3 rounded-xl px-2 py-2 transition-colors ${isHovered ? "bg-slate-50" : ""}`}
+              onMouseEnter={() => setHoveredSlice(index)}
+              onMouseLeave={() => setHoveredSlice(null)}
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: facultyColors[index % facultyColors.length] }}
+                />
+                <span className="truncate text-xs font-semibold text-slate-600" title={faculty.name}>
+                  {faculty.name}
+                </span>
+              </div>
+              <span className="shrink-0 text-xs font-bold text-slate-800">
+                {getSharePercentage(faculty.count, total)}
+              </span>
+            </div>
+          );
+        })}
+        {faculties.length > 6 && <p className="px-2 pt-1 text-xs text-slate-400">และอีก {faculties.length - 6} หน่วยงาน</p>}
+      </div>
     </div>
-  </div>
-);
+  );
+}
+
+function CourseRanking({ courses }: { courses: CourseEnrollmentStat[] }) {
+  if (!courses.length) return <EmptyPanel label="ยังไม่มีหลักสูตรที่มีการลงทะเบียน" />;
+
+  const visibleCourses = courses.slice(0, 5);
+  const maximum = Math.max(...visibleCourses.map((course) => course._count.enrollments), 1);
+
+  return (
+    <div className="space-y-2">
+      {visibleCourses.map((course, index) => (
+        <div
+          key={course.id}
+          className="group rounded-2xl border border-transparent p-3 transition-colors hover:border-slate-200 hover:bg-slate-50"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#eef7f5] text-sm font-bold text-[#0f766e]">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-3">
+                <p className="truncate text-sm font-semibold text-slate-800" title={course.title}>{course.title}</p>
+                <span className="shrink-0 text-xs font-bold text-slate-500">{formatNumber(course._count.enrollments)}</span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full rounded-full bg-[#f5b942] transition-all duration-700"
+                  style={{ width: `${getBarScale(course._count.enrollments, maximum)}%` }}
+                />
+              </div>
+            </div>
+            <ArrowUpRight size={16} className="shrink-0 text-slate-300 transition-colors group-hover:text-[#0f766e]" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LearningPulse({ courses }: { courses: CourseEnrollmentStat[] }) {
+  if (!courses.length) return <EmptyPanel label="ยังไม่มี learning pulse" />;
+
+  const values = courses.slice(0, 7).map((course) => course._count.enrollments);
+  const maximum = Math.max(...values, 1);
+  const points = values
+    .map((value, index) => {
+      const x = values.length === 1 ? 50 : (index / (values.length - 1)) * 100;
+      const y = 88 - (value / maximum) * 68;
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  return (
+    <div>
+      <div className="relative h-44 overflow-hidden rounded-2xl bg-[#f0f8f6] px-3 py-4">
+        <div className="absolute inset-x-4 top-1/4 border-t border-dashed border-[#b7d8d1]" />
+        <div className="absolute inset-x-4 top-1/2 border-t border-dashed border-[#b7d8d1]" />
+        <div className="absolute inset-x-4 top-3/4 border-t border-dashed border-[#b7d8d1]" />
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          className="relative h-full w-full"
+          role="img"
+          aria-label="แนวโน้มการลงทะเบียนหลักสูตรยอดนิยม"
+        >
+          <polyline
+            points={points}
+            fill="none"
+            stroke="#0f766e"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          {values.map((value, index) => {
+            const x = values.length === 1 ? 50 : (index / (values.length - 1)) * 100;
+            const y = 88 - (value / maximum) * 68;
+            return <circle key={`${value}-${index}`} cx={x} cy={y} r="2.6" fill="#f5b942" stroke="white" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />;
+          })}
+        </svg>
+      </div>
+      <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
+        <span>หลักสูตรที่มีผู้เรียนสูงสุด</span>
+        <span className="font-semibold text-[#0f766e]">{formatNumber(Math.max(...values))} learners</span>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminStats() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -91,365 +368,71 @@ export default function AdminStats() {
         setLoading(false);
       }
     };
+
     fetchStats();
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p className="text-gray-500 font-medium">กำลังโหลดข้อมูลสถิติ...</p>
-      </div>
-    );
-
-  if (!stats)
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="p-4 bg-red-50 text-red-600 rounded-full mb-4">
-          <Activity size={32} />
+      <div className="space-y-6" aria-label="กำลังโหลดข้อมูลสถิติ">
+        <div className="grid gap-4 md:grid-cols-3">
+          {["one", "two", "three"].map((item) => <div key={item} className={`${panelClass} h-36 animate-pulse bg-slate-100`} />)}
         </div>
-        <p className="text-gray-800 font-medium text-lg">
-          ไม่สามารถโหลดข้อมูลสถิติได้
-        </p>
-        <p className="text-gray-500 text-sm mt-1">
-          กรุณาลองใหม่อีกครั้งในภายหลัง
-        </p>
+        <div className={`${panelClass} h-80 animate-pulse bg-slate-100`} />
       </div>
     );
+  }
+
+  if (!stats) {
+    return (
+      <div className={`${panelClass} flex min-h-80 flex-col items-center justify-center px-6 text-center`}>
+        <div className="rounded-2xl bg-[#fff1ef] p-4 text-[#d85d4d]"><Activity size={28} /></div>
+        <p className="mt-4 text-lg font-bold text-slate-900">ไม่สามารถโหลดข้อมูลสถิติได้</p>
+        <p className="mt-1 text-sm text-slate-500">กรุณาลองใหม่อีกครั้งในภายหลัง</p>
+      </div>
+    );
+  }
+
+  const totalLearnersByFaculty = stats.facultyStats.reduce((sum, faculty) => sum + faculty.count, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Top Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatCard
-          title="จำนวนผู้เรียน (Total Learners)"
-          value={stats.userCount}
-          icon={<Users size={24} />}
-          gradient="from-blue-500 to-indigo-600"
-          trend="up"
-        />
-        <StatCard
-          title="หลักสูตรทั้งหมด (Total Courses)"
-          value={stats.courseCount}
-          icon={<BookOpen size={24} />}
-          gradient="from-emerald-400 to-teal-500"
-          trend="neutral"
-        />
-        <StatCard
-          title="การลงทะเบียนเรียนทั้งหมด (Total Enrollments)"
-          value={stats.enrollmentCount}
-          icon={<BarChart3 size={24} />}
-          gradient="from-amber-400 to-orange-500"
-          trend="up"
-        />
+    <div className="space-y-5 sm:space-y-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatCard label="Learners" value={stats.userCount} detail="ผู้เรียนในขอบเขตที่คุณดูแล" icon={<UsersRound size={21} />} accent="teal" />
+        <StatCard label="Courses" value={stats.courseCount} detail="หลักสูตรที่พร้อมให้ลงทะเบียน" icon={<BookOpen size={21} />} accent="indigo" />
+        <StatCard label="Enrollments" value={stats.enrollmentCount} detail="การลงทะเบียนเรียนสะสม" icon={<GraduationCap size={21} />} accent="amber" />
       </div>
 
-      {/* Charts Section Placeholders */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        {/* Main Chart Placeholder (e.g., User Registration or Enrollment over time) */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-lg font-bold text-gray-800">
-                สถิติการเข้าเรียนแยกตามหมวดหมู่ (Category Stats)
-              </h2>
-              <p className="text-sm text-gray-500">
-                จำนวนการลงทะเบียนเรียนในแต่ละหมวดหมู่ (Category)
-              </p>
-            </div>
-            <select className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none">
-              <option>เรียงจากมากไปน้อย</option>
-            </select>
-          </div>
+      <div className="grid gap-5 xl:grid-cols-[1.45fr_1fr]">
+        <section className={`${panelClass} p-5 sm:p-6`}>
+          <PanelHeader eyebrow="Enrollment mix" title="การลงทะเบียนแยกตามหมวดหมู่" detail="ดูว่าผู้เรียนกำลังสนใจหลักสูตรประเภทใดมากที่สุด" />
+          <CategoryBars categories={stats.categoryStats} />
+        </section>
 
-          <div className="w-full space-y-6">
-            {stats.categoryStats && stats.categoryStats.length > 0 ? (
-              stats.categoryStats.map((cat, idx) => {
-                const maxCount = Math.max(
-                  ...stats.categoryStats.map((c) => c.count),
-                );
-                const percentage =
-                  maxCount === 0 ? 0 : (cat.count / maxCount) * 100;
-                // สลับสีไล่ระดับสำหรับแต่ละบาร์เพื่อให้ดูน่าสนใจ
-                const colors = [
-                  "bg-blue-500",
-                  "bg-emerald-500",
-                  "bg-purple-500",
-                  "bg-amber-500",
-                  "bg-rose-500",
-                  "bg-teal-500",
-                ];
-                const barColor = colors[idx % colors.length];
-
-                return (
-                  <div key={idx} className="flex items-center">
-                    <div
-                      className="w-1/3 text-sm font-semibold text-gray-700 truncate pr-4"
-                      title={cat.name}
-                    >
-                      {cat.name}
-                    </div>
-                    <div className="w-2/3 flex items-center">
-                      <div className="w-full bg-gray-100 rounded-full h-4 relative overflow-hidden flex-1">
-                        <div
-                          className={`${barColor} h-4 rounded-full transition-all duration-1000 ease-out`}
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-4 text-sm font-bold text-gray-800 w-10 text-right">
-                        {cat.count}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="w-full h-[300px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
-                <BarChart3 size={48} className="mb-4 text-blue-300" />
-                <p className="font-medium text-gray-600">
-                  ไม่มีข้อมูลหมวดหมู่ (No Data)
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Secondary Chart - Faculty Stats (Pie Chart) */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-gray-800">
-              สถิติคณะที่ลงเรียน (Faculty Stats)
-            </h2>
-          </div>
-
-          <div className="flex-1 flex flex-col items-center justify-center relative">
-            {stats.facultyStats && stats.facultyStats.length > 0 ? (
-              <div className="w-full space-y-8 relative">
-                {/* Visual Pie Chart (using SVG) */}
-                <div className="flex justify-center mb-6 relative">
-                  <div className="relative w-56 h-56 group">
-                    <svg
-                      viewBox="0 0 120 120"
-                      className="w-full h-full transform -rotate-90 drop-shadow-sm"
-                    >
-                      {(() => {
-                        const totalStudents = stats.facultyStats.reduce(
-                          (sum, f) => sum + f.count,
-                          0,
-                        );
-                        const radius = 40;
-                        const circumference = 2 * Math.PI * radius; // ~251.327
-                        let currentOffset = 0;
-
-                        return stats.facultyStats.map((faculty, idx) => {
-                          const percentage =
-                            totalStudents === 0
-                              ? 0
-                              : faculty.count / totalStudents;
-                          // If percentage is 100%, subtract a tiny bit so it doesn't disappear
-                          const sliceCircumference =
-                            percentage === 1
-                              ? circumference - 0.01
-                              : percentage * circumference;
-                          const strokeDasharray = `${sliceCircumference} ${circumference}`;
-                          const strokeDashoffset = -currentOffset;
-                          currentOffset += sliceCircumference;
-
-                          const colors = [
-                            "#3b82f6",
-                            "#10b981",
-                            "#8b5cf6",
-                            "#f59e0b",
-                            "#ef4444",
-                            "#14b8a6",
-                            "#6366f1",
-                            "#f43f5e",
-                            "#84cc16",
-                          ];
-                          const color = colors[idx % colors.length];
-
-                          const isHovered = hoveredSlice === idx;
-
-                          return (
-                            <circle
-                              key={idx}
-                              cx="60"
-                              cy="60"
-                              r={radius}
-                              fill="transparent"
-                              stroke={color}
-                              strokeWidth={isHovered ? "24" : "20"}
-                              strokeDasharray={strokeDasharray}
-                              strokeDashoffset={strokeDashoffset}
-                              className={`transition-all duration-300 ease-out cursor-pointer ${hoveredSlice !== null && hoveredSlice !== idx ? "opacity-50" : "opacity-100"}`}
-                              onMouseEnter={() => setHoveredSlice(idx)}
-                              onMouseLeave={() => setHoveredSlice(null)}
-                            />
-                          );
-                        });
-                      })()}
-                    </svg>
-
-                    {/* Inner Content */}
-                    <div className="absolute inset-0 m-auto w-24 h-24 rounded-full flex items-center justify-center pointer-events-none">
-                      <div className="text-center">
-                        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider leading-none">
-                          Total
-                        </p>
-                        <p className="text-xl font-black text-gray-800">
-                          {stats.facultyStats.reduce(
-                            (sum, f) => sum + f.count,
-                            0,
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Tooltip */}
-                    {hoveredSlice !== null && (
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-32 w-48 bg-white border border-gray-100 shadow-xl rounded-lg p-3 z-10 pointer-events-none animate-in fade-in zoom-in duration-200">
-                        {(() => {
-                          const faculty = stats.facultyStats[hoveredSlice];
-                          const totalStudents = stats.facultyStats.reduce(
-                            (sum, f) => sum + f.count,
-                            0,
-                          );
-                          const percentage =
-                            totalStudents === 0
-                              ? 0
-                              : (faculty.count / totalStudents) * 100;
-                          return (
-                            <div className="text-center">
-                              <p className="text-sm font-bold text-gray-800 line-clamp-2 leading-tight mb-1">
-                                {faculty.name}
-                              </p>
-                              <div className="flex justify-center items-center space-x-2">
-                                <span className="text-sm font-bold text-blue-600">
-                                  {faculty.count} คน
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                  ({percentage.toFixed(1)}%)
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                  {stats.facultyStats.map((faculty, idx) => {
-                    const colors = [
-                      "#3b82f6",
-                      "#10b981",
-                      "#8b5cf6",
-                      "#f59e0b",
-                      "#ef4444",
-                      "#14b8a6",
-                      "#6366f1",
-                      "#f43f5e",
-                      "#84cc16",
-                    ];
-                    const color = colors[idx % colors.length];
-                    const totalStudents = stats.facultyStats.reduce(
-                      (sum, f) => sum + f.count,
-                      0,
-                    );
-                    const percentage =
-                      totalStudents === 0
-                        ? 0
-                        : (faculty.count / totalStudents) * 100;
-                    const isHovered = hoveredSlice === idx;
-
-                    return (
-                      <div
-                        key={idx}
-                        className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${isHovered ? "bg-gray-100 shadow-sm" : "hover:bg-gray-50"}`}
-                        onMouseEnter={() => setHoveredSlice(idx)}
-                        onMouseLeave={() => setHoveredSlice(null)}
-                      >
-                        <div className="flex items-center space-x-3 overflow-hidden">
-                          <div
-                            className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: color }}
-                          ></div>
-                          <span
-                            className={`text-xs font-semibold truncate ${isHovered ? "text-gray-900" : "text-gray-600"}`}
-                            title={faculty.name}
-                          >
-                            {faculty.name}
-                          </span>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-2">
-                          <span className="text-xs font-bold text-gray-800">
-                            {faculty.count} คน
-                          </span>
-                          <span className="text-[10px] text-gray-400 block">
-                            {percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="w-full h-[300px] bg-gray-50 rounded-xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400">
-                <p className="text-sm">ไม่มีข้อมูลคณะ</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <section className={`${panelClass} p-5 sm:p-6`}>
+          <PanelHeader eyebrow="Learner map" title="ผู้เรียนตามหน่วยงาน" detail={`${formatNumber(totalLearnersByFaculty)} คนในข้อมูลปัจจุบัน`} />
+          <FacultyDonut faculties={stats.facultyStats} />
+        </section>
       </div>
 
-      {/* Course Enrollment Stats */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <BookOpen className="text-blue-600" size={22} /> สถิติจำนวนผู้เรียนรายหลักสูตร (Learners per Course)
-            </h2>
-            <p className="text-sm text-gray-500">
-              จำนวนผู้เรียนที่ลงทะเบียนเรียนสะสมในแต่ละคอร์สเรียนทั้งหมด
-            </p>
-          </div>
-        </div>
+      <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+        <section className={`${panelClass} p-5 sm:p-6`}>
+          <PanelHeader eyebrow="Course reach" title="หลักสูตรที่มีผู้เรียนสูงสุด" detail="จัดอันดับจากจำนวน Course Enrollment สะสม" />
+          <CourseRanking courses={stats.courseEnrollmentStats} />
+        </section>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-100">
-            <thead>
-              <tr className="bg-gray-50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <th className="px-6 py-4 rounded-l-xl">หลักสูตร (Course)</th>
-                <th className="px-6 py-4 rounded-r-xl text-right">จำนวนผู้เรียน (Total Learners)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {stats.courseEnrollmentStats && stats.courseEnrollmentStats.length > 0 ? (
-                stats.courseEnrollmentStats.map((course) => (
-                  <tr key={course.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-800">
-                      {course.title}
-                    </td>
-                    <td className="px-6 py-4 text-right text-sm font-black text-blue-600">
-                      {course._count.enrollments} คน
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={2} className="px-6 py-10 text-center text-sm text-gray-400">
-                    ไม่มีข้อมูลคอร์สเรียน
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <section className={`${panelClass} p-5 sm:p-6`}>
+          <PanelHeader eyebrow="Learning pulse" title="จังหวะการเรียนรู้" detail="ภาพรวม reach ของหลักสูตรยอดนิยม" />
+          <LearningPulse courses={stats.courseEnrollmentStats} />
+        </section>
       </div>
 
+      {stats.lessonCount !== undefined && (
+        <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-500 sm:px-5">
+          <span className="flex items-center gap-2"><Layers3 size={15} className="text-[#0f766e]" /> Lessons ที่เผยแพร่ในระบบ</span>
+          <span className="font-bold text-slate-800">{formatNumber(stats.lessonCount)} lessons</span>
+        </div>
+      )}
     </div>
   );
 }

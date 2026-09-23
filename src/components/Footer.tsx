@@ -1,7 +1,15 @@
 // src/components/Footer.tsx
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <footer className="bg-gray-300 border-t mt-auto ">
       <div className="container mx-auto px-6 py-4 text-center text-gray-600">
