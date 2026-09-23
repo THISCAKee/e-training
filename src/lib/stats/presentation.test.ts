@@ -4,6 +4,7 @@ import {
   getBarColor,
   getBarScale,
   getCertificateStats,
+  groupCoursesByCategory,
   getSharePercentage,
   sortStatsByCount,
 } from "./presentation";
@@ -45,6 +46,37 @@ describe("public stats presentation helpers", () => {
     expect(getCertificateStats(enrollments)).toEqual([
       { name: "ได้รับใบประกาศ", count: 2 },
       { name: "ยังไม่ได้รับใบประกาศ", count: 1 },
+    ]);
+  });
+
+  it("groups courses under each category and counts their learners", () => {
+    const enrollments = [
+      { courseId: 1, courseTitle: "สร้างภาพด้วย AI", categoryName: "AI For Creative" },
+      { courseId: 1, courseTitle: "สร้างภาพด้วย AI", categoryName: "AI For Creative" },
+      { courseId: 2, courseTitle: "เขียน Prompt", categoryName: "AI For Creative" },
+      { courseId: 3, courseTitle: "AI กับงานวิจัย", categoryName: "AI For Research" },
+      { courseId: 4, courseTitle: "พื้นฐาน AI", categoryName: "AI For Life", count: 0 },
+    ];
+
+    expect(groupCoursesByCategory(enrollments)).toEqual([
+      {
+        name: "AI For Creative",
+        count: 3,
+        courses: [
+          { id: 1, title: "สร้างภาพด้วย AI", count: 2 },
+          { id: 2, title: "เขียน Prompt", count: 1 },
+        ],
+      },
+      {
+        name: "AI For Research",
+        count: 1,
+        courses: [{ id: 3, title: "AI กับงานวิจัย", count: 1 }],
+      },
+      {
+        name: "AI For Life",
+        count: 0,
+        courses: [{ id: 4, title: "พื้นฐาน AI", count: 0 }],
+      },
     ]);
   });
 

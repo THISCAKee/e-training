@@ -14,7 +14,13 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { getBarDelay, getBarScale, getSharePercentage } from "@/lib/stats/presentation";
+import {
+  getBarColor,
+  getBarDelay,
+  getBarScale,
+  getSharePercentage,
+  type CategoryCourseGroup,
+} from "@/lib/stats/presentation";
 
 type CategoryStat = {
   name: string;
@@ -34,6 +40,7 @@ type Stats = {
   courseCount: number;
   enrollmentCount: number;
   categoryStats: CategoryStat[];
+  categoryCourseStats: CategoryCourseGroup[];
   facultyStats: CategoryStat[];
   courseEnrollmentStats: CourseEnrollmentStat[];
 };
@@ -106,6 +113,176 @@ function MetricCard({
           <span className="truncate text-xs text-[#7890a7]">{detail}</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
+  const [hoveredSlice, setHoveredSlice] = useState<number | null>(null);
+
+  if (!faculties.length) {
+    return <EmptyState icon={<Users size={23} />} title="ยังไม่มีข้อมูลคณะ" />;
+  }
+
+  const total = faculties.reduce((sum, faculty) => sum + faculty.count, 0);
+  const radius = 41;
+  const circumference = 2 * Math.PI * radius;
+  const percentages = faculties.map((faculty) => (total > 0 ? faculty.count / total : 0));
+  const activeFaculty = hoveredSlice === null ? null : faculties[hoveredSlice];
+
+  return (
+    <div className="grid gap-6 sm:grid-cols-[minmax(190px,0.9fr)_1fr] sm:items-center">
+      <div className="relative mx-auto h-56 w-56">
+        <svg
+          viewBox="0 0 120 120"
+          className="h-full w-full -rotate-90"
+          role="img"
+          aria-label="สัดส่วนผู้เรียนตามคณะและสังกัด"
+        >
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="#edf2f7" strokeWidth="14" />
+          {faculties.map((faculty, index) => {
+            const percentage = percentages[index];
+            const segment = Math.max(percentage * circumference - 1.8, 0);
+            const offset = percentages
+              .slice(0, index)
+              .reduce((sum, previousPercentage) => sum + previousPercentage * circumference, 0);
+            const isDimmed = hoveredSlice !== null && hoveredSlice !== index;
+
+            return (
+              <circle
+                key={`${faculty.name}-${index}`}
+                cx="60"
+                cy="60"
+                r={radius}
+                fill="none"
+                stroke={getBarColor(index, facultyColors)}
+                strokeWidth={hoveredSlice === index ? "18" : "14"}
+                strokeDasharray={`${segment} ${circumference}`}
+                strokeDashoffset={-offset}
+                className={`origin-center cursor-pointer transition-all duration-300 ${isDimmed ? "opacity-25" : "opacity-100"}`}
+                onMouseEnter={() => setHoveredSlice(index)}
+                onMouseLeave={() => setHoveredSlice(null)}
+                onFocus={() => setHoveredSlice(index)}
+                onBlur={() => setHoveredSlice(null)}
+                tabIndex={0}
+                aria-label={`${faculty.name}: ${formatNumber(faculty.count)} คน`}
+              />
+            );
+          })}
+        </svg>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-center">
+          <div className="max-w-[9rem]">
+            <p
+              className="truncate text-[0.65rem] font-bold uppercase tracking-[0.12em] text-[#8aa0b3]"
+              title={activeFaculty?.name ?? "ผู้เรียนทั้งหมด"}
+            >
+              {activeFaculty?.name ?? "ผู้เรียนทั้งหมด"}
+            </p>
+            <p className="mt-1 text-3xl font-black tracking-tight text-[#172f47]">
+              {formatNumber(activeFaculty?.count ?? total)}
+            </p>
+            <p className="text-[0.68rem] font-semibold text-[#8aa0b3]">คน</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-h-56 space-y-1 overflow-y-auto pr-1" aria-label="รายชื่อคณะและสังกัด">
+        {faculties.map((faculty, index) => {
+          const isHovered = hoveredSlice === index;
+          return (
+            <button
+              key={`${faculty.name}-legend-${index}`}
+              type="button"
+              className={`flex w-full items-center justify-between gap-3 rounded-xl px-2 py-2 text-left transition-colors ${isHovered ? "bg-[#f5f9fc]" : "hover:bg-[#f8fafc]"}`}
+              onMouseEnter={() => setHoveredSlice(index)}
+              onMouseLeave={() => setHoveredSlice(null)}
+              onFocus={() => setHoveredSlice(index)}
+              onBlur={() => setHoveredSlice(null)}
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: getBarColor(index, facultyColors) }}
+                />
+                <span className="truncate text-xs font-semibold text-[#344e67]" title={faculty.name}>
+                  {faculty.name}
+                </span>
+              </span>
+              <span className="shrink-0 text-xs font-bold text-[#172f47]">
+                {getSharePercentage(faculty.count, total)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CategoryCourseList({ categories }: { categories: CategoryCourseGroup[] }) {
+  if (!categories.length) {
+    return <EmptyState icon={<BookOpen size={23} />} title="ยังไม่มีข้อมูลหมวดหมู่" description="เมื่อมีการลงทะเบียน ข้อมูลจะแสดงที่นี่" />;
+  }
+
+  return (
+    <div className="space-y-4">
+      {categories.map((category, index) => {
+        const maximum = Math.max(...category.courses.map((course) => course.count), 1);
+        const color = getBarColor(index, categoryColors);
+
+        return (
+          <article key={`${category.name}-${index}`} className="rounded-2xl border border-[#e1e9f0] bg-[#fbfdff] p-4">
+            <div className="flex items-start gap-3">
+              <span
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black"
+                style={{ backgroundColor: `${color}18`, color }}
+              >
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-black text-[#253f59]" title={category.name}>
+                      {category.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-[#7890a7]">
+                      {category.courses.length} คอร์ส · {formatNumber(category.count)} ครั้ง
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-black text-[#172f47]">
+                    {formatNumber(category.count)} <span className="text-xs font-medium text-[#8aa0b3]">ครั้ง</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3 border-t border-[#e7eef4] pt-3">
+              {category.courses.map((course, courseIndex) => (
+                <div key={course.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="min-w-0 truncate text-xs font-bold text-[#3d5872]" title={course.title}>
+                      {course.title}
+                    </p>
+                    <span className="shrink-0 text-xs font-black text-[#172f47]">
+                      {formatNumber(course.count)} คน
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[#e9f0f5]">
+                    <div
+                      className="stats-bar-fill h-full rounded-full"
+                      style={{
+                        width: `${getBarScale(course.count, maximum)}%`,
+                        backgroundColor: color,
+                        animationDelay: getBarDelay(courseIndex),
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+        );
+      })}
     </div>
   );
 }
@@ -187,11 +364,10 @@ export default function PublicStatsPage() {
   }
 
   const categories = stats.categoryStats ?? [];
+  const categoryCourses = stats.categoryCourseStats ?? [];
   const faculties = stats.facultyStats ?? [];
   const courses = stats.courseEnrollmentStats ?? [];
-  const maxCategoryCount = Math.max(...categories.map((category) => category.count), 0);
   const maxCourseCount = Math.max(...courses.map((course) => course._count.enrollments), 0);
-  const facultyTotal = faculties.reduce((sum, faculty) => sum + faculty.count, 0);
   const featuredCategory = categories[0];
   const featuredCourse = courses[0];
 
@@ -232,49 +408,36 @@ export default function PublicStatsPage() {
           </div>
         </section>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.85fr]">
-          <section aria-labelledby="category-heading" className="rounded-[1.75rem] border border-[#dce6ef] bg-white p-6 shadow-[0_10px_35px_rgba(38,72,102,0.06)] sm:p-8">
+        <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[1.35fr_0.85fr]">
+          <section aria-labelledby="category-heading" className="min-w-0 rounded-[1.75rem] border border-[#dce6ef] bg-white p-6 shadow-[0_10px_35px_rgba(38,72,102,0.06)] sm:p-8">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div>
                 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#2563EB]"><span className="h-1.5 w-5 rounded-full bg-[#2563EB]" /> Popularity map</div>
-                <h2 id="category-heading" className="mt-2 text-2xl font-black tracking-[-0.03em] text-[#172f47]">หมวดหมู่ที่มีการเรียนสูงสุด</h2>
-                <p className="mt-1 text-sm text-[#7890a7]">เปรียบเทียบจำนวนการลงทะเบียนในแต่ละหมวดวิชา</p>
+                <h2 id="category-heading" className="mt-2 text-2xl font-black tracking-[-0.03em] text-[#172f47]">AI For และคอร์สที่มีผู้เรียน</h2>
+                <p className="mt-1 text-sm text-[#7890a7]">ดูว่าทุกหมวดมีคอร์สอะไรบ้างและมีผู้เรียนกี่คน</p>
               </div>
               {featuredCategory && <div className="rounded-xl bg-[#edf4ff] px-3 py-2 text-right"><p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#7090b2]">นำอยู่ตอนนี้</p><p className="mt-0.5 max-w-32 truncate text-sm font-bold text-[#1d4ed8]" title={featuredCategory.name}>{featuredCategory.name}</p></div>}
             </div>
 
-            <div className="mt-8 space-y-5">
-              {categories.length > 0 ? categories.map((category, index) => (
-                <div key={`${category.name}-${index}`} className="group">
-                  <div className="mb-2 flex items-center gap-3"><span className="w-6 font-mono text-xs font-bold text-[#9aabba]">{String(index + 1).padStart(2, "0")}</span><span className="min-w-0 flex-1 truncate text-sm font-bold text-[#344e67]" title={category.name}>{category.name}</span><span className="text-sm font-black text-[#172f47]">{formatNumber(category.count)} <span className="text-xs font-medium text-[#8aa0b3]">ครั้ง</span></span></div>
-                  <div className="ml-9 h-3 overflow-hidden rounded-full bg-[#edf2f7]"><div className="stats-bar-fill h-full rounded-full" style={{ width: `${getBarScale(category.count, maxCategoryCount)}%`, backgroundColor: categoryColors[index % categoryColors.length], animationDelay: getBarDelay(index) }} /></div>
-                </div>
-              )) : <EmptyState icon={<BarChart3 size={23} />} title="ยังไม่มีข้อมูลหมวดหมู่" description="เมื่อมีการลงทะเบียน ข้อมูลจะแสดงที่นี่" />}
+            <div className="mt-8">
+              <CategoryCourseList categories={categoryCourses} />
             </div>
           </section>
 
-          <section aria-labelledby="faculty-heading" className="rounded-[1.75rem] border border-[#dce6ef] bg-white p-6 shadow-[0_10px_35px_rgba(38,72,102,0.06)] sm:p-8">
+          <section aria-labelledby="faculty-heading" className="min-w-0 rounded-[1.75rem] border border-[#dce6ef] bg-white p-6 shadow-[0_10px_35px_rgba(38,72,102,0.06)] sm:p-8">
             <div>
               <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#0f8c78]"><span className="h-1.5 w-5 rounded-full bg-[#14B8A6]" /> Community mix</div>
               <h2 id="faculty-heading" className="mt-2 text-2xl font-black tracking-[-0.03em] text-[#172f47]">ผู้เรียนตามคณะ</h2>
               <p className="mt-1 text-sm text-[#7890a7]">เปรียบเทียบจำนวนผู้เรียนจากแต่ละคณะและสังกัด</p>
             </div>
 
-            {faculties.length > 0 ? (
-              <div className="mt-8 space-y-5">
-                {faculties.map((faculty, index) => (
-                  <div key={`${faculty.name}-${index}`} className="group">
-                    <div className="mb-2 flex items-center gap-3"><span className="w-6 font-mono text-xs font-bold text-[#9aabba]">{String(index + 1).padStart(2, "0")}</span><span className="min-w-0 flex-1 truncate text-sm font-bold text-[#344e67]" title={faculty.name}>{faculty.name}</span><span className="text-sm font-black text-[#172f47]">{formatNumber(faculty.count)} <span className="text-xs font-medium text-[#8aa0b3]">คน</span></span></div>
-                    <div className="ml-9 h-3 overflow-hidden rounded-full bg-[#edf2f7]"><div className="stats-bar-fill h-full rounded-full" style={{ width: `${getBarScale(faculty.count, facultyTotal)}%`, backgroundColor: facultyColors[index % facultyColors.length], animationDelay: getBarDelay(index) }} /></div>
-                    <p className="mt-1 ml-9 text-right text-[11px] font-semibold text-[#8aa0b3]">{getSharePercentage(faculty.count, facultyTotal)} ของผู้เรียนทั้งหมด</p>
-                  </div>
-                ))}
-              </div>
-            ) : <div className="mt-7"><EmptyState icon={<Users size={23} />} title="ยังไม่มีข้อมูลคณะ" /></div>}
+            <div className="mt-8">
+              <FacultyDonut faculties={faculties} />
+            </div>
           </section>
         </div>
 
-        <section aria-labelledby="course-heading" className="mt-6 rounded-[1.75rem] border border-[#dce6ef] bg-white p-6 shadow-[0_10px_35px_rgba(38,72,102,0.06)] sm:p-8">
+        <section aria-labelledby="course-heading" className="mt-6 min-w-0 rounded-[1.75rem] border border-[#dce6ef] bg-white p-6 shadow-[0_10px_35px_rgba(38,72,102,0.06)] sm:p-8">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
               <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#b45309]"><span className="h-1.5 w-5 rounded-full bg-[#f59e0b]" /> Course leaderboard</div>

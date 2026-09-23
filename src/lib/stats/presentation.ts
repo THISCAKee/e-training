@@ -36,6 +36,54 @@ export function getCertificateStats(
   ];
 }
 
+export type CategoryCourseGroup = {
+  name: string;
+  count: number;
+  courses: { id: number; title: string; count: number }[];
+};
+
+export function groupCoursesByCategory(
+  enrollments: readonly {
+    courseId: number;
+    courseTitle: string;
+    categoryName: string;
+    count?: number;
+  }[],
+): CategoryCourseGroup[] {
+  const categoryMap = new Map<
+    string,
+    { count: number; courses: Map<number, { id: number; title: string; count: number }> }
+  >();
+
+  enrollments.forEach(({ categoryName, courseId, courseTitle, count = 1 }) => {
+    const learnerCount = Math.max(0, count);
+    const category = categoryMap.get(categoryName) ?? {
+      count: 0,
+      courses: new Map<number, { id: number; title: string; count: number }>(),
+    };
+    category.count += learnerCount;
+
+    const course = category.courses.get(courseId);
+    if (course) {
+      course.count += learnerCount;
+    } else {
+      category.courses.set(courseId, { id: courseId, title: courseTitle, count: learnerCount });
+    }
+
+    categoryMap.set(categoryName, category);
+  });
+
+  return [...categoryMap.entries()]
+    .map(([name, category]) => ({
+      name,
+      count: category.count,
+      courses: [...category.courses.values()].sort(
+        (left, right) => right.count - left.count || left.title.localeCompare(right.title),
+      ),
+    }))
+    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name));
+}
+
 export function sortStatsByCount<T extends { name: string; count: number }>(
   stats: readonly T[],
 ): T[] {

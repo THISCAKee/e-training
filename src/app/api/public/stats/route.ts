@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { groupCoursesByCategory } from "@/lib/stats/presentation";
 
 export async function GET() {
   try {
@@ -13,22 +14,32 @@ export async function GET() {
     const courseCount = await prisma.course.count();
     const enrollmentCount = await prisma.userCourseEnrollment.count();
 
-    // ดึงข้อมูลการลงทะเบียนทั้งหมดเพื่อนำมาแยกตามหมวดหมู่
-    const enrollments = await prisma.userCourseEnrollment.findMany({
-      include: {
-        course: {
-          include: {
-            category: true,
+    // ดึงทุกคอร์สพร้อมจำนวนผู้เรียน เพื่อให้คอร์สที่ยังไม่มีผู้เรียนแสดงเป็น 0 ได้ด้วย
+    const coursesWithEnrollmentCounts = await prisma.course.findMany({
+      select: {
+        id: true,
+        title: true,
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            enrollments: true,
           },
         },
       },
     });
 
-    const categoryMap: Record<string, number> = {};
-    enrollments.forEach((enrollment) => {
-      const categoryName = enrollment.course?.category?.name || "ไม่มีหมวดหมู่";
-      categoryMap[categoryName] = (categoryMap[categoryName] || 0) + 1;
-    });
+    const categoryCourseStats = groupCoursesByCategory(
+      coursesWithEnrollmentCounts.map((course) => ({
+        courseId: course.id,
+        courseTitle: course.title || "ไม่ระบุชื่อหลักสูตร",
+        categoryName: course.category?.name || "ไม่มีหมวดหมู่",
+        count: course._count.enrollments,
+      })),
+    );
 
     // ดึงข้อมูลผู้ใช้เพื่อนำมาคำนวณสถิติตามคณะ (สังกัด)
     const users = await prisma.user.findMany({
@@ -47,12 +58,7 @@ export async function GET() {
     });
 
     // แปลงข้อมูลให้อยู่ในรูปแบบ Array และเรียงลำดับจากมากไปน้อย
-    const categoryStats = Object.keys(categoryMap)
-      .map((name) => ({
-        name,
-        count: categoryMap[name],
-      }))
-      .sort((a, b) => b.count - a.count);
+    const categoryStats = categoryCourseStats.map(({ name, count }) => ({ name, count }));
 
     const facultyStats = Object.keys(facultyMap)
       .map((name) => ({
@@ -84,6 +90,7 @@ export async function GET() {
         courseCount,
         enrollmentCount,
         categoryStats,
+        categoryCourseStats,
         facultyStats,
         courseEnrollmentStats,
       },
