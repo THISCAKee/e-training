@@ -23,4 +23,10 @@ describe("getLoginDestination", () => {
   ])("rejects unsafe callback %s", (callbackUrl) => {
     expect(getLoginDestination("USER", callbackUrl)).toBe("/");
   });
+
+  it("sends a USER without a faculty to pick one first", () => {
+    expect(getLoginDestination("USER", "/courses/1", true)).toBe(
+      "/complete-profile?callbackUrl=%2Fcourses%2F1",
+    );
+  });
 });

@@ -1,0 +1,196 @@
+.page {
+  width: 100%;
+  max-width: 1280px;
+  color: #102b50;
+  font-family: var(--font-anuphan), sans-serif;
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  min-height: 740px;
+  border: 1px solid #dce7f0;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 20px 65px -28px #173e6b4d;
+  animation: panel-in 650ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 44px 48px 36px;
+  background: #102b50;
+  color: #fff;
+}
+
+.brandName { display: flex; align-items: center; gap: 14px; font-size: 24px; font-weight: 600; letter-spacing: -.6px; }
+.brandAccent { color: #ffd33d; }
+.brandGuide {
+  display: flex;
+  flex-direction: column;
+  padding: 36px 0 32px;
+}
+
+.brandCopy { animation: content-in 700ms 120ms both; }
+.brandCopy h2 {
+  margin: 0;
+  font-size: clamp(30px, 2.6vw, 38px);
+  line-height: 1.55;
+  font-weight: 600;
+  letter-spacing: -.6px;
+}
+.brandCopy h2 span { display: block; color: #ffd33d; }
+
+.loginMethods { margin-top: 30px; }
+.loginMethods h3 {
+  margin: 0 0 22px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.6;
+  animation: content-in 650ms 220ms both;
+}
+.methodList { margin: 0; padding: 0; list-style: none; }
+.methodList li {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  animation: content-in 650ms 300ms both;
+}
+.methodList li + li {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #bed0e526;
+  animation-delay: 400ms;
+}
+.methodIcon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #ffd33d33;
+  border-radius: 13px;
+  background: #ffd33d0a;
+  color: #ffd33d;
+}
+.googleIcon { border-color: #ffffff26; background: #ffffff; }
+.methodList p { margin: 0; color: #f4f8ff; font-size: 16px; line-height: 1.7; }
+.methodList strong { font-weight: 550; }
+.methodList p span { display: block; margin-top: 6px; color: #bed0e5; font-size: 14px; line-height: 1.85; }
+.university { margin: auto 0 0; padding-top: 16px; font-size: 11px; line-height: 1.7; letter-spacing: 3px; color: #aac2dc; }
+.university::before { content: ""; display: block; width: 32px; height: 1px; background: #aac2dc; margin-bottom: 15px; }
+
+.formSide { display: flex; align-items: center; padding: 44px 48px; }
+.formContent { width: 100%; max-width: 460px; margin: auto; }
+.backLink { display: inline-flex; align-items: center; gap: 9px; color: #305e93; font-size: 14px; transition: color 180ms, gap 180ms; }
+.backLink:hover { color: #102b50; gap: 13px; }
+.heading { margin: 32px 0; animation: content-in 650ms 160ms both; }
+.heading h1 { margin: 0; font-size: 36px; font-weight: 650; line-height: 1.5; letter-spacing: -.8px; }
+.heading p { margin: 8px 0 0; color: #6b7a90; font-size: 15px; line-height: 1.8; }
+.form { display: flex; flex-direction: column; gap: 22px; margin-top: 32px; }
+.form > * { animation: content-in 600ms both; }
+.form > :nth-child(1) { animation-delay: 220ms; }
+.form > :nth-child(2) { animation-delay: 280ms; }
+.form > :nth-child(3) { animation-delay: 340ms; }
+.form > :nth-child(n+4) { animation-delay: 400ms; }
+.field label { display: block; margin-bottom: 9px; font-size: 14px; font-weight: 550; }
+.inputWrap { display: flex; align-items: center; min-height: 52px; padding-left: 15px; border: 1px solid #cbd5e1; border-radius: 9px; color: #738299; transition: border-color 180ms, box-shadow 180ms, background 180ms; }
+.inputWrap:focus-within { border-color: #3978bc; box-shadow: 0 0 0 4px #3978bc14; background: #fbfdff; }
+.inputWrap > svg { flex-shrink: 0; }
+.inputWrap input { min-width: 0; width: 100%; padding: 15px 12px; border: 0; outline: none; background: transparent; color: #102b50; font-family: inherit; font-size: 14px; line-height: 1.5; }
+.inputWrap input::placeholder { color: #8b98ab; }
+.inputWrap:has(input[aria-invalid="true"]) { border-color: #d88787; }
+.passwordToggle { display: grid; place-items: center; width: 46px; height: 48px; border-radius: 7px; flex-shrink: 0; color: #738299; transition: color 180ms, background 180ms; }
+.passwordToggle:hover { color: #102b50; background: #edf4fa; }
+.submit, .google { display: flex; align-items: center; justify-content: center; gap: 13px; width: 100%; min-height: 52px; padding: 13px 12px; border-radius: 9px; font-family: inherit; font-size: 15px; font-weight: 550; line-height: 1.6; transition: background 180ms, box-shadow 180ms, transform 180ms; }
+.submit { margin-top: 3px; background: #f8fafc; color: #233e60; border: 1px solid #cbd5e1; }
+.submit:hover:not(:disabled) { background: #edf3f9; border-color: #7a9abb; transform: translateY(-1px); }
+.submit > svg { transition: transform 180ms; }
+.submit:hover:not(:disabled) > svg { transform: translateX(3px); }
+.submit:active:not(:disabled), .google:active:not(:disabled) { transform: translateY(0); }
+.submit:disabled, .google:disabled { cursor: wait; opacity: .6; }
+.divider { display: flex; align-items: center; gap: 16px; color: #7c8a9d; font-size: 13px; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #dbe3ed; }
+.google { min-height: 66px; padding: 14px 18px; border: 1px solid #174779; background: #174779; color: #fff; font-size: 17px; font-weight: 600; box-shadow: 0 7px 20px #17477926; }
+.google:hover:not(:disabled) { background: #10375f; border-color: #10375f; box-shadow: 0 10px 25px #17477938; transform: translateY(-2px); }
+.googleMark { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 9px; background: #fff; }
+.google > svg { flex-shrink: 0; }
+.googleNote { margin: 9px 0 0; text-align: center; font-size: 12px; line-height: 1.8; color: #738299; }
+.register { margin: 13px 0 0; text-align: center; font-size: 14px; color: #6b7a90; }
+.register a { display: inline-flex; align-items: center; gap: 4px; color: #1c59a0; font-weight: 550; }
+.register a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.supportContact {
+  margin: 28px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #dbe3ed;
+  color: #6b7a90;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.supportContact span { display: block; }
+.supportContact a {
+  display: inline-block;
+  margin-top: 4px;
+  color: #1c59a0;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  overflow-wrap: anywhere;
+}
+.supportContact a:hover { color: #102b50; }
+.page a:focus-visible, .page button:focus-visible { outline: 3px solid #4e97e0; outline-offset: 4px; border-radius: 5px; }
+.error { display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; border: 1px solid #f0c9c9; border-radius: 9px; background: #fff3f3; color: #a33333; font-size: 13px; line-height: 1.8; }
+.error svg { flex-shrink: 0; margin-top: 2px; }
+.spinner { animation: orbit-turn 1s linear infinite; }
+
+@keyframes panel-in { from { opacity: 0; transform: translateY(16px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes content-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes orbit-turn { to { transform: rotate(360deg); } }
+
+@media (max-width: 1100px) {
+  .brand { padding: 38px 32px 30px; }
+  .formSide { padding: 38px 32px; }
+  .brandCopy h2 { font-size: 30px; }
+  .heading h1 { font-size: 27px; }
+}
+
+@media (max-width: 767px) {
+  .page { max-width: 480px; }
+  .panel { grid-template-columns: 1fr; border-radius: 22px; min-height: auto; }
+  .brand { padding: 26px 28px 30px; }
+  .brandName { gap: 10px; font-size: 20px; }
+  .brandName svg { width: 27px; height: 27px; }
+  .brandGuide { padding: 28px 0 0; }
+  .brandCopy h2 { font-size: 27px; line-height: 1.5; }
+  .university { display: none; }
+  .loginMethods { margin-top: 23px; }
+  .loginMethods h3 { margin-bottom: 18px; font-size: 15px; }
+  .methodList li { grid-template-columns: 38px minmax(0, 1fr); gap: 12px; }
+  .methodIcon { width: 38px; height: 38px; border-radius: 11px; }
+  .methodIcon svg { width: 21px; height: 21px; }
+  .methodList p { font-size: 14px; }
+  .methodList p span { margin-top: 4px; font-size: 12px; }
+  .methodList li + li { margin-top: 20px; padding-top: 20px; }
+  .formSide { padding: 27px 28px 32px; }
+  .heading { margin: 22px 0 26px; }
+  .heading h1 { font-size: 26px; }
+  .heading p { font-size: 13px; }
+  .form { gap: 20px; }
+  .google { gap: 10px; padding-inline: 12px; font-size: 15px; }
+  .register { margin-top: 9px; font-size: 13px; }
+}
+
+@media (max-width: 359px) {
+  .brand, .formSide { padding-left: 20px; padding-right: 20px; }
+  .brandCopy h2 { font-size: 24px; }
+  .google { gap: 8px; font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page *, .page *::before, .page *::after { animation: none !important; transition: none !important; }
+}

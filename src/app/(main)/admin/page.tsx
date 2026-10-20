@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
                   {currentNav?.id === "dashboard"
-                    ? `ยินดีต้อนรับ, ${displayName} — ติดตามภาพรวมของ e-Training ได้จากหน้านี้`
+                    ? `ยินดีต้อนรับ, ${displayName} — ติดตามภาพรวมของ AI-Training ได้จากหน้านี้`
                     : currentNav?.description}
                 </p>
               </div>

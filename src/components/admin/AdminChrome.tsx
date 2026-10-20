@@ -5,13 +5,13 @@ export function AdminBrand() {
   return (
     <Link
       href="/"
-      aria-label="กลับหน้าหลัก MSU e-Training"
+      aria-label="กลับหน้าหลัก MSU AI-Training"
       className="flex items-center gap-3 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8ad1c5]"
     >
       <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
         <Image
           src="/logo_etraining.png"
-          alt="MSU e-Training"
+          alt="MSU AI-Training"
           width={40}
           height={40}
           className="h-full w-full object-cover"
@@ -21,7 +21,7 @@ export function AdminBrand() {
         <p className="text-[0.67rem] font-bold uppercase tracking-[0.2em] text-[#8ad1c5]">
           MSU
         </p>
-        <p className="text-sm font-semibold text-white">e-Training</p>
+        <p className="text-sm font-semibold text-white">AI-Training</p>
       </div>
     </Link>
   );

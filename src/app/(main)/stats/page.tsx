@@ -381,7 +381,7 @@ export default function PublicStatsPage() {
 
           <div className="relative grid gap-8 px-6 pb-7 pt-8 sm:px-10 sm:pt-10 lg:grid-cols-[1fr_0.72fr] lg:gap-14 lg:px-14 lg:pb-9">
             <div className="max-w-2xl">
-              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#84d9ca]"><span className="h-2 w-2 rounded-full bg-[#f6bd60]" /> MSU E-TRAINING / LEARNING PULSE</div>
+              <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#84d9ca]"><span className="h-2 w-2 rounded-full bg-[#f6bd60]" /> MSU AI-Training / LEARNING PULSE</div>
               <h1 className="mt-5 max-w-xl text-4xl font-black leading-[1.08] tracking-[-0.04em] text-white sm:text-5xl">ภาพรวมการเรียนรู้<br /><span className="text-[#84d9ca]">ของแพลตฟอร์ม</span></h1>
               <p className="mt-5 max-w-lg text-sm leading-7 text-[#b9cad8] sm:text-base">ดูภาพรวมการเติบโตของผู้เรียน หลักสูตรที่ได้รับความสนใจ และชุมชนการเรียนรู้จากข้อมูลสะสมทั้งหมด</p>
 

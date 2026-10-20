@@ -15,7 +15,7 @@ const anuphan = Anuphan({
 });
 
 export const metadata: Metadata = {
-  title: "MSU e-Training",
+  title: "MSU AI-Training",
   description: "เรียนรู้และพัฒนาทักษะยุคใหม่",
   icons: {
     icon: "/logo_etraining.png", // <-- ใช้โลโก้ มมส.

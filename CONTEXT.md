@@ -1,4 +1,4 @@
-# MSU e-Training Context
+# MSU AI-Training Context
 
 A Next.js platform designed for course enrollment, tracking lesson progress, taking quizzes, earning certificates, and administrative course management scoped by organization.
 

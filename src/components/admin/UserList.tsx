@@ -254,7 +254,8 @@ export default function UserList() {
                     {user.email}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">
-                    {user.studentId || "-"}
+                    {user.studentId ||
+                      (user.role === "USER" ? "บุคลากร" : "-")}
                   </td>
                   <td className="py-3 px-4 text-sm text-gray-600">
                     {editingFaculty?.userId === user.id ? (

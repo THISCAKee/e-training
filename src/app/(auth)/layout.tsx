@@ -9,7 +9,7 @@ export default function AuthLayout({
   // และใช้ flex เพื่อจัดเนื้อหา (ฟอร์ม) ให้อยู่กึ่งกลาง
   return (
     <div className="flex flex-col min-h-screen ">
-      <main className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <main className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 has-[.login-page]:bg-[#eef6fd] has-[.login-page]:py-8 sm:has-[.login-page]:py-12">
         {children}
       </main>
     </div>

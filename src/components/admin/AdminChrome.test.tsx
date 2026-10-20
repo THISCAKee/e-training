@@ -14,9 +14,9 @@ describe("admin chrome", () => {
 
     expect(markup).toContain('href="/"');
     expect(markup).toContain("logo_etraining.png");
-    expect(markup).toContain('alt="MSU e-Training"');
+    expect(markup).toContain('alt="MSU AI-Training"');
     expect(markup).toContain("MSU");
-    expect(markup).toContain("e-Training");
+    expect(markup).toContain("AI-Training");
   });
 
   it("renders a readable profile identity", () => {

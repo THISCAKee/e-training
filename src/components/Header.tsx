@@ -44,7 +44,7 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-4">
           {/*<p>
             <span className="text-3xl font-bold text-yellow-400 text-shadow-lg/20 hover:text-amber-500">
-              E-TRAINING
+              AI-Training
             </span>
           </p>*/}
           <Image

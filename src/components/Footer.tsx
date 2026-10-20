@@ -30,7 +30,7 @@ export default function Footer() {
           />
         </Link>
         <p>
-          &copy; {new Date().getFullYear()} E-Training Platform. Mahasarakham
+          &copy; {new Date().getFullYear()} AI-Training Platform. Mahasarakham
           University.
         </p>
       </div>

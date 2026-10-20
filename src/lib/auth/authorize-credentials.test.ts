@@ -121,6 +121,15 @@ describe("authorizeCredentials", () => {
     ).resolves.toBeNull();
   });
 
+  it("rejects password sign-in for an account created through Google", async () => {
+    await expect(
+      authorizeCredentials(
+        { identifier: "learner@example.test", password: "anything" },
+        dependencies([{ ...learner, password: null }]),
+      ),
+    ).resolves.toBeNull();
+  });
+
   it("rejects missing credentials", async () => {
     await expect(
       authorizeCredentials({}, dependencies([admin])),

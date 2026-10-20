@@ -5,7 +5,7 @@ export interface CredentialUser {
   email: string;
   username: string | null;
   name: string | null;
-  password: string;
+  password: string | null;
   role: UserRole;
   studentId: string | null;
   organizationId: number | null;
@@ -42,7 +42,7 @@ export async function authorizeCredentials(
     (await dependencies.findAdminByUsername(identifier)) ??
     (await dependencies.findNonAdminByEmail(identifier));
 
-  if (!user) return null;
+  if (!user?.password) return null;
 
   const isPasswordMatch = await dependencies.comparePassword(
     password,
@@ -51,6 +51,12 @@ export async function authorizeCredentials(
 
   if (!isPasswordMatch) return null;
 
+  return toAuthorizedUser(user);
+}
+
+export function toAuthorizedUser(
+  user: Omit<CredentialUser, "username" | "password">,
+): AuthorizedUser {
   return {
     id: String(user.id),
     email: user.email,

@@ -40,6 +40,11 @@ export default async function DashboardPage() {
     },
   });
 
+  // ผู้ใช้ Google ที่ยังไม่ได้เลือกคณะ/หน่วยงาน
+  if (session.user.needsFaculty && !user?.faculty) {
+    redirect("/complete-profile?callbackUrl=%2Fdashboard");
+  }
+
   const enrollments = await prisma.userCourseEnrollment.findMany({
     where: { userId: userId },
     orderBy: { enrolledAt: "desc" },
@@ -179,10 +184,12 @@ export default async function DashboardPage() {
                   className="text-xs font-semibold px-3 py-1 rounded-full"
                   style={{ background: "rgba(255,255,255,0.2)", color: "white" }}
                 >
-                  นิสิต
+                  {user?.studentId ? "นิสิต" : "บุคลากร"}
                 </span>
               </div>
-              <p className="text-indigo-200 mb-4">รหัสนิสิต: {user?.studentId || "-"}</p>
+              <p className="text-indigo-200 mb-4">
+                {user?.studentId ? `รหัสนิสิต: ${user.studentId}` : "บุคลากร"}
+              </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
