@@ -61,10 +61,10 @@ export default function Header() {
   return (
     <header ref={headerRef} className={styles.header}>
       <div className={styles.inner}>
-        <Link href="/" className={styles.brand} onClick={() => setPanel(null)} aria-label="MSU AI-Training หน้าหลัก">
+        <Link href="/" className={styles.brand} onClick={() => setPanel(null)} aria-label="MSU Smartlearning หน้าหลัก">
           <Image src="/logo_etraining.png" alt="" width={80} height={49} className={styles.logo} />
           <span className={styles.brandText}>
-            <strong>MSU AI-Training</strong>
+            <strong>MSU SMARTLEARNING</strong>
             <span>สำนักวิทยบริการ มหาวิทยาลัยมหาสารคาม</span>
           </span>
         </Link>
