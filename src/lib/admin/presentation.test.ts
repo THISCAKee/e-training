@@ -8,6 +8,7 @@ describe("admin navigation presentation", () => {
       "courses",
       "users",
       "organizations",
+      "podcasts",
     ]);
   });
 

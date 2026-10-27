@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import {
   Activity,
-  ArrowUpRight,
   BarChart3,
   BookOpen,
   GraduationCap,
@@ -11,7 +10,6 @@ import {
   UsersRound,
 } from "lucide-react";
 import {
-  getBarColor,
   getBarDelay,
   getBarScale,
   getSharePercentage,
@@ -42,19 +40,21 @@ type Stats = {
 };
 
 const panelClass =
-  "rounded-[1.35rem] border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]";
+  "rounded-[1.35rem] border border-slate-200/70 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.035)]";
 
-const facultyColors = [
-  "#0f766e",
-  "#4f46e5",
-  "#f5b942",
-  "#0f4c5c",
-  "#a855f7",
-  "#ef6a5b",
-  "#2f9e8f",
-  "#64748b",
-];
-const certificateColors = ["#0f766e", "#f5b942"];
+const graphGradients = [
+  ["#93c5fd", "#dbeafe"],
+  ["#bea8f4", "#e9ddff"],
+  ["#eba8cf", "#fde2f1"],
+  ["#f1cf7c", "#fff1c9"],
+  ["#91d1b5", "#d8f2e8"],
+  ["#86c8e5", "#d6f0fc"],
+] as const;
+
+function getGraphGradient(index: number, direction: "0deg" | "90deg" = "90deg") {
+  const [start, end] = graphGradients[index % graphGradients.length];
+  return `linear-gradient(${direction}, ${start}, ${end})`;
+}
 
 const formatNumber = (value: number) => value.toLocaleString("th-TH");
 
@@ -69,30 +69,30 @@ function StatCard({
   value: number;
   detail: string;
   icon: React.ReactNode;
-  accent: "teal" | "indigo" | "amber";
+  accent: "blue" | "indigo" | "sky";
 }) {
   const accentStyles = {
-    teal: {
-      icon: "bg-[#e4f4f0] text-[#0f766e]",
-      dot: "bg-[#0f766e]",
-      value: "text-[#0f766e]",
+    blue: {
+      icon: "bg-[#e5efff] text-[#356fc1]",
+      glow: "from-blue-100/80 via-sky-50/80 to-white/0",
+      value: "text-slate-900",
     },
     indigo: {
-      icon: "bg-[#e9e8ff] text-[#4f46e5]",
-      dot: "bg-[#4f46e5]",
-      value: "text-[#4f46e5]",
+      icon: "bg-[#e9edff] text-[#526fb6]",
+      glow: "from-indigo-100/80 via-blue-50/80 to-white/0",
+      value: "text-slate-900",
     },
-    amber: {
-      icon: "bg-[#fff3d4] text-[#a16207]",
-      dot: "bg-[#f5b942]",
-      value: "text-[#a16207]",
+    sky: {
+      icon: "bg-[#e2f4ff] text-[#397ca5]",
+      glow: "from-sky-100/80 via-cyan-50/80 to-white/0",
+      value: "text-slate-900",
     },
   }[accent];
 
   return (
     <article className={`${panelClass} group relative overflow-hidden p-5 sm:p-6`}>
       <div
-        className={`absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-60 transition-transform duration-500 group-hover:scale-125 ${accentStyles.dot}`}
+        className={`absolute -right-12 -top-14 h-36 w-36 rounded-full bg-gradient-to-br blur-2xl transition-transform duration-500 group-hover:scale-110 ${accentStyles.glow}`}
         aria-hidden="true"
       />
       <div className="relative flex items-start justify-between gap-4">
@@ -121,16 +121,13 @@ function PanelHeader({
   return (
     <div className="mb-6 flex items-start justify-between gap-4">
       <div>
-        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#0f766e]">
+        <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#315e9c]">
           {eyebrow}
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight text-slate-900">
           {title}
         </h2>
         <p className="mt-1 text-sm text-slate-500">{detail}</p>
-      </div>
-      <div className="hidden rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[0.68rem] font-semibold text-slate-500 sm:block">
-        Live data
       </div>
     </div>
   );
@@ -166,11 +163,12 @@ function CategoryBars({ categories }: { categories: CategoryStat[] }) {
               {formatNumber(category.count)}
             </span>
           </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-8 overflow-hidden rounded-md bg-slate-100">
             <div
-              className="stats-bar-fill h-full rounded-full bg-[#0f766e]"
+              className="stats-bar-fill h-full rounded-md"
               style={{
                 width: `${getBarScale(category.count, maximum)}%`,
+                background: getGraphGradient(index),
                 animationDelay: `${index * 80}ms`,
               }}
             />
@@ -206,7 +204,18 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
           role="img"
           aria-label="สัดส่วนผู้เรียนตามหน่วยงาน"
         >
-          <circle cx="60" cy="60" r={radius} fill="none" stroke="#edf1f2" strokeWidth="15" />
+        <circle cx="60" cy="60" r={radius} fill="none" stroke="#f1f2f4" strokeWidth="15" />
+          <defs>
+            {faculties.map((_, index) => {
+              const [start, end] = graphGradients[index % graphGradients.length];
+              return (
+                <linearGradient key={`faculty-gradient-${index}`} id={`faculty-gradient-${index}`} x1="0%" y1="50%" x2="100%" y2="50%">
+                  <stop offset="0%" stopColor={start} />
+                  <stop offset="100%" stopColor={end} />
+                </linearGradient>
+              );
+            })}
+          </defs>
           {faculties.map((faculty, index) => {
             const percentage = percentages[index];
             const segment = Math.max(percentage * circumference - 1.5, 0);
@@ -222,7 +231,7 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
                 cy="60"
                 r={radius}
                 fill="none"
-                stroke={getBarColor(index, facultyColors)}
+                stroke={`url(#faculty-gradient-${index})`}
                 strokeWidth={hoveredSlice === index ? "18" : "15"}
                 strokeDasharray={`${segment} ${circumference}`}
                 strokeDashoffset={-offset}
@@ -269,7 +278,7 @@ function FacultyDonut({ faculties }: { faculties: CategoryStat[] }) {
               <div className="flex min-w-0 items-center gap-2">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: getBarColor(index, facultyColors) }}
+                  style={{ background: getGraphGradient(index) }}
                 />
                 <span className="truncate text-xs font-semibold text-slate-600" title={faculty.name}>
                   {faculty.name}
@@ -301,7 +310,7 @@ function CourseRanking({ courses }: { courses: CourseEnrollmentStat[] }) {
           className="group rounded-2xl border border-transparent p-3 transition-colors hover:border-slate-200 hover:bg-slate-50"
         >
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#eef7f5] text-sm font-bold text-[#0f766e]">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#edf3ff] text-sm font-bold text-[#345ea8]">
               {String(index + 1).padStart(2, "0")}
             </span>
             <div className="min-w-0 flex-1">
@@ -309,14 +318,13 @@ function CourseRanking({ courses }: { courses: CourseEnrollmentStat[] }) {
                 <p className="truncate text-sm font-semibold text-slate-800" title={course.title}>{course.title}</p>
                 <span className="shrink-0 text-xs font-bold text-slate-500">{formatNumber(course._count.enrollments)}</span>
               </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-2 h-8 overflow-hidden rounded-md bg-slate-100">
                 <div
-                  className="h-full rounded-full bg-[#f5b942] transition-all duration-700"
-                  style={{ width: `${getBarScale(course._count.enrollments, maximum)}%` }}
+                  className="h-full rounded-md transition-all duration-700"
+                style={{ width: `${getBarScale(course._count.enrollments, maximum)}%`, background: getGraphGradient(index) }}
                 />
               </div>
             </div>
-            <ArrowUpRight size={16} className="shrink-0 text-slate-300 transition-colors group-hover:text-[#0f766e]" />
           </div>
         </div>
       ))}
@@ -333,18 +341,18 @@ function CertificateBars({ certificates }: { certificates: CategoryStat[] }) {
 
   return (
     <div
-      className="flex min-h-56 items-end justify-center gap-5 px-1 pb-1 sm:gap-8"
+      className="flex min-h-64 items-end justify-center gap-5 px-1 pb-1 sm:gap-10"
       aria-label="กราฟแท่งแนวตั้งแสดงจำนวนผู้เรียนที่ได้รับและยังไม่ได้รับใบประกาศ"
     >
       {certificates.map((certificate, index) => (
-        <div key={certificate.name} className="flex w-32 flex-col items-center gap-2 sm:w-40">
+        <div key={certificate.name} className="flex w-36 flex-col items-center gap-2 sm:w-35">
           <span className="text-xs font-bold text-slate-700">{formatNumber(certificate.count)} คน</span>
-          <div className="flex h-40 w-full items-end overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-1">
+          <div className="flex h-48 w-20 items-end overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 p-1">
             <div
-              className="stats-bar-fill stats-bar-fill--vertical w-full rounded-xl"
+              className="stats-bar-fill stats-bar-fill--vertical w-full rounded-2xl"
               style={{
                 height: `${getBarScale(certificate.count, maximum)}%`,
-                backgroundColor: getBarColor(index, certificateColors),
+                background: getGraphGradient(index + 1, "0deg"),
                 animationDelay: getBarDelay(index),
               }}
               aria-label={`${certificate.name}: ${formatNumber(certificate.count)} คน`}
@@ -407,33 +415,32 @@ export default function AdminStats() {
   return (
     <div className="space-y-5 sm:space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Learners" value={stats.userCount} detail="ผู้เรียนในขอบเขตที่คุณดูแล" icon={<UsersRound size={21} />} accent="teal" />
-        <StatCard label="Courses" value={stats.courseCount} detail="หลักสูตรที่พร้อมให้ลงทะเบียน" icon={<BookOpen size={21} />} accent="indigo" />
-        <StatCard label="Enrollments" value={stats.enrollmentCount} detail="การลงทะเบียนเรียนสะสม" icon={<GraduationCap size={21} />} accent="amber" />
+        <StatCard label="Learners" value={stats.userCount} detail="จำนวนผู้เรียนทั้งหมด" icon={<UsersRound size={21} />} accent="blue" />
+        <StatCard label="Courses" value={stats.courseCount} detail="จำนวนหลักสูตรทั้งหมด" icon={<BookOpen size={21} />} accent="indigo" />
+        <StatCard label="Enrollments" value={stats.enrollmentCount} detail="จำนวนการลงทะเบียนเรียนทั้งหมด" icon={<GraduationCap size={21} />} accent="sky" />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.45fr_1fr]">
         <section className={`${panelClass} p-5 sm:p-6`}>
-          <PanelHeader eyebrow="Enrollment mix" title="การลงทะเบียนแยกตามหมวดหมู่" detail="ดูว่าผู้เรียนกำลังสนใจหลักสูตรประเภทใดมากที่สุด" />
+          <PanelHeader eyebrow=" " title="หมวดหมู่การลงทะเบียน" detail="ดูว่าผู้เรียนกำลังสนใจหลักสูตรประเภทใดมากที่สุด" />
           <CategoryBars categories={stats.categoryStats} />
         </section>
 
         <section className={`${panelClass} p-5 sm:p-6`}>
-          <PanelHeader eyebrow="Learner map" title="ผู้เรียนตามหน่วยงาน" detail={`${formatNumber(totalLearnersByFaculty)} คนในข้อมูลปัจจุบัน`} />
+          <PanelHeader eyebrow=" " title="ผู้เรียนตามหน่วยงาน" detail={`${formatNumber(totalLearnersByFaculty)} คนในข้อมูลปัจจุบัน`} />
           <FacultyDonut faculties={stats.facultyStats} />
         </section>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
         <section className={`${panelClass} p-5 sm:p-6`}>
-          <PanelHeader eyebrow="Course reach" title="หลักสูตรที่มีผู้เรียนสูงสุด" detail="จัดอันดับจากจำนวน Course Enrollment สะสม" />
+          <PanelHeader eyebrow=" " title="หลักสูตรที่มีผู้เรียนสูงสุด" detail="อันดับ Course ที่เรียนมากที่สุด" />
           <CourseRanking courses={stats.courseEnrollmentStats} />
         </section>
 
         <section className={`${panelClass} p-5 sm:p-6`}>
           <PanelHeader
-            eyebrow="Certificate status"
-            title="สถานะใบประกาศของผู้เรียน"
+            eyebrow=" " title="สถานะใบประกาศของผู้เรียน"
             detail="นับผู้เรียนไม่ซ้ำคนจากหลักสูตรที่ลงทะเบียน"
           />
           <CertificateBars certificates={stats.certificateStats} />
@@ -442,7 +449,7 @@ export default function AdminStats() {
 
       {stats.lessonCount !== undefined && (
         <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-500 sm:px-5">
-          <span className="flex items-center gap-2"><Layers3 size={15} className="text-[#0f766e]" /> Lessons ที่เผยแพร่ในระบบ</span>
+          <span className="flex items-center gap-2"><Layers3 size={15} className="text-[#315e9c]" /> Lessons ที่เผยแพร่ในระบบ</span>
           <span className="font-bold text-slate-800">{formatNumber(stats.lessonCount)} lessons</span>
         </div>
       )}

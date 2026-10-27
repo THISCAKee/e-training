@@ -195,3 +195,16 @@ model Organization {
   users       User[] // ผู้ใช้ที่สังกัดหน่วยงานนี้
   courses     Course[] // คอร์สที่หน่วยงานนี้สร้าง
 }
+
+model Podcast {
+  id             Int      @id @default(autoincrement())
+  title          String   @db.VarChar(255)
+  description    String   @db.Text
+  youtubeVideoId String   @db.VarChar(11)
+  order          Int      @default(0)
+  isPublished    Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([isPublished, order, id])
+}

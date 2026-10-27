@@ -24,7 +24,8 @@ describe("admin chrome", () => {
       <AdminProfile displayName="Admin" isOrgAdmin={false} />,
     );
 
-    expect(markup).toContain(">A<");
+    expect(markup).toContain('aria-label="รูปประจำตัว Admin"');
+    expect(markup).toContain("<svg");
     expect(markup).toContain(">Admin<");
     expect(markup).toContain("Administrator");
     expect(markup).not.toContain("displayName.slice");

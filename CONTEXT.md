@@ -84,3 +84,7 @@ _Avoid_: Quiz Result, Submission
 **Developer**: "When is a **Course Enrollment** marked as completed?"
 
 **Domain Expert**: "When the **Learner** has completed all **Lessons** and passed all associated **Quizzes** in that **Course**."
+
+### Podcasts
+
+**Podcast**: An independently managed YouTube video episode, separate from Course and Lesson. ADMIN manages title, description, YouTube link, display order and publication status in the Podcasts workspace tab. ORG_ADMIN cannot manage podcasts. The public `/podcasts` page shows only published episodes, ordered by display order ascending and ID descending.

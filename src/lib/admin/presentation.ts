@@ -1,7 +1,7 @@
 export type AdminRole = "ADMIN" | "ORG_ADMIN";
 
 export type AdminNavItem = {
-  id: "dashboard" | "courses" | "users" | "organizations";
+  id: "dashboard" | "courses" | "users" | "organizations" | "podcasts";
   label: string;
   description: string;
   adminOnly?: boolean;
@@ -28,6 +28,12 @@ const navigation: AdminNavItem[] = [
     id: "organizations",
     label: "Organizations",
     description: "หน่วยงานในระบบ",
+    adminOnly: true,
+  },
+  {
+    id: "podcasts",
+    label: "Podcasts",
+    description: "จัดการวิดีโอ Podcast",
     adminOnly: true,
   },
 ];
