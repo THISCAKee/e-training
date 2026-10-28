@@ -9,20 +9,20 @@ export function AdminBrand() {
       aria-label="กลับหน้าหลัก MSU AI-Training"
       className="flex items-center gap-3 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
     >
-      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <Image
           src="/logo_etraining.png"
-          alt="MSU AI-Training"
+          alt="DASDBOARD"
           width={40}
           height={40}
           className="h-full w-full object-cover"
         />
       </div>
       <div>
-        <p className="text-[0.67rem] font-bold uppercase tracking-[0.2em] text-blue-700">
-          MSU
+        <p className="text-sm font-bold text-blue-700">
+          DASDBOARD
         </p>
-        <p className="text-sm font-semibold text-slate-900">AI-Training</p>
+        <p className="text-sm font-semibold text-slate-900">SMARTLEARNING</p>
       </div>
     </Link>
   );
@@ -40,7 +40,7 @@ export function AdminProfile({
   avatarSeed?: string;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-full border border-white/80 bg-white/60 py-1.5 pl-3 pr-1.5 shadow-[0_6px_24px_rgba(18,55,66,0.07)] backdrop-blur-xl transition duration-200 hover:bg-white/85 hover:shadow-[0_10px_30px_rgba(18,55,66,0.11)]">
+    <div className="flex min-w-0 items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-3 pr-1.5 shadow-[0_4px_16px_rgba(0,48,73,0.06)] transition duration-200 hover:shadow-[0_7px_20px_rgba(0,48,73,0.1)]">
       <div className="hidden min-w-0 text-right sm:block">
         <p className="max-w-36 truncate text-xs font-bold text-slate-800">
           {displayName}
