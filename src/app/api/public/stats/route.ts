@@ -1,24 +1,14 @@
-// src/app/api/public/stats/route.ts
-
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { groupCoursesByCategory } from "@/lib/stats/presentation";
 
 export async function GET() {
   try {
-    const userCount = await prisma.user.count({
-      where: {
-        role: "USER",
-      },
-    });
-    const courseCount = await prisma.course.count();
-    const enrollmentCount = await prisma.userCourseEnrollment.count();
-
-    // ดึงทุกคอร์สพร้อมจำนวนผู้เรียน เพื่อให้คอร์สที่ยังไม่มีผู้เรียนแสดงเป็น 0 ได้ด้วย
-    const coursesWithEnrollmentCounts = await prisma.course.findMany({
+    const courseEnrollmentStats = await prisma.course.findMany({
       select: {
         id: true,
         title: true,
+        description: true,
+        imageUrl: true,
         category: {
           select: {
             name: true,
@@ -30,72 +20,19 @@ export async function GET() {
           },
         },
       },
-    });
-
-    const categoryCourseStats = groupCoursesByCategory(
-      coursesWithEnrollmentCounts.map((course) => ({
-        courseId: course.id,
-        courseTitle: course.title || "ไม่ระบุชื่อหลักสูตร",
-        categoryName: course.category?.name || "ไม่มีหมวดหมู่",
-        count: course._count.enrollments,
-      })),
-    );
-
-    // ดึงข้อมูลผู้ใช้เพื่อนำมาคำนวณสถิติตามคณะ (สังกัด)
-    const users = await prisma.user.findMany({
-      where: {
-        role: "USER",
-      },
-      select: {
-        faculty: true,
-      },
-    });
-
-    const facultyMap: Record<string, number> = {};
-    users.forEach((user) => {
-      const facultyName = user.faculty || "ไม่ระบุคณะ";
-      facultyMap[facultyName] = (facultyMap[facultyName] || 0) + 1;
-    });
-
-    // แปลงข้อมูลให้อยู่ในรูปแบบ Array และเรียงลำดับจากมากไปน้อย
-    const categoryStats = categoryCourseStats.map(({ name, count }) => ({ name, count }));
-
-    const facultyStats = Object.keys(facultyMap)
-      .map((name) => ({
-        name,
-        count: facultyMap[name],
-      }))
-      .sort((a, b) => b.count - a.count);
-
-    const courseEnrollmentStats = await prisma.course.findMany({
-      select: {
-        id: true,
-        title: true,
-        _count: {
-          select: {
-            enrollments: true,
+      orderBy: [
+        {
+          enrollments: {
+            _count: "desc",
           },
         },
-      },
-      orderBy: {
-        enrollments: {
-          _count: "desc",
+        {
+          title: "asc",
         },
-      },
+      ],
     });
 
-    return NextResponse.json(
-      {
-        userCount,
-        courseCount,
-        enrollmentCount,
-        categoryStats,
-        categoryCourseStats,
-        facultyStats,
-        courseEnrollmentStats,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ courseEnrollmentStats }, { status: 200 });
   } catch (error) {
     console.error("GET_PUBLIC_STATS_ERROR", error);
     return new NextResponse("Internal Server Error", { status: 500 });
