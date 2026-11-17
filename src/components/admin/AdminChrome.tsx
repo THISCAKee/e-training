@@ -12,7 +12,7 @@ export function AdminBrand() {
       <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <Image
           src="/logo_etraining.png"
-          alt="DASDBOARD"
+          alt="MSU AI-Training"
           width={40}
           height={40}
           className="h-full w-full object-cover"
@@ -40,7 +40,7 @@ export function AdminProfile({
   avatarSeed?: string;
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-3 pr-1.5 shadow-[0_4px_16px_rgba(0,48,73,0.06)] transition duration-200 hover:shadow-[0_7px_20px_rgba(0,48,73,0.1)]">
+    <div className="flex min-w-0 items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-3 pr-1.5 transition duration-200">
       <div className="hidden min-w-0 text-right sm:block">
         <p className="max-w-36 truncate text-xs font-bold text-slate-800">
           {displayName}

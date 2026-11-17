@@ -228,7 +228,7 @@ export default function FacultyCombobox({
       </div>
 
       <div
-        className={`absolute inset-x-0 top-full z-20 mt-2 origin-top overflow-hidden rounded-2xl border border-gray-200/80 bg-white/95 shadow-[0_18px_40px_-12px_rgba(15,23,42,0.25)] backdrop-blur transition-[opacity,transform,visibility] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`absolute inset-x-0 top-full z-20 mt-2 origin-top overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg transition-[opacity,transform,visibility] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           isOpen
             ? "visible translate-y-0 scale-100 opacity-100"
             : "invisible -translate-y-1 scale-[0.97] opacity-0"

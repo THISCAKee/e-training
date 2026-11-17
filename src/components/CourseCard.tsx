@@ -12,30 +12,30 @@ export default function CourseCard({ course }: CourseCardProps) {
   const imageUrl = course.imageUrl || "/bg-hero.jpg";
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
-      <Link href={`/courses/${course.id}`}>
+    <div className="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-colors duration-200 hover:border-gray-400">
+      <Link href={`/courses/${course.id}`} className="block">
         <Image
           src={imageUrl}
           alt={course.title}
           width={600}
           height={400}
           unoptimized
-          className="w-full h-48 object-cover"
+          className="w-full h-44 object-cover border-b border-gray-200"
         />
-        <div className="p-6">
+        <div className="p-5">
           {course.category?.name && (
-            <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">
+            <span className="inline-block text-xs font-medium tracking-wide text-accent-text mb-2">
               {course.category.name}
             </span>
           )}
-          <h3 className="text-xl font-bold text-gray-800 mb-2 truncate">
+          <h3 className="text-lg font-semibold leading-snug text-gray-900 mb-2 line-clamp-2">
             {course.title}
           </h3>
-          <p className="text-gray-600 text-sm h-20 overflow-hidden">
+          <p className="text-gray-500 text-sm leading-relaxed line-clamp-3 min-h-16">
             {course.description}
           </p>
-          <div className="mt-4 text-blue-600 font-medium hover:text-blue-800">
-            ดูรายละเอียด →
+          <div className="mt-4 text-sm text-gray-900 font-medium">
+            ดูรายละเอียด <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
           </div>
         </div>
       </Link>

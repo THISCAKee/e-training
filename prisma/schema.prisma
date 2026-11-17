@@ -201,10 +201,12 @@ model Podcast {
   title          String   @db.VarChar(255)
   description    String   @db.Text
   youtubeVideoId String   @db.VarChar(11)
+  category       String?  @db.VarChar(100)
   order          Int      @default(0)
   isPublished    Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@index([isPublished, order, id])
+  @@index([category])
 }

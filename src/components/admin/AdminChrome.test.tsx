@@ -15,8 +15,9 @@ describe("admin chrome", () => {
     expect(markup).toContain('href="/"');
     expect(markup).toContain("logo_etraining.png");
     expect(markup).toContain('alt="MSU AI-Training"');
-    expect(markup).toContain("MSU");
-    expect(markup).toContain("AI-Training");
+    expect(markup).toContain('aria-label="กลับหน้าหลัก MSU AI-Training"');
+    expect(markup).toContain("DASDBOARD");
+    expect(markup).toContain("SMARTLEARNING");
   });
 
   it("renders a readable profile identity", () => {

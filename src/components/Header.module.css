@@ -2,10 +2,9 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  border-bottom: 1px solid #e8edf2;
-  background: rgb(255 255 255 / 94%);
-  backdrop-filter: blur(20px);
-  color: #263346;
+  border-bottom: 1px solid #e6ebef;
+  background: rgb(255 255 255 / 96%);
+  color: #003049;
   font-family: var(--font-anuphan), sans-serif;
 }
 .inner {
@@ -14,32 +13,32 @@
   flex-wrap: wrap;
   gap: 16px;
   max-width: 1280px;
-  min-height: 84px;
+  min-height: 72px;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 10px 24px;
 }
 .brand { display: flex; align-items: center; gap: 16px; flex-shrink: 0; border-radius: 10px; }
-.logo { width: 72px; height: auto; }
-.brandText { display: none; padding-left: 16px; border-left: 1px solid #e5eaf0; }
-.brandText strong { display: block; font-size: 15px; letter-spacing: -.4px; color: #172439; }
-.brandText > span { display: block; margin-top: 3px; font-size: 11px; color: #7c8797; }
+.logo { width: 60px; height: auto; }
+.brandText { display: none; padding-left: 16px; border-left: 1px solid #e6ebef; }
+.brandText strong { display: block; font-size: 15px; letter-spacing: -.2px; color: #003049; }
+.brandText > span { display: block; margin-top: 3px; font-size: 11px; color: #66788a; }
 .navigation { display: none; order: 3; width: 100%; gap: 4px; }
-.navigationOpen { display: flex; flex-direction: column; padding-top: 12px; border-top: 1px solid #edf0f4; }
+.navigationOpen { display: flex; flex-direction: column; padding-top: 12px; border-top: 1px solid #e6ebef; }
 .navLink {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
-  color: #637084;
-  transition: background 180ms, color 180ms;
+  color: #4a5e6f;
+  transition: color 160ms;
 }
-.navLink:hover { background: #f5f7fa; color: #172439; }
-.navLink[aria-current="page"] { background: #fff7e2; color: #825c15; }
-.activeDot { display: none; width: 5px; height: 5px; border-radius: 50%; background: #e9a918; }
+.navLink:hover { color: #003049; }
+.navLink[aria-current="page"] { color: #003049; font-weight: 600; }
+.activeDot { display: none; width: 4px; height: 4px; border-radius: 50%; background: #f77f00; }
 .navLink[aria-current="page"] .activeDot { display: block; }
 .actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .loginButton {
@@ -47,103 +46,83 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
-  min-height: 44px;
-  padding: 10px 17px;
-  background: #f7bf35;
-  border: 1px solid #efb731;
-  border-radius: 13px;
-  box-shadow: 0 3px 0 #e8ad24;
-  color: #342a17;
+  min-height: 40px;
+  padding: 8px 16px;
+  background: #003049;
+  border: 1px solid #003049;
+  border-radius: 8px;
+  color: #ffffff;
   font-size: 14px;
-  font-weight: 600;
-  transition: transform 180ms, box-shadow 180ms, background 180ms;
+  font-weight: 500;
+  transition: background 160ms;
 }
-.loginButton:hover { transform: translateY(-2px); background: #ffca45; box-shadow: 0 5px 0 #e8ad24; }
-.loginButton:active { transform: translateY(2px); box-shadow: 0 1px 0 #e8ad24; }
-.mobileButton { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #e5eaf0; border-radius: 13px; color: #637084; }
-.mobileButton:hover { background: #f5f7fa; }
-.skeleton { height: 48px; width: 100px; border-radius: 16px; background: #f0f3f6; }
+.loginButton:hover { background: #00263a; }
+.mobileButton { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #e6ebef; border-radius: 8px; color: #4a5e6f; }
+.mobileButton:hover { background: #f6f8fa; }
+.skeleton { height: 40px; width: 100px; border-radius: 8px; background: #f6f8fa; }
 .profile { position: relative; }
 .profileButton {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  padding: 5px 10px 5px 6px;
+  gap: 10px;
+  min-height: 48px;
+  padding: 4px 8px 4px 4px;
   border: 1px solid transparent;
-  border-radius: 18px;
-  background: #f7f8fa;
+  border-radius: 10px;
+  background: transparent;
   text-align: left;
-  transition: background 200ms, border-color 200ms, box-shadow 200ms;
+  transition: background 160ms, border-color 160ms;
 }
 .profileButton:hover, .profileButton[aria-expanded="true"] {
-  background: #fffcf4;
-  border-color: #f2dfa7;
-  box-shadow: 0 4px 16px rgb(172 126 25 / 7%);
+  background: #f6f8fa;
+  border-color: #e6ebef;
 }
-.avatarEntrance { display: block; animation: avatar-arrive 650ms cubic-bezier(.2, .8, .3, 1.25) both; }
-.avatarShell { display: block; position: relative; width: 42px; height: 42px; isolation: isolate; }
-.avatarShell::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  z-index: -1;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, #f8c542, #fff0b6, #e9a31c, #fff0b6, #f8c542);
-  opacity: 0;
-  animation: avatar-halo 1100ms 250ms ease-out both;
-  transition: opacity 200ms, transform 600ms;
-}
+.avatarEntrance { display: block; }
+.avatarShell { display: block; position: relative; width: 36px; height: 36px; }
 .avatarShell > svg {
   display: block;
   width: 100%;
   height: 100%;
-  border: 2px solid white;
   border-radius: 50%;
-  transition: transform 350ms cubic-bezier(.2, .8, .3, 1.4);
 }
-.profileButton:hover .avatarShell > svg { transform: translateY(-2px) rotate(-8deg) scale(1.08); }
-.profileButton:hover .avatarShell::before,
-.profileButton[aria-expanded="true"] .avatarShell::before { animation: none; opacity: 1; transform: rotate(100deg); }
-.profileButton[aria-expanded="true"] .avatarShell > svg { transform: rotate(5deg) scale(1.05); }
 .onlineBadge {
   display: grid;
   place-items: center;
   position: absolute;
   bottom: 0;
   right: -1px;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: 2px solid white;
   border-radius: 50%;
   background: #3d9475;
   color: white;
 }
 .identity { display: none; min-width: 0; }
-.greeting { display: block; margin-bottom: 1px; font-size: 10px; line-height: 1.4; color: #8791a0; }
-.identity strong { display: block; overflow: hidden; max-width: 128px; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; color: #263346; }
-.chevron { color: #939ba7; transition: transform 250ms; }
+.greeting { display: block; margin-bottom: 1px; font-size: 10px; line-height: 1.4; color: #66788a; }
+.identity strong { display: block; overflow: hidden; max-width: 128px; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; color: #003049; }
+.chevron { color: #9aa8b3; transition: transform 250ms; }
 .profileButton[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 .dropdown {
   position: absolute;
-  top: calc(100% + 13px);
+  top: calc(100% + 10px);
   right: -54px;
-  width: 310px;
+  width: 300px;
   max-width: calc(100vw - 32px);
-  padding: 7px;
-  border: 1px solid #e8edf2;
-  border-radius: 22px;
+  padding: 6px;
+  border: 1px solid #e6ebef;
+  border-radius: 12px;
   background: white;
-  box-shadow: 0 18px 50px -12px rgb(26 39 57 / 20%), 0 3px 10px rgb(26 39 57 / 4%);
+  box-shadow: 0 8px 24px rgb(0 48 73 / 8%);
   transform-origin: top right;
-  animation: account-open 230ms cubic-bezier(.2, .8, .2, 1) both;
+  animation: account-open 160ms ease-out both;
 }
-.accountCard { display: flex; align-items: center; gap: 12px; padding: 18px 14px; border: 1px solid #f1e9d6; border-radius: 16px; background: #fffbf1; }
-.cardAvatar { display: block; width: 52px; height: 52px; flex-shrink: 0; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgb(116 83 18 / 8%); }
+.accountCard { display: flex; align-items: center; gap: 12px; padding: 14px 12px; border-bottom: 1px solid #e6ebef; }
+.cardAvatar { display: block; width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; }
 .cardAvatar svg { display: block; width: 100%; height: 100%; border-radius: 50%; }
 .accountIdentity { min-width: 0; }
-.accountIdentity > strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: #263346; }
-.accountIdentity > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; font-size: 11px; color: #8791a0; }
+.accountIdentity > strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: #003049; }
+.accountIdentity > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; font-size: 11px; color: #66788a; }
 .accountIdentity .accountStatus { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; color: #468269; font-size: 10px; }
 .accountStatus > span { width: 5px; height: 5px; border-radius: 50%; background: #439674; }
 .dropdownLinks { padding: 7px 2px 2px; }
@@ -152,34 +131,24 @@
   align-items: center;
   gap: 11px;
   width: 100%;
-  min-height: 48px;
-  padding: 8px;
-  border-radius: 12px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 8px;
   text-align: left;
   font-size: 13px;
-  color: #526176;
-  transition: background 180ms, color 180ms;
+  color: #4a5e6f;
+  transition: background 160ms, color 160ms;
 }
-.dropdownLink:hover { background: #f5f7fa; color: #172439; }
-.menuIcon { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid #e9edf2; border-radius: 10px; background: white; }
-.menuArrow { margin-left: auto; color: #9aa4b2; transition: transform 180ms; }
+.dropdownLink:hover { background: #f6f8fa; color: #003049; }
+.menuIcon { display: grid; place-items: center; width: 24px; height: 24px; color: inherit; }
+.menuArrow { margin-left: auto; color: #9aa8b3; transition: transform 160ms; }
 .dropdownLink:hover .menuArrow { transform: translate(2px, -2px); }
-.signOut { margin-top: 5px; border-top: 1px solid #f0f2f5; border-radius: 0 0 12px 12px; padding-top: 12px; color: #bb625e; }
-.signOut:hover { background: #fff5f4; color: #ba4742; }
-.header a:focus-visible, .header button:focus-visible { outline: 2px solid #dba52d; outline-offset: 4px; }
-@keyframes avatar-arrive {
-  0% { opacity: 0; transform: translateY(6px) scale(.65) rotate(-16deg); }
-  65% { opacity: 1; transform: translateY(-2px) scale(1.1) rotate(5deg); }
-  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
-}
-@keyframes avatar-halo {
-  0% { opacity: 0; transform: rotate(-120deg) scale(.85); }
-  35% { opacity: 1; }
-  100% { opacity: 0; transform: rotate(200deg) scale(1.1); }
-}
+.signOut { margin-top: 4px; border-top: 1px solid #e6ebef; border-radius: 0 0 8px 8px; padding-top: 10px; color: #d62828; }
+.signOut:hover { background: #fdf3f3; color: #b41f25; }
+.header a:focus-visible, .header button:focus-visible { outline: 2px solid #f77f00; outline-offset: 3px; }
 @keyframes account-open {
-  from { opacity: 0; transform: translateY(-6px) scale(.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @media (min-width: 640px) {
   .brandText { display: block; }
@@ -188,7 +157,7 @@
   .inner { flex-wrap: nowrap; gap: 16px; }
   .brandText { display: none; }
   .navigation, .navigationOpen { display: flex; flex-direction: row; order: 0; width: auto; margin-left: auto; padding: 0; border: 0; }
-  .actions { margin-left: 0; padding-left: 20px; border-left: 1px solid #e8edf2; }
+  .actions { margin-left: 0; padding-left: 20px; border-left: 1px solid #e6ebef; }
   .mobileButton { display: none; }
   .dropdown { right: 0; }
 }
@@ -199,7 +168,4 @@
 }
 @media (max-width: 374px) {
   .inner { padding-left: 16px; padding-right: 16px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .header *, .header *::before, .header *::after { animation: none !important; transition: none !important; }
 }

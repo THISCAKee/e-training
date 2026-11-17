@@ -9,11 +9,12 @@ type Episode = {
   title: string;
   description: string;
   youtubeVideoId: string;
+  category: string | null;
   order: number;
   isPublished: boolean;
 };
-type Draft = { title: string; description: string; youtubeUrl: string; order: number; isPublished: boolean };
-const emptyDraft: Draft = { title: "", description: "", youtubeUrl: "", order: 0, isPublished: false };
+type Draft = { title: string; description: string; youtubeUrl: string; category: string; order: number; isPublished: boolean };
+const emptyDraft: Draft = { title: "", description: "", youtubeUrl: "", category: "", order: 0, isPublished: false };
 const inputClass = "mt-2 min-h-11 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base leading-5 text-slate-900 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 sm:text-sm";
 
 async function responseError(response: Response) {
@@ -37,6 +38,7 @@ export default function PodcastManagement() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const previewId = youtubeVideoId(draft.youtubeUrl);
+  const categories = [...new Set(episodes.map((episode) => episode.category).filter((category): category is string => Boolean(category)))].sort((a, b) => a.localeCompare(b, "th"));
 
   async function loadEpisodes() {
     try {
@@ -64,6 +66,7 @@ export default function PodcastManagement() {
     setDraft(episode ? {
       title: episode.title, description: episode.description,
       youtubeUrl: `https://www.youtube.com/watch?v=${episode.youtubeVideoId}`,
+      category: episode.category ?? "",
       order: episode.order, isPublished: episode.isPublished,
     } : { ...emptyDraft });
     setError("");
@@ -143,6 +146,14 @@ export default function PodcastManagement() {
               <input id="podcast-url" required type="url" aria-describedby="podcast-url-hint" placeholder="https://www.youtube.com/watch?v=..." value={draft.youtubeUrl} onChange={(e) => setDraft({ ...draft, youtubeUrl: e.target.value })} className={inputClass} />
               <p id="podcast-url-hint" className="mt-2 text-xs text-slate-500">รองรับลิงก์ YouTube แบบปกติ, youtu.be, Shorts และ Live</p>
             </div>
+            <div>
+              <label htmlFor="podcast-category" className="block text-sm font-semibold text-slate-700">หมวดหมู่</label>
+              <input id="podcast-category" list="podcast-category-options" maxLength={100} aria-describedby="podcast-category-hint" placeholder="เช่น AI กับการเรียนรู้" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} className={inputClass} />
+              <datalist id="podcast-category-options">
+                {categories.map((category) => <option key={category} value={category} />)}
+              </datalist>
+              <p id="podcast-category-hint" className="mt-2 text-xs text-slate-500">เลือกหมวดหมู่เดิมหรือพิมพ์ชื่อใหม่ เว้นว่างได้หากไม่ต้องการจัดหมวดหมู่</p>
+            </div>
             {previewId && <div className="aspect-video w-full overflow-hidden rounded-xl bg-slate-950 sm:max-w-xl"><iframe key={previewId} src={`https://www.youtube-nocookie.com/embed/${previewId}`} title="ตัวอย่างวิดีโอ Podcast" className="h-full w-full border-0" allow="encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /></div>}
             <div className="grid items-start gap-5 sm:grid-cols-2">
               <div>
@@ -179,6 +190,7 @@ export default function PodcastManagement() {
               <div className="min-w-0">
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">ลำดับ {episode.order}</span>
+                  {episode.category && <span className="rounded-full border border-slate-200 px-2.5 py-1 text-slate-600">{episode.category}</span>}
                   <span className={`rounded-full px-2.5 py-1 font-semibold ${episode.isPublished ? "bg-teal-50 text-teal-700" : "bg-amber-50 text-amber-700"}`}>{episode.isPublished ? "เผยแพร่แล้ว" : "ฉบับร่าง"}</span>
                 </div>
                 <h3 className="font-semibold break-words text-slate-900">{episode.title}</h3>

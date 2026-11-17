@@ -21,9 +21,11 @@ export function parsePodcastInput(value: unknown) {
   const data = value as Record<string, unknown>;
   if (typeof data.title !== "string" || !data.title.trim() || data.title.trim().length > 255) throw new Error("กรุณากรอกชื่อตอน ไม่เกิน 255 ตัวอักษร");
   if (typeof data.description !== "string" || data.description.length > 10000) throw new Error("รายละเอียดต้องไม่เกิน 10,000 ตัวอักษร");
+  if (data.category != null && (typeof data.category !== "string" || data.category.trim().length > 100)) throw new Error("ชื่อหมวดหมู่ต้องไม่เกิน 100 ตัวอักษร");
+  const category = typeof data.category === "string" && data.category.trim() ? data.category.trim().replace(/\s+/g, " ") : null;
   const videoId = typeof data.youtubeUrl === "string" ? youtubeVideoId(data.youtubeUrl) : null;
   if (!videoId) throw new Error("กรุณากรอกลิงก์วิดีโอ YouTube ที่ถูกต้อง");
   if (typeof data.order !== "number" || !Number.isInteger(data.order) || data.order < 0 || data.order > 2147483647) throw new Error("ลำดับต้องเป็นจำนวนเต็มตั้งแต่ 0 ถึง 2147483647");
   if (typeof data.isPublished !== "boolean") throw new Error("สถานะเผยแพร่ไม่ถูกต้อง");
-  return { title: data.title.trim(), description: data.description.trim(), youtubeVideoId: videoId, order: data.order, isPublished: data.isPublished };
+  return { title: data.title.trim(), description: data.description.trim(), youtubeVideoId: videoId, category, order: data.order, isPublished: data.isPublished };
 }

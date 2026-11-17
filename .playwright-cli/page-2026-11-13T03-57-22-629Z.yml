@@ -1,0 +1,83 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]:
+        - link "MSU Smartlearning หน้าหลัก" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7]:
+            - strong [ref=e8]: MSU SMARTLEARNING
+            - generic [ref=e9]: สำนักวิทยบริการ มหาวิทยาลัยมหาสารคาม
+        - navigation "เมนูหลัก" [ref=e10]:
+          - link "หลักสูตรทั้งหมด" [ref=e11] [cursor=pointer]:
+            - /url: /courses
+          - link "ข้อมูลและสถิติ" [ref=e15] [cursor=pointer]:
+            - /url: /stats
+        - status [ref=e19]:
+          - generic [ref=e20]: กำลังโหลดข้อมูลผู้ใช้
+      - main [ref=e21]:
+        - generic [ref=e23]:
+          - generic:
+            - generic [aria-hidden]:
+              - generic: AI Prompt วิธีการคุยกับ AI
+            - generic [aria-hidden]:
+              - generic: การออกแบบงานนำเสนอและอินโฟกราฟิกด้วย Canva
+          - generic:
+            - paragraph: E-TRAINING · LEARNING FOR THE FUTURE
+            - heading "พลิกโฉมการเรียนรู้ สู่โลกดิจิทัล" [level=1]
+            - paragraph: แพลตฟอร์มที่จะช่วยพัฒนาทักษะของคุณให้พร้อมสำหรับอนาคต
+        - generic [ref=e25]:
+          - generic [ref=e27]:
+            - button "AI-Training" [ref=e28] [cursor=pointer]
+            - link "Podcast" [ref=e41] [cursor=pointer]:
+              - /url: /podcasts
+            - link "E-Learning" [ref=e48] [cursor=pointer]:
+              - /url: http://202.28.34.38/elearning/
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - heading "ฝึกฝนทักษะ AI ของคุณ" [level=2] [ref=e55]
+              - paragraph [ref=e56]: เลือกหมวดหมู่ที่ตรงกับความสนใจและเป้าหมายของคุณ เพื่อเริ่มการเรียนรู้และฝึกฝนการใช้งานเครื่องมือ AI อย่างมีประสิทธิภาพ
+            - generic [ref=e57]:
+              - link [ref=e58] [cursor=pointer]:
+                - /url: /category/AI For Creative
+                - heading "AI For Creative" [level=3] [ref=e66]
+                - paragraph [ref=e67]: ปลดล็อกจินตนาการด้วยเครื่องมือ AI สำหรับงานสร้างสรรค์และออกแบบ สร้างสรรค์ผลงานศิลปะ บทความ และวิดีโอได้อย่างไร้ขีดจำกัด
+                - generic [ref=e68]: เข้าสู่หมวดหมู่
+              - link [ref=e71] [cursor=pointer]:
+                - /url: /category/AI For Life
+                - heading "AI For Life" [level=3] [ref=e76]
+                - paragraph [ref=e77]: ยกระดับคุณภาพชีวิตด้วยการประยุกต์ใช้ AI ในชีวิตประจำวันและสังคม เพิ่มประสิทธิภาพการทำงานและการจัดการเวลา
+                - generic [ref=e78]: เข้าสู่หมวดหมู่
+              - link [ref=e81] [cursor=pointer]:
+                - /url: /category/AI For Research
+                - heading "AI For Research" [level=3] [ref=e86]
+                - paragraph [ref=e87]: เพิ่มศักยภาพการวิจัยด้วย AI สำหรับการวิเคราะห์ข้อมูลขั้นสูง การประมวลผลภาษาธรรมชาติ และการค้นคว้าทางวิทยาศาสตร์
+                - generic [ref=e88]: เข้าสู่หมวดหมู่
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - heading "หลักสูตรแนะนำ" [level=2] [ref=e94]
+            - paragraph [ref=e95]: เริ่มต้นเส้นทางการเรียนรู้ AI ของคุณด้วยหลักสูตรที่ได้รับความนิยมและมีคุณภาพครอบคลุมทุกระดับตั้งแต่พื้นฐานจนถึงขั้นสูง
+          - generic [ref=e96]:
+            - link "AI Prompt วิธีการคุยกับ AI AI For Research AI Prompt วิธีการคุยกับ AI การพัฒนาทักษะความเป็นเลิศเพื่อผู้ใช้บริการ (AI LAB for Research and Digital Creative and Digital Information New gen learning Up-Skill) ดูรายละเอียด →" [ref=e98] [cursor=pointer]:
+              - /url: /courses/2
+              - img "AI Prompt วิธีการคุยกับ AI" [ref=e99]
+              - generic [ref=e100]:
+                - generic [ref=e101]: AI For Research
+                - heading "AI Prompt วิธีการคุยกับ AI" [level=3] [ref=e102]
+                - paragraph [ref=e103]: การพัฒนาทักษะความเป็นเลิศเพื่อผู้ใช้บริการ (AI LAB for Research and Digital Creative and Digital Information New gen learning Up-Skill)
+                - generic [ref=e104]: ดูรายละเอียด →
+            - link "การออกแบบงานนำเสนอและอินโฟกราฟิกด้วย Canva AI For Creative การออกแบบงานนำเสนอและอินโฟกราฟิกด้วย Canva โครงการพัฒนาทักษะความเป็นเลิศเพื่อผู้ใช้บริการ (AI LAB for Research and Digital Creative and Digital Information New gen learning Up-Skill) ดูรายละเอียด →" [ref=e106] [cursor=pointer]:
+              - /url: /courses/1
+              - img "การออกแบบงานนำเสนอและอินโฟกราฟิกด้วย Canva" [ref=e107]
+              - generic [ref=e108]:
+                - generic [ref=e109]: AI For Creative
+                - heading "การออกแบบงานนำเสนอและอินโฟกราฟิกด้วย Canva" [level=3] [ref=e110]
+                - paragraph [ref=e111]: โครงการพัฒนาทักษะความเป็นเลิศเพื่อผู้ใช้บริการ (AI LAB for Research and Digital Creative and Digital Information New gen learning Up-Skill)
+                - generic [ref=e112]: ดูรายละเอียด →
+          - link "ดูหลักสูตรทั้งหมด" [ref=e114] [cursor=pointer]:
+            - /url: /courses
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]:
+      - link [ref=e119] [cursor=pointer]:
+        - /url: /
+      - paragraph [ref=e120]: © 2026 AI-Training Platform. Mahasarakham University.
+  - button "Open Next.js Dev Tools" [ref=e126] [cursor=pointer]

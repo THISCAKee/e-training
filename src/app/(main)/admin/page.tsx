@@ -37,7 +37,7 @@ function LoadingState() {
   return (
     <div className="admin-dashboard-state flex min-h-screen items-center justify-center px-6">
       <div className="text-center">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-[#d7e7ed] border-t-[#f77f00]" />
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-[#d7e7ed] border-t-[#b35900]" />
         <p className="mt-4 text-sm font-medium text-[#003049]">กำลังตรวจสอบสิทธิ์...</p>
       </div>
     </div>
@@ -115,7 +115,7 @@ export default function AdminDashboardPage() {
 
       <div className="relative flex min-h-screen">
         <aside
-          className={`fixed inset-y-0 left-0 z-50 flex w-[16.5rem] shrink-0 flex-col border-r border-slate-200 bg-white px-4 py-5 text-slate-600 shadow-[8px_0_28px_rgba(0,48,73,0.06)] transition-[transform,background-color] duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shadow-none ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+          className={`fixed inset-y-0 left-0 z-50 flex w-[16.5rem] shrink-0 flex-col border-r border-slate-200 bg-white px-4 py-5 text-slate-600 transition-[transform,background-color] duration-300 ease-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:shadow-none ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
           <div className="flex items-center justify-between px-2">
             <AdminBrand />
@@ -140,10 +140,10 @@ export default function AdminDashboardPage() {
                     type="button"
                     aria-current={isActive ? "page" : undefined}
                     onClick={() => handleTabChange(item.id)}
-                    className={`group relative flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-[background-color,border-color,color,transform,box-shadow] duration-200 ease-out hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f77f00]/45 ${isActive ? "border-[#003049] bg-[#003049] text-white shadow-[0_6px_16px_rgba(0,48,73,0.18)]" : "border-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900"}`}
+                    className={`group relative flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-[background-color,border-color,color,transform,box-shadow] duration-200 ease-out hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b35900]/45 ${isActive ? "border-[#003049] bg-[#003049] text-white" : "border-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900"}`}
                   >
                     <span className={`absolute left-[-1px] h-7 w-[3px] rounded-full bg-[#fcbf49] transition-all duration-200 ${isActive ? "scale-y-100 opacity-100" : "scale-y-50 opacity-0"}`} />
-                    <span className={`flex h-9 w-9 items-center justify-center rounded-xl bg-[#fcbf49]/20 text-[#f77f00] transition-all duration-200 ${isActive ? "scale-105 shadow-[0_5px_16px_rgba(252,191,73,0.22)]" : "group-hover:scale-105"}`}>
+                    <span className={`flex h-9 w-9 items-center justify-center rounded-xl bg-[#fcbf49]/20 text-[#b35900] transition-all duration-200 ${isActive ? "scale-105" : "group-hover:scale-105"}`}>
                       <NavIcon id={item.id} />
                     </span>
                     <span className="min-w-0">
@@ -158,7 +158,7 @@ export default function AdminDashboardPage() {
 
           <div className="admin-glass-card--soft mt-auto rounded-xl border p-4">
             <div className="flex items-center gap-2 text-[#003049]">
-              <Settings2 size={15} strokeWidth={1.8} className="text-[#f77f00]" />
+              <Settings2 size={15} strokeWidth={1.8} className="text-[#b35900]" />
               <span className="text-xs font-semibold">Admin workspace</span>
             </div>
             <p className="mt-2 text-xs leading-5 text-slate-500">จัดการหลักสูตรและติดตามการเรียนรู้ในพื้นที่ของคุณ</p>
@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
 
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-30 px-3 pt-3 sm:px-5">
-            <div className="mx-auto flex h-[4.25rem] max-w-[1600px] items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 shadow-[0_6px_24px_rgba(0,48,73,0.05)] sm:px-6 lg:px-8">
+            <div className="mx-auto flex h-[4.25rem] max-w-[1600px] items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <button
                   type="button"
@@ -210,8 +210,8 @@ export default function AdminDashboardPage() {
               </div>
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500 shadow-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--admin-accent)]/45 motion-reduce:animate-none" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#f77f00]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--admin-accent)]/45" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#b35900]" />
                 </span>
                 {isOrgAdmin ? "Organization scope" : "System scope"}
               </div>

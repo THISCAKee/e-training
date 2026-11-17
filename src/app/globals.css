@@ -1,31 +1,149 @@
 @import "tailwindcss";
 
 :root {
+    /* Minimal palette: navy text, white surfaces, bright colors used sparingly. */
     --background: #ffffff;
-    --foreground: #171717;
+    --foreground: #003049;
+    --surface-muted: #f6f8fa;
+    --line: #e6ebef;
+    --accent: #f77f00;
+    --accent-text: #b35900;
+    --highlight: #fcbf49;
+    --danger: #d62828;
+}
+
+@theme {
+    /* Flatten elevation and soften radii for every utility at once. */
+    --shadow-2xs: 0 0 0 0 transparent;
+    --shadow-xs: 0 1px 1px rgb(0 48 73 / 3%);
+    --shadow-sm: 0 1px 2px rgb(0 48 73 / 4%);
+    --shadow-md: 0 2px 6px rgb(0 48 73 / 5%);
+    --shadow-lg: 0 4px 12px rgb(0 48 73 / 6%);
+    --shadow-xl: 0 6px 18px rgb(0 48 73 / 7%);
+    --shadow-2xl: 0 10px 28px rgb(0 48 73 / 9%);
+    --radius-xl: 0.625rem;
+    --radius-2xl: 0.75rem;
+    --radius-3xl: 1rem;
 }
 
 @theme inline {
+    --color-navy: #003049;
+    --color-powder: #e6ebef;
+    --color-sunflower: #fcbf49;
+    --color-accent: var(--accent);
+    --color-accent-text: var(--accent-text);
+    --color-highlight: var(--highlight);
+    --color-danger: var(--danger);
+    --color-line: var(--line);
+    --color-surface-muted: var(--surface-muted);
+    --color-blue-50: #f2f6f8;
+    --color-blue-100: #e3ecf1;
+    --color-blue-200: #c9d8e1;
+    --color-blue-300: #9fb7c5;
+    --color-blue-400: #6c8ea2;
+    --color-blue-500: #2f5a73;
+    --color-blue-600: #003049;
+    --color-blue-700: #00263a;
+    --color-blue-800: #001f30;
+    --color-blue-900: #001926;
+    --color-indigo-50: #f2f6f8;
+    --color-indigo-100: #e3ecf1;
+    --color-indigo-500: #2f5a73;
+    --color-indigo-600: #003049;
+    --color-indigo-700: #00263a;
+    --color-gray-50: #f6f8fa;
+    --color-gray-100: #eef2f5;
+    --color-gray-200: #e6ebef;
+    --color-gray-300: #d3dbe1;
+    --color-gray-400: #9aa8b3;
+    --color-gray-500: #66788a;
+    --color-gray-600: #4a5e6f;
+    --color-gray-700: #33495b;
+    --color-gray-800: #1d3a4f;
+    --color-gray-900: #003049;
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #ffffff;
-        --foreground: #ededed;
-    }
-}
-
 body {
     background: var(--background);
     color: var(--foreground);
     font-family: Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 button {
     @apply cursor-pointer;
+}
+
+/* Podcast coverflow: calm the vendored glassy skin down to the minimal site style. */
+.podcast-coverflow.gc-shell {
+    grid-template-rows: 0 minmax(0, 1fr) auto;
+    height: clamp(520px, 72svh, 720px);
+    min-height: 520px;
+    padding-top: 12px;
+    font-family: inherit;
+}
+
+.podcast-coverflow .gc-atmosphere {
+    background: none;
+}
+
+.podcast-coverflow .gc-floor {
+    opacity: 0.35;
+}
+
+.podcast-coverflow .gc-card,
+.podcast-coverflow .gc-card[data-active] {
+    box-shadow: 0 8px 24px rgb(0 48 73 / 10%);
+}
+
+.podcast-coverflow .gc-poster {
+    aspect-ratio: 16 / 9;
+}
+
+/* hqdefault thumbnails are letterboxed 4:3; cropping to 16:9 removes the bars. */
+.podcast-coverflow .gc-poster > img {
+    object-fit: cover;
+}
+
+.podcast-coverflow .gc-card-info strong {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.podcast-coverflow .gc-active-info h2,
+.podcast-coverflow .gc-dialog,
+.podcast-coverflow .gc-dialog-caption h2 {
+    font-family: inherit;
+}
+
+.podcast-coverflow .gc-active-info h2 {
+    max-width: 48rem;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.podcast-coverflow .gc-dock {
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.podcast-coverflow .gc-dialog::backdrop {
+    background: rgb(0 48 73 / 55%);
+    backdrop-filter: none;
+}
+
+.podcast-coverflow .gc-dialog-caption p {
+    white-space: pre-line;
+}
+
+.podcast-coverflow .gc-external {
+    border-radius: 8px;
 }
 
 .course-carousel {
@@ -141,54 +259,35 @@ button {
     }
 }
 
-.admin-dashboard::before {
-    position: fixed;
-    z-index: -1;
-    inset: -12rem;
-    pointer-events: none;
-    content: "";
-    background: radial-gradient(ellipse at 90% 0%, rgb(252 191 73 / 9%), transparent 48%);
-    background-repeat: no-repeat;
-}
-
 .admin-dashboard-state {
-    background: #f4f7f9;
+    background: var(--surface-muted);
 }
 
 .admin-dashboard .admin-glass-card {
-    border-color: #e1e9ed;
+    border-color: var(--line);
     background: #ffffff;
-    box-shadow:
-        0 8px 24px rgb(0 48 73 / 5%),
-        inset 0 1px 0 rgb(255 255 255 / 90%);
+    box-shadow: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    transition:
-        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 220ms ease,
-        border-color 220ms ease;
+    transition: border-color 180ms ease;
 }
 
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+@media (hover: hover) {
     .admin-dashboard .admin-glass-card:hover {
-        transform: translateY(-3px);
-        border-color: rgb(0 48 73 / 18%);
-        box-shadow:
-            0 14px 32px rgb(0 48 73 / 9%),
-            inset 0 1px 0 rgb(255 255 255 / 95%);
+        border-color: rgb(0 48 73 / 22%);
     }
 }
 
 .admin-dashboard .admin-glass-card--soft {
-    border-color: #e7eef1;
-    background: #f8fafb;
+    border-color: var(--line);
+    background: var(--surface-muted);
     box-shadow: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
 }
 
 .admin-dashboard .admin-glass-card--soft:hover {
-    background: #fff8e9;
+    background: #ffffff;
 }
 
 .admin-dashboard [class~="bg-white"] {
@@ -207,17 +306,17 @@ button {
 .admin-dashboard {
     --admin-navy: #003049;
     --admin-red: #d62828;
-    --admin-orange: #f77f00;
+    --admin-orange: #b35900;
     --admin-yellow: #fcbf49;
-    --admin-canvas: #f4f7f9;
+    --admin-canvas: #f6f8fa;
     --admin-surface: #ffffff;
     --admin-soft-surface: #f5f8fa;
     --admin-ink: var(--admin-navy);
-    --admin-muted: #667c88;
+    --admin-muted: #66788a;
     --admin-accent: var(--admin-orange);
     --admin-accent-strong: var(--admin-navy);
-    --admin-accent-soft: #eaf2f5;
-    --admin-border: #dfe8ec;
+    --admin-accent-soft: #eef2f5;
+    --admin-border: #e6ebef;
 
     background: var(--admin-canvas);
     color: var(--admin-ink);
@@ -313,22 +412,3 @@ button {
     animation: admin-content-arrive 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .stats-bar-fill,
-    .course-card-arrive,
-    .combobox-option,
-    .profile-card-in,
-    .year-chip-pop,
-    .admin-content-enter {
-        animation: none;
-    }
-
-    .admin-dashboard *,
-    .admin-dashboard *::before,
-    .admin-dashboard *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-    }
-}

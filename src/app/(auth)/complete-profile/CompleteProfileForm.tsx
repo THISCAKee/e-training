@@ -57,7 +57,7 @@ export default function CompleteProfileForm({
   };
 
   return (
-    <div className="profile-card-in w-full max-w-md space-y-8 rounded-3xl border border-gray-100 bg-white p-8 shadow-[0_24px_60px_-20px_rgba(15,23,42,0.25)] sm:p-10">
+    <div className="profile-card-in w-full max-w-md space-y-8 rounded-3xl border border-gray-100 bg-white p-8 sm:p-10">
       <div className="flex flex-col items-center text-center">
         <div className="grid size-14 place-items-center rounded-2xl bg-blue-50 text-blue-600">
           {isStudent ? (
@@ -105,8 +105,8 @@ export default function CompleteProfileForm({
                     onClick={() => setYear(option)}
                     className={`h-11 rounded-xl border text-sm font-medium transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20 active:scale-95 ${
                       isSelected
-                        ? "year-chip-pop border-blue-600 bg-blue-600 text-white shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)]"
-                        : "border-gray-200 bg-white text-gray-700 hover:-translate-y-0.5 hover:border-blue-300 hover:text-blue-700"
+                        ? "year-chip-pop border-blue-600 bg-blue-600 text-white"
+                        : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:text-blue-700"
                     }`}
                   >
                     ปี {option}
@@ -131,7 +131,7 @@ export default function CompleteProfileForm({
         <button
           type="submit"
           disabled={isSaving || !isComplete}
-          className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-medium text-white shadow-[0_10px_24px_-10px_rgba(37,99,235,0.8)] transition-all duration-200 hover:bg-blue-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+          className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
         >
           {isSaving ? (
             <>

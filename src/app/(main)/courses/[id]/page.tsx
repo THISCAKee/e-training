@@ -149,7 +149,7 @@ export default async function CourseDetailPage(
             </div>
           ) : (
             // กรณีไม่มีรูปภาพ
-            <div className="h-64 md:h-80 bg-gradient-to-r from-blue-50 to-indigo-100 flex items-center justify-center">
+            <div className="h-64 md:h-80 bg-gray-50 flex items-center justify-center">
               <BookOpen size={64} className="text-blue-300" />
             </div>
           )}

@@ -26,7 +26,7 @@ describe("Podcast administration API", () => {
   it("stores the normalized video ID and retains the draft flag", async () => {
     store.create.mockResolvedValue({ id: 1 });
     expect((await POST(request())).status).toBe(201);
-    expect(store.create).toHaveBeenCalledWith({ data: { title: "Podcast", description: "", youtubeVideoId: "abcdefghijk", order: 2, isPublished: false } });
+    expect(store.create).toHaveBeenCalledWith({ data: { title: "Podcast", description: "", youtubeVideoId: "abcdefghijk", category: null, order: 2, isPublished: false } });
   });
   it("rejects an invalid video before writing", async () => {
     const response = await POST(new Request("http://localhost", { method: "POST", body: JSON.stringify({ ...input, youtubeUrl: "https://example.com" }) }));
@@ -48,7 +48,7 @@ describe("Podcast administration API", () => {
   it("updates publication state with validated data", async () => {
     store.updateMany.mockResolvedValue({ count: 1 });
     expect((await PATCH(request(), context())).status).toBe(200);
-    expect(store.updateMany).toHaveBeenCalledWith({ where: { id: 1 }, data: { title: "Podcast", description: "", youtubeVideoId: "abcdefghijk", order: 2, isPublished: false } });
+    expect(store.updateMany).toHaveBeenCalledWith({ where: { id: 1 }, data: { title: "Podcast", description: "", youtubeVideoId: "abcdefghijk", category: null, order: 2, isPublished: false } });
   });
   it("deletes a matching episode", async () => {
     store.deleteMany.mockResolvedValue({ count: 1 });

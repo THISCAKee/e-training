@@ -216,7 +216,7 @@ export default async function DashboardPage() {
               style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(10px)", minWidth: "120px" }}
             >
               <p style={{ color: "rgba(199,210,254,1)", fontSize: "12px", marginBottom: "4px" }}>ความคืบหน้า</p>
-              <p className="text-4xl font-black text-white">{completionRate}%</p>
+              <p className="text-4xl font-bold text-white">{completionRate}%</p>
               <p style={{ color: "rgba(167,243,208,1)", fontSize: "12px", marginTop: "4px" }}>เรียนจบแล้ว</p>
             </div>
           </div>
@@ -275,7 +275,7 @@ export default async function DashboardPage() {
                 <span style={{ color: card.iconColor }}>{card.icon}</span>
               </div>
               <p className="text-gray-500 text-sm mb-1">{card.label}</p>
-              <p className="text-4xl font-black" style={{ background: card.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <p className="text-4xl font-bold" style={{ background: card.gradient, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 {card.value}
               </p>
             </div>
@@ -298,14 +298,14 @@ export default async function DashboardPage() {
             {/* Total attempts */}
             <div className="text-center">
               <p className="text-gray-500 text-sm mb-2">จำนวนครั้งทั้งหมด</p>
-              <p className="text-4xl font-black text-blue-600 mb-1">{totalQuizAttempts}</p>
+              <p className="text-4xl font-bold text-blue-600 mb-1">{totalQuizAttempts}</p>
               <p className="text-gray-400 text-xs">ครั้ง</p>
             </div>
 
             {/* Passed */}
             <div className="text-center">
               <p className="text-gray-500 text-sm mb-2">สอบผ่าน</p>
-              <p className="text-4xl font-black text-emerald-600 mb-1">{passedQuizAttempts}</p>
+              <p className="text-4xl font-bold text-emerald-600 mb-1">{passedQuizAttempts}</p>
               <div className="flex items-center justify-center gap-2 mt-2">
                 <div className="flex-grow h-2 rounded-full bg-gray-100" style={{ maxWidth: "120px" }}>
                   <div
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
             {/* Avg Score */}
             <div className="text-center">
               <p className="text-gray-500 text-sm mb-2">คะแนนเฉลี่ย</p>
-              <p className="text-4xl font-black text-violet-600 mb-1">{averageScore}<span className="text-xl font-bold text-gray-400">%</span></p>
+              <p className="text-4xl font-bold text-violet-600 mb-1">{averageScore}<span className="text-xl font-bold text-gray-400">%</span></p>
               <div className="flex items-center justify-center gap-1 mt-1">
                 {[1,2,3,4,5].map((s) => (
                   <Star

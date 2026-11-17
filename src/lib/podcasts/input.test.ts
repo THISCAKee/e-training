@@ -18,12 +18,17 @@ describe("podcast inputs", () => {
     expect(youtubeVideoId(url)).toBe(expected);
   });
   it("trims fields and retains an unpublished episode", () => {
-    expect(parsePodcastInput(valid)).toEqual({ title: "ตอนแรก", description: "รายละเอียด", youtubeVideoId: id, order: 0, isPublished: false });
+    expect(parsePodcastInput(valid)).toEqual({ title: "ตอนแรก", description: "รายละเอียด", youtubeVideoId: id, category: null, order: 0, isPublished: false });
+  });
+  it("normalizes an optional category and treats blank as uncategorized", () => {
+    expect(parsePodcastInput({ ...valid, category: "  AI   กับการเรียนรู้ " }).category).toBe("AI กับการเรียนรู้");
+    expect(parsePodcastInput({ ...valid, category: "   " }).category).toBeNull();
   });
   it.each([
     null, [], { ...valid, title: "  " }, { ...valid, title: "a".repeat(256) },
     { ...valid, order: -1 }, { ...valid, order: 1.5 },
     { ...valid, isPublished: "false" }, { ...valid, youtubeUrl: "https://evil.com" },
+    { ...valid, category: 5 }, { ...valid, category: "ก".repeat(101) },
   ])("rejects invalid fields", (input) => {
     expect(() => parsePodcastInput(input)).toThrow();
   });

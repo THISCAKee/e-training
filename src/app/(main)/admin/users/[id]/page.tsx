@@ -227,7 +227,7 @@ export default function AdminUserDetailPage() {
           <div className="lg:col-span-1 space-y-6">
             {/* Profile Card */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 flex justify-between items-center border-b border-gray-100">
+              <div className="bg-gray-50 p-6 flex justify-between items-center border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center border border-gray-100">
                     <UserIcon size={24} className="text-blue-600" />

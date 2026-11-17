@@ -43,15 +43,15 @@ type RecentRow = {
 };
 
 const panelClass =
-  "admin-glass-card rounded-[1.35rem] border";
+  "admin-glass-card rounded-2xl border";
 
 const graphGradients = [
   ["#003049", "#34758f"],
   ["#d62828", "#ed6d66"],
-  ["#f77f00", "#ffad52"],
+  ["#b35900", "#ffad52"],
   ["#fcbf49", "#ffde91"],
   ["#17607a", "#8eb9ca"],
-  ["#d96f00", "#ffd09d"],
+  ["#b35900", "#ffd09d"],
 ] as const;
 
 function getGraphGradient(index: number, direction: "0deg" | "90deg" = "90deg") {
@@ -86,27 +86,20 @@ function StatCard({
   const accentStyles = {
     blue: {
       icon: "bg-[#eaf2f5] text-[#003049]",
-      glow: "from-[#003049]/10 via-[#eaf2f5]/55 to-white/0",
       value: "text-slate-900",
     },
     indigo: {
-      icon: "bg-[#fff4e7] text-[#d96f00]",
-      glow: "from-[#f77f00]/12 via-[#fff4e7]/55 to-white/0",
+      icon: "bg-[#fff4e7] text-[#b35900]",
       value: "text-slate-900",
     },
     sky: {
       icon: "bg-[#fff1f0] text-[#d62828]",
-      glow: "from-[#d62828]/10 via-[#fff1f0]/55 to-white/0",
       value: "text-slate-900",
     },
   }[accent];
 
   return (
     <article className={`${panelClass} group relative overflow-hidden p-5 sm:p-6`}>
-      <div
-        className={`absolute -right-12 -top-14 h-36 w-36 rounded-full bg-gradient-to-br blur-2xl transition-transform duration-500 group-hover:scale-110 ${accentStyles.glow}`}
-        aria-hidden="true"
-      />
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
@@ -194,7 +187,7 @@ function RecentPanel({
 function EmptyPanel({ label }: { label: string }) {
   return (
     <div className="admin-glass-card--soft flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 px-5 text-center">
-      <div className="rounded-2xl bg-[#fff4e7] p-3 text-[#f77f00]">
+      <div className="rounded-2xl bg-[#fff4e7] p-3 text-[#b35900]">
         <BarChart3 size={22} />
       </div>
       <p className="mt-3 text-sm font-semibold text-slate-600">{label}</p>
@@ -221,7 +214,7 @@ function CategoryBars({ categories }: { categories: AdminStatsCategory[] }) {
             aria-expanded={showAllCategories}
             aria-controls="category-bars-list"
             onClick={() => setShowAllCategories((showingAll) => !showingAll)}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f77f00]"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b35900]"
           >
             {showAllCategories ? "แสดงเฉพาะหมวดหมู่ยอดนิยม" : `แสดงทุกหมวดหมู่ (${categories.length})`}
             {showAllCategories ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -267,7 +260,7 @@ function CategoryBars({ categories }: { categories: AdminStatsCategory[] }) {
                       ...current,
                       [category.name]: !expanded,
                     }))}
-                    className="mt-2 inline-flex min-h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f77f00]"
+                    className="mt-2 inline-flex min-h-8 items-center gap-1 rounded-md px-2 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b35900]"
                   >
                     {expanded ? "ซ่อนคอร์ส" : `แสดง ${category.courses.length} คอร์ส`}
                     {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -444,7 +437,7 @@ function CourseRanking({ courses }: { courses: CourseEnrollmentStat[] }) {
             aria-expanded={showAllCourses}
             aria-controls="course-ranking-list"
             onClick={() => setShowAllCourses((showingAll) => !showingAll)}
-            className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f77f00]"
+            className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b35900]"
           >
             {showAllCourses ? "แสดง 5 อันดับแรก" : "แสดงทั้งหมด"}
             {showAllCourses ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -518,7 +511,7 @@ function PodcastViewsPanel({ videos }: { videos: PodcastViewStat[] }) {
       <div className="flex flex-col gap-5 border-b border-slate-200/60 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#003049]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#f77f00]" aria-hidden="true" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#b35900]" aria-hidden="true" />
             PODCAST VIEWS
           </p>
           <h2 className="mt-2 text-lg font-bold tracking-tight text-slate-900">ยอดชม Podcast</h2>
@@ -589,7 +582,7 @@ function PodcastViewsPanel({ videos }: { videos: PodcastViewStat[] }) {
             aria-expanded={showAllVideos}
             aria-controls="podcast-view-ranking-list"
             onClick={() => setShowAllVideos((showingAll) => !showingAll)}
-            className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f77f00]"
+            className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[#003049] transition-colors hover:bg-[#fcbf49]/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b35900]"
           >
             {showAllVideos ? "ย่อรายการ" : `ดูวิดีโอทั้งหมด (${formatNumber(rows.length)})`}
             {showAllVideos ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
