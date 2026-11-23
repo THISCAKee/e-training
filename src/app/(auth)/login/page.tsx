@@ -27,7 +27,7 @@ function LoginForm() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/etraining";
 
   // Error จาก URL params (กรณี redirect มาจากหน้าอื่น)
   const errorCode = searchParams.get("error");

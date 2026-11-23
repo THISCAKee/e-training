@@ -14,7 +14,7 @@ export default async function CompleteProfilePage({
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const { callbackUrl = "/" } = await searchParams;
+  const { callbackUrl = "/etraining" } = await searchParams;
   const destination = getLoginDestination(session.user.role, callbackUrl);
 
   const user = await prisma.user.findUnique({
