@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react"; // (ยืนยันว่า import useEffect)
 import VideoPlayer from "./VideoPlayer";
 import { formatDuration } from "@/lib/utils";
+import { loadLessonDuration } from "@/lib/lesson-durations";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Lock, PlayCircle } from "lucide-react";
@@ -45,6 +46,17 @@ export default function CoursePlayer({
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isVideoEnded, setIsVideoEnded] = useState(false);
+  const [videoDurations, setVideoDurations] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    const cleanups = course.lessons.filter((lesson) => lesson.videoUrl).map((lesson) => {
+      const video = document.createElement("video");
+      return loadLessonDuration(video, lesson.videoUrl, (duration) => {
+        setVideoDurations((previous) => ({ ...previous, [lesson.id]: duration }));
+      });
+    });
+    return () => cleanups.forEach((cleanup) => cleanup());
+  }, [course.lessons]);
 
   // (useEffect เดิม: ตั้งค่า activeLesson แรก)
   useEffect(() => {
@@ -187,7 +199,7 @@ export default function CoursePlayer({
                     {lesson.title}
                   </span>
                   <span className="text-sm text-gray-500 font-mono">
-                    {formatDuration(lesson.duration)}
+                    {formatDuration(videoDurations[lesson.id] ?? lesson.duration)}
                   </span>
                 </button>
 
